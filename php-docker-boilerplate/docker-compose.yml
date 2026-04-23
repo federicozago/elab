@@ -1,0 +1,25 @@
+name: elab
+
+volumes:
+  variabili_globali:
+    driver_opts:
+      type: cifs
+      o: username=administrator,password=C0pyGr@ph,vers=3.0,file_mode=0777,dir_mode=0777
+      device: "//172.21.15.24/c/"
+
+# Definizione dei servizi per l'ambiente di sviluppo PHP
+services:
+  # Servizio PHP che esegue PHP 8
+  php:
+    build:
+      context: .
+    env_file: # AGGIUNTO QUI
+      - .env
+    environment:
+      - PHP_IDE_CONFIG=serverName=docker_xdebug
+    volumes:
+      - ./src:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+      - variabili_globali://172.21.15.24/c/
+    ports:
+      - 9001:80

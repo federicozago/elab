@@ -1,0 +1,2 @@
+# Escludo la cartella vendor. Va versionato solo composer.json e composer.lock
+vendor

@@ -1,0 +1,45 @@
+[7] Log opened at 2025-09-22 13:27:43.044191
+[7] [Config] WARN: Not setting up control socket with default value due to unavailable 'tsc' clock
+[7] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[7] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[7] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[7] Log closed at 2025-09-22 13:27:43.058619
+
+[8] Log opened at 2025-09-22 13:32:16.041763
+[8] [Config] WARN: Not setting up control socket with default value due to unavailable 'tsc' clock
+[8] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[8] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[8] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[8] Log closed at 2025-09-22 13:32:16.054839
+
+[7] Log opened at 2025-09-22 13:33:08.976646
+[7] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[7] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[7] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[7] Log closed at 2025-09-22 13:33:08.987783
+
+[8] Log opened at 2025-09-22 13:46:51.241728
+[8] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[8] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[8] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[8] Log closed at 2025-09-22 13:46:51.252159
+
+[7] Log opened at 2025-09-22 13:49:20.749871
+[7] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[7] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[7] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[7] Log closed at 2025-09-22 13:49:20.812959
+
+[8] Log opened at 2025-09-22 13:50:00.597002
+[8] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[8] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[8] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[8] Log closed at 2025-09-22 13:50:00.623761
+
+[7] Log opened at 2025-10-02 07:02:58.517754
+[7] [Config] WARN: Not setting up control socket with default value due to unavailable 'tsc' clock
+[7] [Step Debug] INFO: Connecting to configured address/port: host.docker.internal:9005.
+[7] [Step Debug] WARN: Creating socket for 'host.docker.internal:9005', poll success, but error: Operation now in progress (29).
+[7] [Step Debug] ERR: Could not connect to debugging client. Tried: host.docker.internal:9005 (through xdebug.client_host/xdebug.client_port).
+[7] Log closed at 2025-10-02 07:02:58.556354
+

@@ -1,0 +1,33 @@
+{
+  "name": "contest/contest",
+  "description": "contest",
+  "require": {
+    "gestione_automatica_lavoro_da_ftp/gestione_automatica_lavoro_da_ftp": "dev-master",
+    "cassetta_attrezzi_php/cassetta_attrezzi_php": "dev-master",
+    "elaborazione_postale/elaborazione_postale": "dev-master"
+  },
+  "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/indisrl/Gestione_automatica_lavoro_da_ftp.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/indisrl/cassetta_attrezzi_php.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/indisrl/Elaborazione_postale.git"
+    },
+    {
+      "type": "composer",
+      "url": "https://www.setasign.com/downloads/"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "indi\\": "app"
+    }
+  }
+}

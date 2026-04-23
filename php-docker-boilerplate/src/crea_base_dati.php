@@ -1,0 +1,84 @@
+<?php
+namespace indi\Classes;
+require 'vendor/autoload.php';
+
+// Configura gli header CORS se necessario
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+
+// Cartella di destinazione per l'upload
+$uploadDir = 'temp/';
+
+try {
+    $jsonData = json_decode(file_get_contents('php://input'), true);//da usare quando il front end manda i dati con axios senza headers: { 'Content-Type': 'multipart/form-data' }
+    // Verifica se è stato inviato un file
+    if (!isset($jsonData["nome_base_dati"]) or !isset($jsonData["campo_cap"]) or !isset($jsonData["campo_provincia"]) or !isset($jsonData["campo_localita"]) or !isset($jsonData["file_base_dati"]) or !isset($jsonData["intestazione_si_no"]))
+        throw new \Exception('Mancano dati in input');
+
+    $vg = new Variabili_globali_import();
+    $vg = $vg->get_variabili_globali("elab");
+    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $db = new Gestione_db("elab", $log);
+
+
+    //creazione sql base dati
+    $sql_tab = "CREATE TABLE `{$jsonData["nome_base_dati"]}` (
+  `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT (uuid()),
+  `id_tabella` int NOT NULL AUTO_INCREMENT,";
+
+    if(!is_array($jsonData["intestazione"]))
+        throw new \Exception("Errore durante la creazione della tabella, intestazione non valida");
+    foreach ($jsonData["intestazione"] as $c) {
+        $sql_tab .= "`{$c}` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,";
+    }
+
+    $sql_tab .= "
+    `nome_file_idx_input` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `id_flusso` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `id_elaborazione` int NOT NULL DEFAULT NULL,
+  `totpagine_calcolate` int DEFAULT NULL,
+  `data_inserimento` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `folder_z` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `lavoro` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `nome_elaborazione` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_3` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_4` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_5` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  PRIMARY KEY (`id_tabella`),
+  UNIQUE KEY `dati_id_IDX` (`id`) USING BTREE,
+  KEY `dati_id_flusso_IDX` (`id_flusso`) USING BTREE,
+  KEY `dati_folder_z_IDX` (`folder_z`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
+
+    if(!$db->esegui_query($sql_tab))
+        throw new \Exception("Errore durante la creazione della tabella");
+
+    //salvo record base_dati
+    $jsonData["intestazione"] = implode("|", $jsonData["intestazione"]);
+    if(!$db->carica_a_db($jsonData, "base_dati", null,true))
+        throw new \Exception("Errore durante l'inserimento nella tabella base dati");
+
+    $id = $db->get_ultimo_id_inserito();
+        // Restituisci una risposta di successo
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Base dati creata con successo',
+        'id_base_dati'=>$id
+    ]);
+}catch (\Exception $e) {
+    // In caso di errore
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+}
+?>
+
+
+
+
