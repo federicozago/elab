@@ -1,24 +1,50 @@
 import {useQuasar} from 'quasar'
 export function useCassettaAttrezzi() {
   const $q = useQuasar()
-  const gestioneErrore = (error: any,msg: string) => {
+  const gestioneErrore = (error: any, msg: string) => {
     if (error.response) {
-      // La richiesta è stata effettuata e il server ha risposto con un codice di stato
-      $q.notify({
+      let timeoutId: NodeJS.Timeout | null = null
+      let dismiss: (() => void) | null = null
+      const timeoutDuration = 2500
+
+      // Funzione per avviare il timeout
+      const startTimeout = () => {
+        if (timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          if (dismiss) dismiss()
+        }, timeoutDuration)
+      }
+
+      // Funzione per fermare il timeout
+      const stopTimeout = () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
+      }
+
+      // Crea la notifica con timeout disabilitato (lo gestiamo manualmente)
+      dismiss = $q.notify({
         type: 'negative',
         message: msg,
         position: 'top',
-        timeout: 2500,
+        timeout: 0, // Disabilitiamo il timeout automatico
         actions: [{ icon: 'close', color: 'white', round: true }],
+        attrs: {
+          onmouseenter: stopTimeout,
+          onmouseleave: startTimeout,
+        },
       })
+
+      // Avvia il timeout iniziale
+      startTimeout()
+
       console.log('Dati errore:', error.response.data)
       console.log('Status:', error.response.status)
       console.log('Headers:', error.response.headers)
     } else if (error.request) {
-      // La richiesta è stata effettuata ma non è stata ricevuta alcuna risposta
       console.log('Errore richiesta:', error.request)
     } else {
-      // Si è verificato un errore durante l'impostazione della richiesta
       console.log('Errore:', error.message)
     }
   }

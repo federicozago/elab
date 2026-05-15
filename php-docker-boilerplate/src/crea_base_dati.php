@@ -2,10 +2,16 @@
 namespace indi\Classes;
 require 'vendor/autoload.php';
 
-// Configura gli header CORS se necessario
+// Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
+// Gestisci la richiesta preflight OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 // Cartella di destinazione per l'upload
 $uploadDir = 'temp/';
@@ -21,6 +27,9 @@ try {
     $log = new Segnalazioni_e_log($vg["id_flusso"]);
     $db = new Gestione_db("elab", $log);
 
+    //verifica esistenza base dati
+    if($db->verifica_esistenza_tabella("{$vg["database_cliente"]}.$jsonData[nome_base_dati]"))
+        throw new \Exception("La base dati {$jsonData["nome_base_dati"]} esiste già");
 
     //creazione sql base dati
     $sql_tab = "CREATE TABLE `{$jsonData["nome_base_dati"]}` (
@@ -30,23 +39,25 @@ try {
     if(!is_array($jsonData["intestazione"]))
         throw new \Exception("Errore durante la creazione della tabella, intestazione non valida");
     foreach ($jsonData["intestazione"] as $c) {
+        if(strtolower($c) == "id")
+            $c = "id2";
         $sql_tab .= "`{$c}` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,";
     }
 
     $sql_tab .= "
     `nome_file_idx_input` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `id_flusso` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `id_elaborazione` int NOT NULL DEFAULT NULL,
+  `id_elaborazione` int DEFAULT NULL,
   `totpagine_calcolate` int DEFAULT NULL,
   `data_inserimento` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `folder_z` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `folder_z` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `lavoro` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `nome_elaborazione` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `campo_libero_1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `campo_libero_2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `campo_libero_3` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `campo_libero_4` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `campo_libero_5` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_1` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_2` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_3` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_4` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `campo_libero_5` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id_tabella`),
   UNIQUE KEY `dati_id_IDX` (`id`) USING BTREE,
   KEY `dati_id_flusso_IDX` (`id_flusso`) USING BTREE,
@@ -54,12 +65,12 @@ try {
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
 
     if(!$db->esegui_query($sql_tab))
-        throw new \Exception("Errore durante la creazione della tabella");
+        throw new \Exception("Errore durante la creazione della tabella - " . $db->get_errori());
 
     //salvo record base_dati
     $jsonData["intestazione"] = implode("|", $jsonData["intestazione"]);
     if(!$db->carica_a_db($jsonData, "base_dati", null,true))
-        throw new \Exception("Errore durante l'inserimento nella tabella base dati");
+        throw new \Exception("Errore durante l'inserimento nella tabella base dati - " . $db->get_errori());
 
     $id = $db->get_ultimo_id_inserito();
         // Restituisci una risposta di successo
@@ -67,7 +78,8 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Base dati creata con successo',
-        'id_base_dati'=>$id
+        'id_base_dati'=>$id,
+        'nome_base_dati'=>$jsonData["nome_base_dati"]
     ]);
 }catch (\Exception $e) {
     // In caso di errore

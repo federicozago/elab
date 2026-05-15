@@ -4,18 +4,16 @@ Immagina di avere 50 input nel tuo progetto. Se un giorno decidessi che tutti gl
 Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta tutte le proprietà di q-input, usi un'interfaccia più semplice e pulita che hai creato tu, esponendo solo quello che ti serve davvero.
 -->
 
-    <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
-  <div class="form-field q-pb-md">
-    <q-btn
-        :label="label"
-        v-bind="$attrs"
-      ></q-btn>
-  </div><!--
+  <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
+
+    <q-btn :label="label" v-bind="$attrs" :class="$attrs.class" :type="$attrs.type"></q-btn>
+
+  <!--
     Grazie all'uso di v-bind="$attrs" che abbiamo inserito nel tuo BaseInput.vue: Tutto quello che scrivi su BaseInput (come type="number", maxlength="50", step="1", ecc.) viene "passato" automaticamente al q-input interno di Quasar.
+    :class fa in modo che che le classi dinamiche vengano applicate correttamente al componente q-btn.
     outlined: Disegna un bordo completo attorno all'input (invece della sola linea in basso).
 dense: Riduce l'altezza dell'input e i margini interni, rendendo il form più compatto (molto utile se hai tanti campi).
 hide-bottom-space: Normalmente Quasar lascia uno spazio vuoto sotto l'input per mostrare eventuali messaggi di errore. Se non ci sono errori, quello spazio rimane vuoto e "allunga" il form inutilmente. Questa proprietà nasconde quello spazio, facendolo apparire solo se c'è effettivamente un errore da mostrare.-->
-
 </template>
 
 <script setup>

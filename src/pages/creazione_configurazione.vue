@@ -1,7 +1,11 @@
 <template>
   <q-page class="q-pa-md">
     <BaseSelect v-model="tipoSpedizione" label="Tipo di spedizione" :options="tipiSpedizioni" />
-    <Creazione_configurazione v-model="configurazione" :tipoSpedizione="tipoSpedizione" />
+    <Creazione_configurazione
+      v-model="configurazione"
+      :tipoSpedizione="tipoSpedizione"
+      v-if="tipoSpedizione"
+    />
   </q-page>
 </template>
 
@@ -18,9 +22,9 @@ const configurazione = ref(null)
 onMounted(() => {
   api.post('preleva_tipi_spedizione.php').then((response) => {
     tipiSpedizioni.value = response.data.spedizioni
+    console.log(tipiSpedizioni.value)
   })
 })
-
 </script>
 
 <style scoped></style>

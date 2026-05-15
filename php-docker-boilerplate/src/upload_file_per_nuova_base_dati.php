@@ -37,7 +37,7 @@ try {
     }
 
     $file = $_FILES['file_to_upload'];
-    $intestazioneSiNo = filter_var($_POST['intestazione_si_no'], FILTER_VALIDATE_BOOLEAN);//converte in booleano
+    $intestazioneSiNo = $_POST['intestazione_si_no'];//converte in booleano
 
     // Verifica eventuali errori durante l'upload
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -64,14 +64,14 @@ try {
     }else{
         $file = new Excel($log);
     }
-    if(!$file->apri($targetPath, $_POST["intestazione_si_no"]))
+    if(!$file->apri($targetPath, $intestazioneSiNo))
         throw new \Exception("Errore durante l'apertura del file");
 
     //estrazione intestazione (inizialmente estraggo prima riga, anche se non è l'intestazione
     if (!$intestazione_temp = $file->estrai_intestazione())
         throw new \Exception("Errore durante l'estrazione dell'intestazione");
 
-    if( ! $_POST["intestazione_si_no"]){
+    if( ! $intestazioneSiNo){
         $intestazione = [];
         foreach($intestazione_temp as $i => $campo){
             $intestazione[] = "Colonna $i";

@@ -4,7 +4,7 @@
       <q-dialog v-model="dialogConfigurazioneVisible" persistent>
         <q-card style="min-width: 900px; max-width: 95vw">
           <q-card-section class="row items-center justify-between">
-            <div class="text-h6">Nuova configurazione</div>
+            <div class="text-h6">Nuova configurazione {{ tipoSpedizioneScelta }}</div>
             <BaseBtn
               icon="close"
               flat
@@ -21,21 +21,51 @@
               v-model="configurazioneCorrente"
               :tipoSpedizione="tipoSpedizioneScelta"
               @saved="onConfigurazioneSalvata"
+              :creazioneNuovaConfigurazione="true"
+              :nomeConfigurazione="nomeElaborazioneScelta"
             />
           </q-card-section>
         </q-card>
       </q-dialog>
 
-      <BaseForm :formData="formData" v-model:valido="formValido" @submit="creaLavoro">
+      <BaseSelect
+        label="Lista lavori esistenti"
+        v-model="lavoro"
+        :options="lavori"
+        @update:model-value="lavoroCambiato"
+        v-if="isModifica"
+      ></BaseSelect>
+
+      <BaseForm :formData="formData" @submit="creaLavoro" labelInvia="Salva lavoro">
         <div class="row q-gutter-x-md items-start">
           <div class="col">
-            <BaseSelect v-model="formData.idBaseDati" label="Base dati" :options="basiDati" />
+            <!--select base dati (quando cambia, se sotto è indicata un elaborazione sola autocompilo nome_elaborazione e nome lavoro-->
+            <BaseSelect
+              v-model="formData.id_base_dati"
+              label="Base dati"
+              :options="basiDati"
+              :rules="[required]"
+              @update:model-value="
+                (newValue) => {
+                  if (newValue.value) {
+                    //aggiorno nome lavoro
+                    if (formData.nome_lavoro === '') {
+                      formData.nome_lavoro = newValue.label
+                    }
+                    //aggiorno nome elaborazione
+                    if (
+                      formData.elaborazioni.length === 1 &&
+                      formData.elaborazioni[0].nome_elaborazione == ''
+                    ) {
+                      formData.elaborazioni[0].nome_elaborazione = newValue.label
+                    }
+                  }
+                }
+              "
+            />
           </div>
           <div class="col-auto">
-            <BaseBtn
-              label="Nuova Base Dati"
-              @click="nuovaBaseDati"
-            ></BaseBtn>
+            <BaseBtn label="Nuova Base Dati" @click="nuovaBaseDati"></BaseBtn>
           </div>
         </div>
 
@@ -44,13 +74,18 @@
           label="Nome lavoro"
           :rules="[required, maxLength(50)]"
           @change="
-            formData.elaborazioni.length === 1
+            formData.elaborazioni.length === 1 && formData.elaborazioni[0].nome_elaborazione == ''
               ? (formData.elaborazioni[0].nome_elaborazione = formData.nome_lavoro)
               : null
           "
         />
 
-        <div v-for="elaborazione in formData.elaborazioni" :key="elaborazione.nome">
+        <div
+          style="border: 0.5px lightgrey solid; border-radius: 5px"
+          class="q-pa-sm q-mb-sm"
+          v-for="elaborazione in formData.elaborazioni"
+          :key="elaborazione.nome"
+        >
           <BaseInput
             v-model="elaborazione.nome_elaborazione"
             label="Nome sotto elaborazione"
@@ -68,45 +103,50 @@
             :rules="[required]"
             @update:model-value="tipoSpedizioneCambiato(elaborazione.id)"
           />
-          <BaseSelect
-            v-model="elaborazione.id_configurazione"
-            label="Configurazione"
-            :options="listaConfigurazioni[elaborazione.id]"
-            :rules="[required]"
-            :disabled="!elaborazione.tipo_spedizione"
-          />
-          <BaseBtn
-            label="Nuova configurazione"
-            @click="apriDialogConfigurazione(elaborazione.id)"
-          ></BaseBtn>
-
+          <div class="row q-gutter-x-md items-start">
+            <div class="col">
+              <BaseSelect
+                v-model="elaborazione.id_configurazione"
+                label="Configurazione"
+                :options="listaConfigurazioni[elaborazione.id]"
+                :rules="[required]"
+                :disable="!elaborazione.tipo_spedizione"
+              />
+            </div>
+            <div class="col-auto">
+              <BaseBtn
+                label="Nuova configurazione"
+                @click="apriDialogConfigurazione(elaborazione.id)"
+                :disable="!elaborazione.tipo_spedizione"
+              ></BaseBtn>
+            </div>
+          </div>
           <BaseInput
             v-model="elaborazione.where"
             label="Sql vista (solo contenuto where)"
+            :suggestions="baseDatiSelezionata?.intestazione.split('|')"
             :rules="formData.elaborazioni.length > 1 ? [required, sqlSafe] : [sqlSafe]"
           >
-            <q-tooltip :delay="100">
+            <q-tooltip :delay="100" :offset="[0, 20]">
               {{ baseDatiSelezionata?.intestazione }}
             </q-tooltip>
           </BaseInput>
 
           <BaseBtn
             label="Elimina"
-            @click="eliminaElaborazione(elaborazione.nome_elaborazione)"
+            @click="eliminaElaborazione(elaborazione.id)"
             v-if="formData.elaborazioni.length > 1"
           ></BaseBtn>
+
+          <BaseBtn label="Aggiungi" @click="aggiungiElaborazione"></BaseBtn>
         </div>
-
-        <BaseBtn label="Aggiungi" @click="aggiungiElaborazione"></BaseBtn>
-
-        <BaseBtn type="submit" label="Importa" :disable="!formValido"></BaseBtn>
       </BaseForm>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 import { useRoute } from 'vue-router'
@@ -125,13 +165,14 @@ const indiceElaborazioneInCorso = ref(null)
 const dialogConfigurazioneVisible = ref(false)
 const tipoSpedizioneScelta = ref(null)
 const configurazioneCorrente = ref(null)
-const formValido = ref(false)
 const formData = ref({
-  idBaseDati: route.query.idBaseDati ? route.query.idBaseDati : '', //se ritorno dalla pagina creazione_base_dati potrei voler importare i dati precedenti
-  nome_lavoro: '',
+  id_base_dati: route.query.id_base_dati
+    ? { label: route.query.nome_base_dati, value: route.query.id_base_dati }
+    : null, //se ritorno dalla pagina creazione_base_dati potrei voler importare i dati precedenti
+  nome_lavoro: route.query.nome_base_dati ? route.query.nome_base_dati : '',
   elaborazioni: [
     {
-      nome_elaborazione: '',
+      nome_elaborazione: route.query.nome_base_dati ? route.query.nome_base_dati : '',
       where: '',
       tipo_spedizione: '',
       id_configurazione: '',
@@ -139,19 +180,34 @@ const formData = ref({
     },
   ],
 })
+//svuoto array query per non far comparire sul menu la base dati creata in precedenza
+router.replace({
+  path: route.path,
+  query: {},
+})
 const listaConfigurazioni = ref([])
 const basiDati = ref([])
 const visteEsistenti = ref([])
-const baseDatiSelezionata = computed(() => {
-  return basiDati.value.find((bd) => bd.value === formData.value.idBaseDati)
-})
+const baseDatiSelezionata = ref(null)
+watch(
+  () => formData.value.id_base_dati,
+  (newVal) => {
+    console.log('base dati cambiata', newVal)
+    baseDatiSelezionata.value = newVal
+  },
+)
 const idElaborazionePagina = ref(0)
 const tipi_spedizioni = ref([])
+const nomeElaborazioneScelta = ref('')
+const isModifica = computed(() => route.path.includes('/modifica_lavoro'))
+const lavori = ref([])
+const lavoro = ref(null)
 
-function tipoSpedizioneCambiato(idElaborazione) {
+async function tipoSpedizioneCambiato(idElaborazione) {
   tipoSpedizioneScelta.value = formData.value.elaborazioni[idElaborazione].tipo_spedizione
+  nomeElaborazioneScelta.value = formData.value.elaborazioni[idElaborazione].nome_elaborazione
   try {
-    api
+    await api
       .post('/preleva_configurazioni.php', {
         tipo_spedizione: formData.value.elaborazioni[idElaborazione].tipo_spedizione,
       })
@@ -164,6 +220,29 @@ function tipoSpedizioneCambiato(idElaborazione) {
   }
 }
 
+function lavoroCambiato(val) {
+  //prelevo dati configurazione
+  api
+    .post('/preleva_lavoro.php', {
+      id_lavoro: val.value,
+    })
+    .then((response) => {
+      //setto il formData con i dati prelevati
+      formData.value.nome_lavoro = response.data[0].nome_lavoro
+      formData.value.id_base_dati = {
+        label: response.data[0].nome_base_dati,
+        value: response.data.id_base_dati,
+      }
+    })
+    .catch((e) => {
+      gestioneErrore(
+        e,
+        'Impossibile prelevare la configurazione, controllare i dati inseriti - ' +
+          e.response.data.message,
+      )
+    })
+}
+
 function apriDialogConfigurazione(indexElaborazione) {
   dialogConfigurazioneVisible.value = true
   indiceElaborazioneInCorso.value = indexElaborazione
@@ -172,8 +251,10 @@ function chiudiDialogConfigurazione() {
   dialogConfigurazioneVisible.value = false
   configurazioneCorrente.value = null
 }
-function onConfigurazioneSalvata(idConfigurazione) {
-  formData.value.elaborazioni[indiceElaborazioneInCorso.value].id_configurazione = idConfigurazione
+function onConfigurazioneSalvata(configurazione) {
+  //imposto il select configurazione
+  formData.value.elaborazioni[indiceElaborazioneInCorso.value].id_configurazione = configurazione
+  chiudiDialogConfigurazione()
 }
 
 onMounted(() => {
@@ -184,49 +265,77 @@ onMounted(() => {
   //prelevo configurazioni
 
   //prelevo base dati
-  try {
-    api.post('/preleva_basi_dati.php').then((response) => {
+  api
+    .post('/preleva_basi_dati.php')
+    .then((response) => {
       basiDati.value = response.data.basi_dati
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare le basi dati')
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
+    })
 
   //prelevo le viste già esistenti (per non inserire doppioni di elaborazione
-  try {
-    api.post('/preleva_viste.php').then((response) => {
+
+  api
+    .post('/preleva_viste.php')
+    .then((response) => {
       visteEsistenti.value = response.data.viste
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare le viste esistenti')
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare viste - ' + e.response.data.message)
+    })
 
   //prelevo le spedizioni possibili
-  try {
-    api.post('/preleva_tipi_spedizione.php').then((response) => {
+
+  api
+    .post('/preleva_tipi_spedizione.php')
+    .then((response) => {
       tipi_spedizioni.value = response.data.spedizioni
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare le viste esistenti')
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare tipi spedizione - ' + e.response.data.message)
+    })
+
+  if (isModifica.value) {
+    api
+      .post('/preleva_lavori.php')
+      .then((response) => {
+        lavori.value = response.data.lavori
+      })
+      .catch((e) => {
+        gestioneErrore(e, 'Impossibile prelevare lavori - ' + e.response.data.message)
+      })
   }
 })
 
 function creaLavoro() {
-  //creazione lavoro
-  try {
-    api
-      .post('/crea_lavoro.php', {
-        id_base_dati: formData.value.idBaseDati,
-        nome_lavoro: formData.value.nome_lavoro,
-        elaborazioni: JSON.stringify(formData.value.elaborazioni),
-      })
-      .then(() => {
-        messaggioPositivo('Elaborazione caricata con successo')
-        router.push({ path: '/' })
-      })
-  } catch (e) {
-    gestioneErrore(e, 'Impossibile salvare la configurazione, controllare i dati inseriti')
-  }
+  //creazione/salvataggio lavoro
+  api
+    .post(isModifica.value ? '/aggiorna_lavoro.php' : '/crea_lavoro.php', {
+      id_base_dati: formData.value.id_base_dati.value,
+      nome_lavoro: formData.value.nome_lavoro,
+      //elaborazioni: JSON.stringify(formData.value.elaborazioni),
+      elaborazioni: formData.value.elaborazioni,
+    })
+    .then((response) => {
+      messaggioPositivo(
+        isModifica.value
+          ? 'Elaborazione aggiornata con successo'
+          : 'Elaborazione caricata con successo',
+      )
+      if (!isModifica.value) {
+        router.replace({
+          path: '/',
+          query: {
+            id_lavoro: response.data.id_lavoro,
+            nome_lavoro: formData.value.nome_lavoro,
+          },
+        })
+      }
+    })
+    .catch((e) => {
+      gestioneErrore(e, isModifica.value ? 'Impossibile aggiornare il lavoro - ' + e.response.data.message : 'Impossibile creare  il lavoro - ' + e.response.data.message)
+    })
 }
 
 function nuovaBaseDati() {
@@ -234,17 +343,19 @@ function nuovaBaseDati() {
 }
 
 function aggiungiElaborazione() {
+  idElaborazionePagina.value++
   formData.value.elaborazioni.push({
     id: idElaborazionePagina.value,
     nome: '',
     where: '',
   })
-  idElaborazionePagina.value++
 }
 
-function eliminaElaborazione(nomeElaborazione) {
+function eliminaElaborazione(idElaborazione) {
   formData.value.elaborazioni = formData.value.elaborazioni.filter(
-    (elaborazione) => elaborazione.nome_elaborazione !== nomeElaborazione,
+    (elaborazione) => elaborazione.id !== idElaborazione,
   )
 }
 </script>
+
+<style scoped></style>

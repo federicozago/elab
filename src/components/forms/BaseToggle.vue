@@ -4,22 +4,15 @@ Immagina di avere 50 input nel tuo progetto. Se un giorno decidessi che tutti gl
 Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta tutte le proprietà di q-input, usi un'interfaccia più semplice e pulita che hai creato tu, esponendo solo quello che ti serve davvero.
 -->
   <div class="form-field q-pb-md">
-    <q-field
-      v-model="model"
-      :label="label"
-      :rules="rules"
-      borderless
-      hide-bottom-space
-    >
-    <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
+    <q-field v-model="model" :label="label" :rules="rules" borderless hide-bottom-space>
+      <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
       <template v-slot:control>
-        <q-toggle
-        v-model="model"
-        v-bind="$attrs"
-        ></q-toggle>
+        <q-toggle v-model="model" v-bind="$attrs">
+          <slot></slot>
+        </q-toggle>
       </template>
     </q-field>
-        <!--
+    <!--
     Grazie all'uso di v-bind="$attrs" che abbiamo inserito nel tuo BaseInput.vue: Tutto quello che scrivi su BaseInput (come type="number", maxlength="50", step="1", ecc.) viene "passato" automaticamente al q-input interno di Quasar.
     outlined: Disegna un bordo completo attorno all'input (invece della sola linea in basso).
 dense: Riduce l'altezza dell'input e i margini interni, rendendo il form più compatto (molto utile se hai tanti campi).

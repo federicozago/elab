@@ -13,7 +13,9 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
       outlined
       dense
       hide-bottom-space
-    ></q-select
+    >
+      <slot></slot>
+    </q-select
     ><!--
     Grazie all'uso di v-bind="$attrs" che abbiamo inserito nel tuo BaseInput.vue: Tutto quello che scrivi su BaseInput (come type="number", maxlength="50", step="1", ecc.) viene "passato" automaticamente al q-input interno di Quasar.
     outlined: Disegna un bordo completo attorno all'input (invece della sola linea in basso).

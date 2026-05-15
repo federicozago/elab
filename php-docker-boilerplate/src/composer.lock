@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:indisrl/cassetta_attrezzi_php.git",
-                "reference": "98150da5beeba29afaadb0ff246a6726454059cb"
+                "reference": "f27597160d1addfcae2f183d83e746552ff06f5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indisrl/cassetta_attrezzi_php/zipball/98150da5beeba29afaadb0ff246a6726454059cb",
-                "reference": "98150da5beeba29afaadb0ff246a6726454059cb",
+                "url": "https://api.github.com/repos/indisrl/cassetta_attrezzi_php/zipball/f27597160d1addfcae2f183d83e746552ff06f5e",
+                "reference": "f27597160d1addfcae2f183d83e746552ff06f5e",
                 "shasum": ""
             },
             "require": {
@@ -62,7 +62,8 @@
                     "app/Classes/data_converti_formato.php",
                     "app/Classes/estrai_testo.php",
                     "app/Classes/interpreta_blocchi_indirizzi.php",
-                    "app/Classes/strreplace_ricorsivo.php"
+                    "app/Classes/strreplace_ricorsivo.php",
+                    "app/Classes/array_rename_columns.php"
                 ]
             },
             "description": "cassetta_attrezzi_php",
@@ -70,7 +71,7 @@
                 "source": "https://github.com/indisrl/cassetta_attrezzi_php/tree/master",
                 "issues": "https://github.com/indisrl/cassetta_attrezzi_php/issues"
             },
-            "time": "2026-03-31T09:08:03+00:00"
+            "time": "2026-04-23T07:46:46+00:00"
         },
         {
             "name": "composer/pcre",
@@ -78,12 +79,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/pcre.git",
-                "reference": "cc69ce9877ca31cb8fb3e87cb89792f2c139f87b"
+                "reference": "f66479231ddcddabf416ca40bc4918dc1bf2b106"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/pcre/zipball/cc69ce9877ca31cb8fb3e87cb89792f2c139f87b",
-                "reference": "cc69ce9877ca31cb8fb3e87cb89792f2c139f87b",
+                "url": "https://api.github.com/repos/composer/pcre/zipball/f66479231ddcddabf416ca40bc4918dc1bf2b106",
+                "reference": "f66479231ddcddabf416ca40bc4918dc1bf2b106",
                 "shasum": ""
             },
             "require": {
@@ -147,7 +148,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-03T10:22:10+00:00"
+            "time": "2026-04-08T17:27:20+00:00"
         },
         {
             "name": "elaborazione_postale/elaborazione_postale",
@@ -155,12 +156,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:indisrl/Elaborazione_postale.git",
-                "reference": "929d07722cac919a1d85fb754620c37b7c122209"
+                "reference": "2b09cf6c5ecfa51fb9c5b6ffc7ae91d4d347a7ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indisrl/Elaborazione_postale/zipball/929d07722cac919a1d85fb754620c37b7c122209",
-                "reference": "929d07722cac919a1d85fb754620c37b7c122209",
+                "url": "https://api.github.com/repos/indisrl/Elaborazione_postale/zipball/2b09cf6c5ecfa51fb9c5b6ffc7ae91d4d347a7ee",
+                "reference": "2b09cf6c5ecfa51fb9c5b6ffc7ae91d4d347a7ee",
                 "shasum": ""
             },
             "require": {
@@ -178,7 +179,7 @@
                 "source": "https://github.com/indisrl/Elaborazione_postale/tree/master",
                 "issues": "https://github.com/indisrl/Elaborazione_postale/issues"
             },
-            "time": "2026-03-19T09:41:52+00:00"
+            "time": "2026-04-23T08:50:39+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -298,12 +299,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:indisrl/Gestione_automatica_lavoro_da_ftp.git",
-                "reference": "c0daaea71d61e901ac897297af1cc5ff190dab83"
+                "reference": "a51e2ba8e76f5736de4f8c4bd59d252102006591"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indisrl/Gestione_automatica_lavoro_da_ftp/zipball/c0daaea71d61e901ac897297af1cc5ff190dab83",
-                "reference": "c0daaea71d61e901ac897297af1cc5ff190dab83",
+                "url": "https://api.github.com/repos/indisrl/Gestione_automatica_lavoro_da_ftp/zipball/a51e2ba8e76f5736de4f8c4bd59d252102006591",
+                "reference": "a51e2ba8e76f5736de4f8c4bd59d252102006591",
                 "shasum": ""
             },
             "require": {
@@ -324,7 +325,7 @@
                 "source": "https://github.com/indisrl/Gestione_automatica_lavoro_da_ftp/tree/master",
                 "issues": "https://github.com/indisrl/Gestione_automatica_lavoro_da_ftp/issues"
             },
-            "time": "2026-03-04T10:40:37+00:00"
+            "time": "2026-04-23T08:51:09+00:00"
         },
         {
             "name": "hidehalo/nanoid-php",
@@ -631,12 +632,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "cce0438c9bf8ae3285059e5715c78d89ccc10c9c"
+                "reference": "b8a0bc128fed2c085dda24d3719fd5c9c38a5c88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/cce0438c9bf8ae3285059e5715c78d89ccc10c9c",
-                "reference": "cce0438c9bf8ae3285059e5715c78d89ccc10c9c",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/b8a0bc128fed2c085dda24d3719fd5c9c38a5c88",
+                "reference": "b8a0bc128fed2c085dda24d3719fd5c9c38a5c88",
                 "shasum": ""
             },
             "require": {
@@ -706,7 +707,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-24T14:54:25+00:00"
+            "time": "2026-04-21T06:53:54+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",
@@ -714,12 +715,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "791986826cabb4c86f2dca9f8cdef3f5ec1a6aee"
+                "reference": "02970383cc12e7bf0bc0707ea6e2e8ed23a7aec9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/791986826cabb4c86f2dca9f8cdef3f5ec1a6aee",
-                "reference": "791986826cabb4c86f2dca9f8cdef3f5ec1a6aee",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/02970383cc12e7bf0bc0707ea6e2e8ed23a7aec9",
+                "reference": "02970383cc12e7bf0bc0707ea6e2e8ed23a7aec9",
                 "shasum": ""
             },
             "require": {
@@ -814,7 +815,7 @@
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
                 "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.x"
             },
-            "time": "2026-03-05T05:38:52+00:00"
+            "time": "2026-04-19T06:00:39+00:00"
         },
         {
             "name": "picqer/php-barcode-generator",
@@ -1098,12 +1099,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/smalot/pdfparser.git",
-                "reference": "a6061664644f16074321322dffe43289f1bbb0d3"
+                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/a6061664644f16074321322dffe43289f1bbb0d3",
-                "reference": "a6061664644f16074321322dffe43289f1bbb0d3",
+                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/2cfa0d92bd557875c9f52a75fde0e8392302a354",
+                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354",
                 "shasum": ""
             },
             "require": {
@@ -1142,7 +1143,7 @@
                 "issues": "https://github.com/smalot/pdfparser/issues",
                 "source": "https://github.com/smalot/pdfparser/tree/master"
             },
-            "time": "2026-03-27T07:31:19+00:00"
+            "time": "2026-04-17T11:37:58+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1150,12 +1151,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "6d857f4d76bd4b343eac26d6b539585d2bc56493"
+                "reference": "6a21eb99c6973357967f6ce3708cd55a6bec6315"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6d857f4d76bd4b343eac26d6b539585d2bc56493",
-                "reference": "6d857f4d76bd4b343eac26d6b539585d2bc56493",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6a21eb99c6973357967f6ce3708cd55a6bec6315",
+                "reference": "6a21eb99c6973357967f6ce3708cd55a6bec6315",
                 "shasum": ""
             },
             "require": {
@@ -1208,7 +1209,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.33.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/1.x"
             },
             "funding": [
                 {
@@ -1228,7 +1229,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-23T08:48:59+00:00"
+            "time": "2026-04-10T17:25:58+00:00"
         },
         {
             "name": "tecnickcom/tc-lib-barcode",

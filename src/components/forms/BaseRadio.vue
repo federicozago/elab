@@ -7,14 +7,18 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
   <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
   <div class="form-field q-pb-md">
     <div class="q-mb-xs text-caption">{{ label }}</div>
-    <q-option-group
-      v-model="model"
-      :options="opzioniFormattate"
-      :rules="rules"
-      v-bind="$attrs"
-      type="radio"
-      inline
-    />
+    <q-field v-model="model" :rules="rules" borderless hide-bottom-space>
+      <template v-slot:control>
+        <q-option-group
+          v-model="model"
+          v-bind="$attrs"
+          :options="opzioniFormattate"
+          :rules="rules"
+          type="radio"
+          inline
+        />
+      </template>
+    </q-field>
   </div>
   <!--
     Grazie all'uso di v-bind="$attrs" che abbiamo inserito nel tuo BaseInput.vue: Tutto quello che scrivi su BaseInput (come type="number", maxlength="50", step="1", ecc.) viene "passato" automaticamente al q-input interno di Quasar.
@@ -35,9 +39,10 @@ const props = defineProps({
   rules: { type: Array, default: () => [] },
 })
 
-const opzioniFormattate = computed(()=>{
-  return props.elementi.map(el=>({
-    label:el,value:el
+const opzioniFormattate = computed(() => {
+  return props.elementi.map((el) => ({
+    label: el.toString(),
+    value: el,
   }))
 })
 </script>

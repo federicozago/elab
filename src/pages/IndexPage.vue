@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pa-md">
     <div class="q-gutter-y-md">
-      <BaseForm v-model:valido="formValido" :formData="formData" @submit="creaElaborazione">
+      <BaseForm :formData="formData" @submit="creaElaborazione" labelInvia="Elabora">
         <div class="row q-gutter-x-md items-start">
           <div class="col">
             <BaseSelect
@@ -12,7 +12,7 @@
             />
           </div>
           <div class="col-auto">
-            <BaseBtn label="Nuovo lavoro" @click="creaNuovoLavoro"  />
+            <BaseBtn label="Nuovo lavoro" @click="creaNuovoLavoro" />
           </div>
         </div>
         <!-- spiegazione classi div precedenti
@@ -30,14 +30,13 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         <BaseInput
           v-model="formData.folder_z"
           label="Folder z (path completa)"
-          :rules="[required]"
+          :rules="[required, maxLength(50)]"
         />
         <BaseInput
           v-model="formData.id_flusso"
           label="Commessa (opzionale)"
           :rules="[maxLength(10)]"
         />
-        <BaseBtn type="submit" label="Elabora" :disable="!formValido" />
       </BaseForm>
     </div>
 
@@ -281,6 +280,8 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
 <script setup>
 import { useRouter } from 'vue-router'
 const router = useRouter()
+import { useRoute } from 'vue-router'
+const route = useRoute()
 import BaseBtn from 'components/forms/BaseBtn.vue'
 import BaseSelect from 'components/forms/BaseSelect.vue'
 import BaseForm from 'components/forms/BaseForm.vue'
@@ -296,13 +297,19 @@ import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
 const formData = ref({
-  lavoro: '',
+  lavoro: route.query.id_lavoro
+    ? { value: route.query.id_lavoro, label: route.query.nome_lavoro }
+    : null,
   fileBaseDati: fileStore.hasFile ? fileStore.selectedFile : null,
   folder_z: '',
   id_flusso: null,
 })
+//svuoto array query per non far comparire sul menu la base dati creata in precedenza
+router.replace({
+  path: route.path,
+  query: {},
+})
 const lavori = ref([])
-const formValido = ref(false)
 
 // function market() {
 //   LocalStorage.set('tipoSpedizione', 'market')
@@ -414,24 +421,29 @@ const columnsElaborazioniConcluse = [
 ]
 
 onMounted(() => {
-  try {
-    api.post('preleva_lavori.php').then((response) => {
+  api
+    .post('preleva_lavori.php')
+    .then((response) => {
       lavori.value = response.data.lavori
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare i lavori')
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare lavori - ' + e.response.data.message)
+    })
 
   prelevaElaborazioniInCorso()
   prelevaElaborazioniConcluse()
 
-  try {
-    api.post('/preleva_azioni_elaborazioni.php').then((response) => {
+  api
+    .post('/preleva_azioni_elaborazioni.php')
+    .then((response) => {
       azioni.value = response.data.azioni
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare le azioni elaborazioni')
-  }
+    .catch((e) => {
+      gestioneErrore(
+        e,
+        'Impossibile prelevare le azioni delle elaborazioni - ' + e.response.data.message,
+      )
+    })
 })
 function prelevaElaborazioniInCorso() {
   try {
@@ -443,27 +455,28 @@ function prelevaElaborazioniInCorso() {
   }
 }
 function prelevaElaborazioniConcluse() {
-  try {
-    api.post('/preleva_elaborazioni_concluse.php').then((response) => {
+  api
+    .post('/preleva_elaborazioni_concluse.php')
+    .then((response) => {
       elaborazioniConcluse.value = response.data.elaborazioni
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare le elaborazioni concluse')
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare elaborazioni concluse - ' + e.response.data.message)
+    })
 }
 
 function lanciaElaborazione(id_elaborazione) {
-  try {
-    api.post('/lancia_ordinamento.php', {
+  api
+    .post('/lancia_ordinamento.php', {
       id_elaborazione: id_elaborazione,
     })
-    //setto stato a 1
-    elaborazioniInCorso.value.filter(
-      (elaborazione) => elaborazione.id === id_elaborazione,
-    )[0].ordinato = 1
-  } catch (error) {
-    gestioneErrore(error, "Impossibile lanciare l'elaborazione")
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile lanciare ordinamento - ' + e.response.data.message)
+    })
+  //setto stato a 1
+  elaborazioniInCorso.value.filter(
+    (elaborazione) => elaborazione.id === id_elaborazione,
+  )[0].ordinato = 1
 }
 
 async function copiaQuery(query) {
@@ -476,71 +489,76 @@ async function copiaQuery(query) {
 }
 
 function lanciaPrenotazione(id_elaborazione) {
-  try {
+  if (!dataPrenotazione.value[id_elaborazione]) {
+    gestioneErrore(null, 'Data prenotazione non inserita')
+    return
+  }
+
+  api
+    .post('/prenotazione.php', {
+      data_prenotazione: dataPrenotazione.value[id_elaborazione],
+      id_elaborazione: id_elaborazione,
+    })
+    .then(() => {
+      messaggioPositivo('Prenotazione effettuata')
+    })
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile lanciare prenotazione - ' + e.response.data.message)
+    })
+}
+
+function lanciaAzione(datiAzione, id_elaborazione) {
+  if (datiAzione.parametri.includes('d')) {
     if (!dataPrenotazione.value[id_elaborazione]) {
       gestioneErrore(null, 'Data prenotazione non inserita')
       return
     }
-
-    api
-      .post('/prenotazione.php', {
-        data_prenotazione: dataPrenotazione.value[id_elaborazione],
-        id_elaborazione: id_elaborazione,
-      })
-      .then(() => {
-        messaggioPositivo('Prenotazione effettuata')
-      })
-  } catch (e) {
-    gestioneErrore(e, 'Impossibile lanciare prenotazione')
   }
-}
 
-function lanciaAzione(datiAzione, id_elaborazione) {
-  try {
-    if (datiAzione.parametri.includes('d')) {
-      if (!dataPrenotazione.value[id_elaborazione]) {
-        gestioneErrore(null, 'Data prenotazione non inserita')
-        return
-      }
-    }
+  var dati = {
+    data_spedizione: datiAzione.parametri?.includes('d')
+      ? dataPrenotazione.value[id_elaborazione]
+      : null,
+    id_elaborazione: id_elaborazione,
+  }
 
-    var dati = {
-      data_spedizione: datiAzione.parametri?.includes('d')
-        ? dataPrenotazione.value[id_elaborazione]
-        : null,
-      id_elaborazione: id_elaborazione,
-    }
-
-    api.post('/' + datiAzione.endpoint, dati).then(() => {
+  api
+    .post('/' + datiAzione.endpoint, dati)
+    .then(() => {
       messaggioPositivo('Azione eseguita')
     })
-  } catch (e) {
-    gestioneErrore(e, 'Impossibile lanciare azione ' + datiAzione.endpoint)
-  }
+    .catch((e) => {
+      gestioneErrore(
+        e,
+        'Impossibile eseguire  azione ' + datiAzione.endpoint + ' - ' + e.response.data.message,
+      )
+    })
 }
 
 function chiudiElaborazione(id_elaborazione) {
-  try {
-    api.post('/chiudi_elaborazione.php', { id_elaborazione: id_elaborazione }).then(() => {
+  api
+    .post('/chiudi_elaborazione.php', { id_elaborazione: id_elaborazione })
+    .then(() => {
       messaggioPositivo('Elaborazione chiusa')
       prelevaElaborazioniInCorso()
       prelevaElaborazioniConcluse()
     })
-  } catch (e) {
-    gestioneErrore(e, 'Impossibile chiudere elaborazione')
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile chiudere elaborazione - ' + e.response.data.message)
+    })
 }
 
 function riapriElaborazione(id_elaborazione) {
-  try {
-    api.post('/riapri_elaborazione.php', { id_elaborazione: id_elaborazione }).then(() => {
+  api
+    .post('/riapri_elaborazione.php', { id_elaborazione: id_elaborazione })
+    .then(() => {
       messaggioPositivo('Elaborazione riaperta')
       prelevaElaborazioniInCorso()
       prelevaElaborazioniConcluse()
     })
-  } catch (e) {
-    gestioneErrore(e, 'Impossibile riaprire elaborazione')
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile riaprire elaborazione - ' + e.response.data.message)
+    })
 }
 </script>
 <style scoped>

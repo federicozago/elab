@@ -13,7 +13,8 @@ $vg=$vg->get_variabili_globali("elab");
 $log = new Segnalazioni_e_log($vg["id_flusso"]);
 $db = new Gestione_db("elab",$log);
 
-if(!$basi_dati = $db->preleva_da_db("select id as value,nome as label,intestazione from base_dati order by nome")) {
+$basi_dati = $db->preleva_da_db("select id as value,nome_base_dati as label,intestazione from base_dati order by nome_base_dati",[],false);
+if($basi_dati === false) {
     http_response_code(400);
     echo json_encode([
         'success' => false,

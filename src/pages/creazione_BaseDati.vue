@@ -9,8 +9,10 @@
         @update:model-value="baseDatiCambiata"
       />
 
+      <h3>Crea base dati</h3>
+
       <!-- form creazione base dati -->
-      <BaseForm :formData="formData" @submit="creaBaseDati">
+      <BaseForm :formData="formData" @submit="creaBaseDati" labelInvia="Crea base dati">
         <BaseInput
           v-model="formData.nome_base_dati"
           label="Nome nuova base dati"
@@ -53,8 +55,6 @@
           :disable="!intestazione.length"
           :rules="[required]"
         />
-
-        <BaseBtn type="submit" label="Salva Base Dati" />
       </BaseForm>
     </div>
   </q-page>
@@ -67,7 +67,6 @@ import BaseFile from 'components/forms/BaseFile.vue'
 import { api } from 'boot/axios.js'
 import { maxLength, required, notInArray } from 'src/composables/rules.js'
 import BaseForm from 'components/forms/BaseForm.vue'
-import BaseBtn from 'components/forms/BaseBtn.vue'
 import { onMounted, ref } from 'vue'
 import { useCassettaAttrezzi } from 'src/composables/cassettaAttrezzi'
 const { gestioneErrore, messaggioPositivo } = useCassettaAttrezzi()
@@ -94,9 +93,14 @@ const formData = ref({
 })
 
 onMounted(() => {
-  api.post('/preleva_basi_dati.php').then((response) => {
-    basiDati.value = response.data.basi_dati
-  })
+  api
+    .post('/preleva_basi_dati.php')
+    .then((response) => {
+      basiDati.value = response.data.basi_dati
+    })
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
+    })
 })
 
 function baseDatiCambiata(idBaseDati) {
@@ -108,6 +112,9 @@ function baseDatiCambiata(idBaseDati) {
       Object.keys(response.data.base_dati).forEach((key) => {
         if (key in formData.value) formData.value[key] = response.data.base_dati[key]
       })
+    })
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
     })
 }
 
@@ -142,23 +149,27 @@ function creaBaseDati() {
   //se bisogna importare i dati
   const dati = { ...formData.value, intestazione: intestazione.value }
   dati.file_base_dati = dati.file_base_dati.name
-  try {
-    api.post('/crea_base_dati.php', dati).then((response) => {
+
+  api
+    .post('/crea_base_dati.php', dati)
+    .then((response) => {
       messaggioPositivo('Base dati creata con successo')
       //ritorno alla pagina di creazione elaborazione
       if (creazioneLavoroInCorso) {
-        router.push({
+        router.replace({
           path: '/creazione_lavoro/',
           query: {
-            idBaseDati: response.data.id_base_dati,
+            id_base_dati: response.data.id_base_dati,
+            nome_base_dati: response.data.nome_base_dati,
           },
         })
       }
     })
-  } catch (e) {
-    gestioneErrore(e, 'Impossibile creare la base dati')
-    return false
-  }
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile creare la base dati - ' + e.response.data.message)
+      return false
+    })
 }
 </script>
+
 <style scoped></style>
