@@ -2,7 +2,6 @@ import {useQuasar} from 'quasar'
 export function useCassettaAttrezzi() {
   const $q = useQuasar()
   const gestioneErrore = (error: any, msg: string) => {
-    if (error.response) {
       let timeoutId: NodeJS.Timeout | null = null
       let dismiss: (() => void) | null = null
       const timeoutDuration = 2500
@@ -39,6 +38,7 @@ export function useCassettaAttrezzi() {
       // Avvia il timeout iniziale
       startTimeout()
 
+    if (error.response) {
       console.log('Dati errore:', error.response.data)
       console.log('Status:', error.response.status)
       console.log('Headers:', error.response.headers)

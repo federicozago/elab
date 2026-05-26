@@ -21,18 +21,18 @@ try {
 
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
     $dati = $db->preleva_da_db("
 select 
-    nome_lavoro,id_base_dati, nome_base_dati,nome_elaborazione,`where`,tipo_spedizione  
+    nome_lavoro,id_base_dati, nome_base_dati,intestazione, elaborazioni_lavoro.id as id_elaborazione, nome_elaborazione,`where`,tipo_spedizione, id_configurazione
 from 
     lavori 
         join base_dati on id_base_dati = base_dati.id 
-        join elaborazioni_lavoro on id_lavoro = lavoro.id
+        join elaborazioni_lavoro on id_lavoro = lavori.id
 where
-    lavoro.id = ?
+    lavori.id = ?
 order by elaborazioni_lavoro.id",[$jsonData["id_lavoro"]]);//se stato è maggiore di zero allora è già ordinato
     if($dati === false)
         throw new \Exception("Errore durante prelievo lavori");

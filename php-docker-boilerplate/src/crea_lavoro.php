@@ -46,21 +46,33 @@ try {
         throw new \Exception("Errore durante l'inserimento nella tabella lavori");
     $id_lavoro = $db->get_ultimo_id_inserito();
 
+    //prelevo nome base dati
+    if( ! $nome_base_dati = $db->preleva_da_db_un_singolo_valore("select nome_base_dati from base_dati where id=?",[$jsonData["id_base_dati"]]))
+        throw new \Exception("Errore durante prelievo nome base dati");
+
     //creo i record elaborazione del lavoro
     $elaborazioni = $jsonData['elaborazioni'];
     foreach($elaborazioni as $key => $elaborazione){
         if(!isSqlSafe($elaborazione["where"]))
             throw new \Exception("Where non sicuro");
+        $where = $elaborazione["where"] ? "where {$elaborazione['where']}" : "";
 
         $elaborazione["id_lavoro"] = $id_lavoro;
         $elaborazione["id_configurazione"] = $elaborazione["id_configurazione"]["value"];
         unset($elaborazione["id"]);
         if(!$db->carica_a_db($elaborazione, "elaborazioni_lavoro",null,true))
             throw new \Exception("Errore durante l'inserimento nella tabella elaborazioni_lavoro");
+
+        //creo la vista dei dati (nome base dati + id elaborazione
+        $query_viste[] = "create OR REPLACE ALGORITHM = UNDEFINED  VIEW `{$jsonData["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}` as select * from `$nome_base_dati` $where";
     }
 
     $db->sblocca_db();
 
+    //creo le viste delle elaborazioni
+    foreach($query_viste as $query)
+        if(!$db->esegui_query($query))
+            throw new \Exception("Errore durante la creazione della vista $query");
 
     // Restituisci una risposta di successo
     http_response_code(200);

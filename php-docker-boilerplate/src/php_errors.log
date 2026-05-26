@@ -861,3 +861,281 @@
 [14-May-2026 12:10:40 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
 [14-May-2026 12:10:40 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
 [14-May-2026 12:10:40 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[15-May-2026 12:31:23 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[15-May-2026 12:31:23 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[15-May-2026 12:31:23 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[15-May-2026 12:31:23 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[15-May-2026 12:31:23 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[15-May-2026 12:31:23 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[15-May-2026 12:31:23 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[18-May-2026 10:28:57 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[18-May-2026 10:28:57 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[18-May-2026 10:28:57 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[18-May-2026 10:28:57 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[18-May-2026 10:28:57 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[18-May-2026 10:28:57 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[18-May-2026 10:28:57 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[18-May-2026 10:29:09 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:29:09 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:29:09 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:29:09 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:04 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:04 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:04 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:04 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:08 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:08 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:24 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:27 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:27 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:45 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:45 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:45 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:30:45 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:33:23 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:33:23 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:33:23 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[18-May-2026 10:33:23 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[19-May-2026 06:34:41 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[19-May-2026 06:34:41 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[19-May-2026 06:34:41 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[19-May-2026 06:34:41 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[19-May-2026 06:34:41 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[19-May-2026 06:34:41 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[19-May-2026 06:34:41 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[19-May-2026 12:39:49 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[19-May-2026 12:39:49 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[19-May-2026 12:39:49 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[19-May-2026 12:39:49 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[19-May-2026 12:39:49 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[19-May-2026 12:39:49 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[19-May-2026 12:39:49 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[19-May-2026 13:51:58 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(106): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:51:58 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/fatal_error_handler.php(6): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: fatal_handler()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:52:23 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(106): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:52:23 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/fatal_error_handler.php(6): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: fatal_handler()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:53:15 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[19-May-2026 13:53:25 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(376): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/fatal_error_handler.php(6): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: fatal_handler()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:55:18 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[19-May-2026 13:55:22 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(377): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/fatal_error_handler.php(6): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: fatal_handler()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:55:51 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(106): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:56:02 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/fatal_error_handler.php(6): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: fatal_handler()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:57:46 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(106): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 13:57:55 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'import_file.import_file.log' doesn't exist in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php:223
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php(223): PDOStatement->execute()
+#1 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php(375): indi\Classes\Gestione_db->carica_a_db()
+#2 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/fatal_error_handler.php(6): indi\Classes\Segnalazioni_e_log->scrivi_log()
+#3 [internal function]: fatal_handler()
+#4 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 223
+[19-May-2026 14:00:01 UTC] PHP Fatal error:  Uncaught ErrorException: [2026-05-19 13:59:59] Eccezione: Attempt to assign property "messaggio_per_fatal_error" on null
+-Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php:107
+Stack trace:
+#0 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php on line 107
+[20-May-2026 06:14:41 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[20-May-2026 06:14:41 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[20-May-2026 06:14:41 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[20-May-2026 06:14:41 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[20-May-2026 06:14:41 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[20-May-2026 06:14:41 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[20-May-2026 06:14:41 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[20-May-2026 06:15:29 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[20-May-2026 06:15:29 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[20-May-2026 06:15:29 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[20-May-2026 06:15:29 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[20-May-2026 06:17:22 UTC] PHP Fatal error:  Uncaught ErrorException: [2026-05-20 06:17:22] Eccezione: Attempt to assign property "messaggio_per_fatal_error" on null
+-Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php:107
+Stack trace:
+#0 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Segnalazioni_e_log.php on line 107
+[20-May-2026 06:30:01 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:25:31 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[20-May-2026 08:25:31 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[20-May-2026 08:25:31 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[20-May-2026 08:25:31 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[20-May-2026 08:25:31 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[20-May-2026 08:25:31 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[20-May-2026 08:25:31 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[20-May-2026 08:25:39 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:26:29 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:32:55 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:33:28 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:48:33 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:49:08 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:50:00 UTC] PHP Fatal error:  Uncaught Error: Attempt to assign property "messaggio_per_fatal_error" on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:77
+Stack trace:
+#0 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#1 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 77
+[20-May-2026 08:51:22 UTC] PHP Fatal error:  Uncaught Error: Call to a member function cellExists() on null in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php:162
+Stack trace:
+#0 /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php(106): indi\Classes\Excel->leggi_riga()
+#1 /var/www/html/crea_elaborazione.php(69): indi\Classes\Excel->converti_in_array()
+#2 {main}
+  thrown in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Excel.php on line 162
+[22-May-2026 08:05:10 UTC] PHP Warning:  Packets out of order. Expected 1 received 0. Packet size=145 in /var/www/html/vendor/cassetta_attrezzi_php/cassetta_attrezzi_php/app/Classes/Gestione_db.php on line 339
+[22-May-2026 08:05:10 UTC] PHP Fatal error:  Uncaught ErrorException: Packets out of order. Expected 1 received 0. Packet size=145 in Unknown:0
+Stack trace:
+#0 [internal function]: indi\Classes\Segnalazioni_e_log->indi\Classes\{closure}()
+#1 {main}
+  thrown in Unknown on line 0
+[22-May-2026 09:45:33 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[22-May-2026 09:45:33 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[22-May-2026 09:45:33 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[22-May-2026 09:45:33 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[22-May-2026 09:45:33 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[22-May-2026 09:45:33 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[22-May-2026 09:45:33 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[22-May-2026 09:50:16 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method indi\Classes\Excel::apri_file() in /var/www/html/crea_elaborazione.php:69
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/crea_elaborazione.php on line 69
+[22-May-2026 12:20:44 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[22-May-2026 12:20:44 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[22-May-2026 12:20:44 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[22-May-2026 12:20:44 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[22-May-2026 12:20:44 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[22-May-2026 12:20:44 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[22-May-2026 12:20:44 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[25-May-2026 12:12:13 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[25-May-2026 12:12:13 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[25-May-2026 12:12:13 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[25-May-2026 12:12:13 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[25-May-2026 12:12:13 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[25-May-2026 12:12:13 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[25-May-2026 12:12:13 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[25-May-2026 12:13:10 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:13:10 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:13:10 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:13:10 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:14:04 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:14:04 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:14:05 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:14:05 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:14:05 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[25-May-2026 12:14:05 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 06:58:37 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[26-May-2026 06:58:38 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[26-May-2026 06:58:38 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[26-May-2026 06:58:38 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[26-May-2026 06:58:38 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[26-May-2026 06:58:38 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[26-May-2026 06:58:38 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[26-May-2026 06:58:51 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 06:58:51 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 06:58:51 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 06:58:51 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).

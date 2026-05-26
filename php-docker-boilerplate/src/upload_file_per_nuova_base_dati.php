@@ -99,6 +99,8 @@ try {
         'intestazione'=>$intestazione
     ]);
 } catch (\Exception $e) {
+    if(file_exists($targetPath))
+        unlink($targetPath);
     // In caso di errore
     http_response_code(400);
     echo json_encode([

@@ -161,6 +161,7 @@ function creaBaseDati() {
           query: {
             id_base_dati: response.data.id_base_dati,
             nome_base_dati: response.data.nome_base_dati,
+            intestazione: response.data.intestazione,
           },
         })
       }

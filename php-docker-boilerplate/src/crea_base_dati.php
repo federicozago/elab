@@ -28,8 +28,14 @@ try {
     $db = new Gestione_db("elab", $log);
 
     //verifica esistenza base dati
-    if($db->verifica_esistenza_tabella("{$vg["database_cliente"]}.$jsonData[nome_base_dati]"))
+    $jsonData['nome_base_dati'] = strtolower($jsonData['nome_base_dati']);
+    if($db->verifica_esistenza_tabella("{$vg["database_cliente"]}.{$jsonData['nome_base_dati']}"))
         throw new \Exception("La base dati {$jsonData["nome_base_dati"]} esiste già");
+
+    //verifico se non è già presente la base dati in tab mysql base_dati
+    if($db->verifica_presenza_record("select * from base_dati where nome_base_dati='{$jsonData["nome_base_dati"]}'")){
+        throw new \Exception("La base dati {$jsonData["nome_base_dati"]} è già presente a db");
+    }
 
     //creazione sql base dati
     $sql_tab = "CREATE TABLE `{$jsonData["nome_base_dati"]}` (
@@ -79,7 +85,8 @@ try {
         'success' => true,
         'message' => 'Base dati creata con successo',
         'id_base_dati'=>$id,
-        'nome_base_dati'=>$jsonData["nome_base_dati"]
+        'nome_base_dati'=>$jsonData["nome_base_dati"],
+        'intestazione'=>$jsonData["intestazione"]
     ]);
 }catch (\Exception $e) {
     // In caso di errore

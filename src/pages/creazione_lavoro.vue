@@ -36,6 +36,8 @@
         v-if="isModifica"
       ></BaseSelect>
 
+      <h3>{{ isModifica ? 'Modifica lavoro' : 'Crea lavoro' }}</h3>
+
       <BaseForm :formData="formData" @submit="creaLavoro" labelInvia="Salva lavoro">
         <div class="row q-gutter-x-md items-start">
           <div class="col">
@@ -166,9 +168,7 @@ const dialogConfigurazioneVisible = ref(false)
 const tipoSpedizioneScelta = ref(null)
 const configurazioneCorrente = ref(null)
 const formData = ref({
-  id_base_dati: route.query.id_base_dati
-    ? { label: route.query.nome_base_dati, value: route.query.id_base_dati }
-    : null, //se ritorno dalla pagina creazione_base_dati potrei voler importare i dati precedenti
+  id_base_dati: null, //se ritorno dalla pagina creazione_base_dati potrei voler importare i dati precedenti
   nome_lavoro: route.query.nome_base_dati ? route.query.nome_base_dati : '',
   elaborazioni: [
     {
@@ -181,10 +181,6 @@ const formData = ref({
   ],
 })
 //svuoto array query per non far comparire sul menu la base dati creata in precedenza
-router.replace({
-  path: route.path,
-  query: {},
-})
 const listaConfigurazioni = ref([])
 const basiDati = ref([])
 const visteEsistenti = ref([])
@@ -192,7 +188,6 @@ const baseDatiSelezionata = ref(null)
 watch(
   () => formData.value.id_base_dati,
   (newVal) => {
-    console.log('base dati cambiata', newVal)
     baseDatiSelezionata.value = newVal
   },
 )
@@ -203,6 +198,12 @@ const isModifica = computed(() => route.path.includes('/modifica_lavoro'))
 const lavori = ref([])
 const lavoro = ref(null)
 
+if(route.query.id_base_dati)
+  formData.value.id_base_dati = { label: route.query.nome_base_dati, value: route.query.id_base_dati, intestazione: route.query.intestazione }
+router.replace({
+  path: route.path,
+  query: {},
+})
 async function tipoSpedizioneCambiato(idElaborazione) {
   tipoSpedizioneScelta.value = formData.value.elaborazioni[idElaborazione].tipo_spedizione
   nomeElaborazioneScelta.value = formData.value.elaborazioni[idElaborazione].nome_elaborazione
@@ -228,17 +229,32 @@ function lavoroCambiato(val) {
     })
     .then((response) => {
       //setto il formData con i dati prelevati
-      formData.value.nome_lavoro = response.data[0].nome_lavoro
+      formData.value.nome_lavoro = response.data.lavori[0].nome_lavoro
       formData.value.id_base_dati = {
-        label: response.data[0].nome_base_dati,
-        value: response.data.id_base_dati,
+        label: response.data.lavori[0].nome_base_dati,
+        value: response.data.lavori[0].id_base_dati,
+        intestazione: response.data.lavori[0].intestazione,
       }
+
+      formData.value.elaborazioni = []
+      Object.keys(response.data.lavori).forEach((key) => {
+        formData.value.elaborazioni.push({
+          id: response.data.lavori[key].id_elaborazione,
+          nome_elaborazione: response.data.lavori[key].nome_elaborazione,
+          where: response.data.lavori[key].where,
+          tipo_spedizione: response.data.lavori[key].tipo_spedizione,
+          id_configurazione: {
+            value: response.data.lavori[key].id_configurazione,
+            label: response.data.lavori[key].nome_configurazione,
+          },
+        })
+      })
     })
     .catch((e) => {
       gestioneErrore(
         e,
         'Impossibile prelevare la configurazione, controllare i dati inseriti - ' +
-          e.response.data.message,
+          e.response?.data?.message || 'errore sconosciuto',
       )
     })
 }
@@ -316,6 +332,7 @@ function creaLavoro() {
       nome_lavoro: formData.value.nome_lavoro,
       //elaborazioni: JSON.stringify(formData.value.elaborazioni),
       elaborazioni: formData.value.elaborazioni,
+      id_lavoro: isModifica.value ? lavoro.value.value : null,
     })
     .then((response) => {
       messaggioPositivo(
@@ -334,7 +351,12 @@ function creaLavoro() {
       }
     })
     .catch((e) => {
-      gestioneErrore(e, isModifica.value ? 'Impossibile aggiornare il lavoro - ' + e.response.data.message : 'Impossibile creare  il lavoro - ' + e.response.data.message)
+      gestioneErrore(
+        e,
+        isModifica.value
+          ? 'Impossibile aggiornare il lavoro - ' + e.response.data.message
+          : 'Impossibile creare  il lavoro - ' + e.response.data.message,
+      )
     })
 }
 

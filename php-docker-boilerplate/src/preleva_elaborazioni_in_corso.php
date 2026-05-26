@@ -16,7 +16,7 @@ try {
     // Verifica se è stato inviato un file
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
     $dati = $db->preleva_da_db("select *  from elab_join where stato != 255 order by id_lavoro,id_elaborazione",[],false);//se stato è maggiore di zero allora è già ordinato
@@ -55,7 +55,7 @@ try {
         $elaborazione["row-id"] = $indice_riga++;
         $dati_out[$indice_dati_out]["dettagli"][] = $elaborazione;
 
-        $nome_lavoro = $elaborazione["nome_elaborazione_gruppo"];
+        $nome_lavoro = $elaborazione["nome_lavoro"];
 
     }
 

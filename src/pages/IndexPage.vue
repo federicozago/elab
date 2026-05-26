@@ -30,12 +30,12 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         <BaseInput
           v-model="formData.folder_z"
           label="Folder z (path completa)"
-          :rules="[required, maxLength(50)]"
+          :rules="[required]"
         />
         <BaseInput
           v-model="formData.id_flusso"
-          label="Commessa (opzionale)"
-          :rules="[maxLength(10)]"
+          label="Commessa"
+          :rules="[required, maxLength(10)]"
         />
       </BaseForm>
     </div>
@@ -149,7 +149,15 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                                       label="Copia"
                                       @click="
                                         copiaQuery(
-                                          `SELECT * FROM ${props.row.base_dati}_${props.row.id} e JOIN ordinati_${props.row.tipo_spedizione}_${props.row.base_dati} o ON e.id=o.c1 ORDER BY progr`,
+                                          'SELECT * FROM `' +
+                                            props.row.nome_base_dati +
+                                            '_' +
+                                            props.row.nome_elaborazione +
+                                            '` e JOIN `ordinati_' +
+                                            props.row.tipo_spedizione +
+                                            '_' +
+                                            props.row.nome_base_dati +
+                                            '` o ON e.id=o.c1 ORDER BY progr',
                                         )
                                       "
                                     ></BaseBtn>
@@ -168,8 +176,8 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
 
                                 <q-card-section>
                                   <pre class="sql-code">
-  SELECT * FROM {{ props.row.base_dati }}_{{ props.row.id }} e
-      JOIN ordinati_{{ props.row.tipo_spedizione }}_{{ props.row.base_dati }} o
+  SELECT * FROM `{{ props.row.nome_base_dati }}_{{ props.row.nome_elaborazione }}` e
+      JOIN `ordinati_{{ props.row.tipo_spedizione }}_{{ props.row.nome_base_dati }}` o
            ON e.id=o.c1
   ORDER BY progr
                               </pre
@@ -341,26 +349,23 @@ function creaNuovoLavoro() {
 }
 
 function creaElaborazione() {
-  try {
-    const uploadData = new FormData()
-    uploadData.append('file_to_upload', formData.value.fileBaseDati) //(se non è già stato caricato quando si è creato la base dati che allora è ancora sul server viene caricata solo la stringa della path del file sul server che andrà in automatico nell'array $_POST e non nell'array $_FILES
-
-    uploadData.append('folder_z', formData.value.folder_z)
-    uploadData.append('id_flusso', formData.value.id_flusso)
-    uploadData.append('id_lavoro', formData.value.lavoro)
-
-    //creazione elaborazione
-    api
-      .post('/crea_elaborazione.php', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then(() => {
-        messaggioPositivo('Elaborazione creata')
-        prelevaElaborazioniInCorso()
-      })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile creare elaborazione')
-  }
+  const uploadData = new FormData()
+  uploadData.append('file_to_upload', formData.value.fileBaseDati) //(se non è già stato caricato quando si è creato la base dati che allora è ancora sul server viene caricata solo la stringa della path del file sul server che andrà in automatico nell'array $_POST e non nell'array $_FILES
+  uploadData.append('folder_z', formData.value.folder_z)
+  uploadData.append('id_flusso', formData.value.id_flusso)
+  uploadData.append('id_lavoro', formData.value.lavoro.value)
+  //creazione elaborazione
+  api
+    .post('/crea_elaborazione.php', uploadData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    .then(() => {
+      messaggioPositivo('Elaborazione creata')
+      prelevaElaborazioniInCorso()
+    })
+    .catch((e) => {
+      gestioneErrore(e, 'Impossibile creare elaborazione - ' + e.response.data.message)
+    })
 }
 
 const tab = ref('elaborazioni')
@@ -376,15 +381,15 @@ const columnsGruppiElaborazioniInCorso = [
   {
     name: 'nomeGruppo',
     label: 'Nome',
-    field: 'nome_gruppo',
+    field: 'nome_lavoro',
     sortable: true,
   },
 ]
 const columnsElaborazioniInCorso = [
   {
-    name: 'id',
+    name: 'id_elaborazione',
     label: 'ID',
-    field: 'id',
+    field: 'id_elaborazione',
     sortable: true,
   },
   {
@@ -446,13 +451,17 @@ onMounted(() => {
     })
 })
 function prelevaElaborazioniInCorso() {
-  try {
-    api.post('/preleva_elaborazioni_in_corso.php').then((response) => {
+  api
+    .post('/preleva_elaborazioni_in_corso.php')
+    .then((response) => {
       elaborazioniInCorso.value = response.data.elaborazioni
     })
-  } catch (error) {
-    gestioneErrore(error, 'Impossibile prelevare le elaborazioni in corso')
-  }
+    .catch((e) => {
+      gestioneErrore(
+        e,
+        'Impossibile prelevare le elaborazioni in corso - ' + e.response.data.message,
+      )
+    })
 }
 function prelevaElaborazioniConcluse() {
   api
