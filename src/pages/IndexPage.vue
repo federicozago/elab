@@ -399,7 +399,7 @@ const columnsElaborazioniInCorso = [
     sortable: true,
   },
   { name: 'tipo_spedizione', label: 'Tipo spedizione', field: 'tipo_spedizione', sortable: true },
-  { name: 'base_dati', label: 'Base Dati', field: 'base_dati', sortable: true },
+  { name: 'nome_base_dati', label: 'Base Dati', field: 'nome_base_dati', sortable: true },
   { name: 'folder_z', label: 'Folder Z', field: 'folder_z', sortable: true },
   { name: 'ordinato', label: 'Ordinato', field: 'ordinato', sortable: true },
   { name: 'sql', label: 'Sql', field: 'sql', sortable: false },
