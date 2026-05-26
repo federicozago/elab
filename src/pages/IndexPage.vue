@@ -116,7 +116,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                       row-key="row-id"
                       :filter="filter"
                     >
-                      <template v-slot:body-cell-ordinato="props">
+                      <template v-slot:body-cell-stato="props">
                         <q-td :props="props">
                           <div v-if="props.value === 0">
                             <BaseBtn
@@ -401,7 +401,7 @@ const columnsElaborazioniInCorso = [
   { name: 'tipo_spedizione', label: 'Tipo spedizione', field: 'tipo_spedizione', sortable: true },
   { name: 'nome_base_dati', label: 'Base Dati', field: 'nome_base_dati', sortable: true },
   { name: 'folder_z', label: 'Folder Z', field: 'folder_z', sortable: true },
-  { name: 'ordinato', label: 'Ordinato', field: 'ordinato', sortable: true },
+  { name: 'stato', label: 'Stato', field: 'stato', sortable: true },
   { name: 'sql', label: 'Sql', field: 'sql', sortable: false },
   { name: 'da_prenotare', label: 'Da prenotare', field: 'da_prenotare', sortable: true },
   { name: 'Azioni', label: 'Azioni', field: 'azioni', sortable: true },
@@ -485,7 +485,7 @@ function lanciaElaborazione(id_elaborazione) {
   //setto stato a 1
   elaborazioniInCorso.value.filter(
     (elaborazione) => elaborazione.id === id_elaborazione,
-  )[0].ordinato = 1
+  )[0].stato = 1
 }
 
 async function copiaQuery(query) {
