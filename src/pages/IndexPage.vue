@@ -122,7 +122,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                             <BaseBtn
                               label="Ordina"
                               size="sm"
-                              @click="lanciaElaborazione(props.row.id)"
+                              @click="lanciaElaborazione(props.row.id_elaborazione)"
                             />
                           </div>
                           <div v-if="props.value === 1">In elaborazione</div>
@@ -483,9 +483,16 @@ function lanciaElaborazione(id_elaborazione) {
       gestioneErrore(e, 'Impossibile lanciare ordinamento - ' + e.response.data.message)
     })
   //setto stato a 1
-  elaborazioniInCorso.value.filter(
-    (elaborazione) => elaborazione.id === id_elaborazione,
-  )[0].stato = 1
+  //console.log(elaborazioniInCorso.value)
+  for (const lavoro of elaborazioniInCorso.value) {
+    for (const elaborazione of lavoro.dettagli) {
+      if (elaborazione.id_elaborazione === id_elaborazione) {
+        elaborazione.stato = 1
+        break
+      }
+    }
+  }
+  //elaborazioniInCorso.value.filter((lavoro) => lavoro.nome === id_elaborazione)[0].stato = 1
 }
 
 async function copiaQuery(query) {

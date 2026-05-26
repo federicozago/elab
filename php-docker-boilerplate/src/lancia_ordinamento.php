@@ -28,7 +28,7 @@ try {
     $db = new Gestione_db("elab", $log);
 
     //prelevo dati e configurazioni elaborazione richiesta
-    if(!$elaborazione = $db->preleva_da_db("select * from elab_join where e.id_elaborazione = ?", [$jsonData["id_elaborazione"]]))
+    if(!$elaborazione = $db->preleva_da_db("select * from elab_join where id_elaborazione = ?", [$jsonData["id_elaborazione"]]))
         throw new \Exception("Errore durante prelievo elaborazioni");
     $elaborazione = $elaborazione[0];
     if(!$configurazione = $db->preleva_da_db("select * from {$elaborazione['tipo_spedizione']} where id = ?",[$elaborazione['id_configurazione']]))
