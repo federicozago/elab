@@ -802,10 +802,18 @@ try {
 
 **File:** `temp/elab.php`
 
-Contiene:
-- Array `azioni_elaborazioni`: Definisce prodotti postali e relative azioni
-- Configurazioni database
-- Configurazioni FTP Poste Italiane
-- Configurazioni email per segnalazioni
+**Nota importante:** Il file `temp/elab.php` presente nel progetto è **solo un file di esempio**. Le variabili globali reali sono memorizzate su un altro server e vengono caricate dinamicamente durante l'esecuzione.
 
-Questo file è la fonte di verità per i prodotti postali disponibili e le loro azioni.
+### Scopo delle Variabili Globali
+
+Le variabili globali servono per fornire alcuni settaggi al progetto utili allo svolgimento delle varie operazioni. Questo sistema permette di modificare le configurazioni (database, FTP, email, ecc.) senza dover entrare nel codice del progetto: è sufficiente modificare le variabili globali sul server centralizzato.
+
+### Contenuto delle Variabili Globali
+
+Le variabili globali contengono:
+- Array `azioni_elaborazioni`: Definisce prodotti postali e relative azioni
+- Configurazioni database (host, porta, credenziali)
+- Configurazioni FTP Poste Italiane (credenziali, percorsi)
+- Configurazioni email per segnalazioni (SMTP, destinatari)
+
+L'array `azioni_elaborazioni` è la fonte di verità per i prodotti postali disponibili e le loro azioni.

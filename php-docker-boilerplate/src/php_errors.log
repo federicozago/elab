@@ -1139,3 +1139,14 @@ Stack trace:
 [26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
 [26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
 [26-May-2026 07:01:26 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:08:59 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:08:59 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:08:59 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 07:08:59 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[26-May-2026 08:46:34 UTC] PHP Warning:  Module "curl" is already loaded in Unknown on line 0
+[26-May-2026 08:46:34 UTC] PHP Warning:  Module "fileinfo" is already loaded in Unknown on line 0
+[26-May-2026 08:46:34 UTC] PHP Warning:  Module "mbstring" is already loaded in Unknown on line 0
+[26-May-2026 08:46:34 UTC] PHP Warning:  PHP Startup: Unable to load dynamic library 'openssl' (tried: /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl: cannot open shared object file: No such file or directory), /usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so (/usr/local/lib/php/extensions/no-debug-non-zts-20220829/openssl.so: cannot open shared object file: No such file or directory)) in Unknown on line 0
+[26-May-2026 08:46:34 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
+[26-May-2026 08:46:34 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
+[26-May-2026 08:46:35 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
