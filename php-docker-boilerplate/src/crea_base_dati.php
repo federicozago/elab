@@ -58,16 +58,18 @@ try {
   `data_inserimento` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `folder_z` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `lavoro` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `nome_elaborazione` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `campo_libero_1` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `campo_libero_2` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `campo_libero_3` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `campo_libero_4` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `campo_libero_5` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id_tabella`),
-  UNIQUE KEY `dati_id_IDX` (`id`) USING BTREE,
-  KEY `dati_id_flusso_IDX` (`id_flusso`) USING BTREE,
-  KEY `dati_folder_z_IDX` (`folder_z`) USING BTREE
+  UNIQUE KEY `{$jsonData["nome_base_dati"]}_IDX` (`id`) USING BTREE,
+  KEY `{$jsonData["nome_base_dati"]}_id_flusso_IDX` (`id_flusso`) USING BTREE,
+  KEY `{$jsonData["nome_base_dati"]}_lavoro_IDX` (`lavoro`) USING BTREE,
+  KEY `{$jsonData["nome_base_dati"]}_folder_z_IDX` (`folder_z`) USING BTREE,
+  KEY `{$jsonData["nome_base_dati"]}_id_flusso2_IDX` (`id_flusso`,`id`) USING BTREE,
+  KEY `idx_flusso_province_id` (`id_flusso`,`{$jsonData["campo_cap"]}`,`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
 
     if(!$db->esegui_query($sql_tab))

@@ -116,7 +116,7 @@ try {
             if (!isSqlSafe($where))
                 throw new \Exception("Where non sicuro");
             //aggiorno record dati con nome elaborazione
-            if (!$db->esegui_query("update `{$dati_lavoro["nome_base_dati"]}` set id_elaborazione=?,nome_elaborazione= ? where id_flusso='$id_flusso' $where ", [$id_elaborazione, $elaborazione["nome_elaborazione"]]))
+            if (!$db->esegui_query("update `{$dati_lavoro["nome_base_dati"]}` set id_elaborazione=? where id_flusso='$id_flusso' $where ", [$id_elaborazione]))
                 throw new \Exception("Errore durante l'aggiornamento della tabella dati");
         }
     }

@@ -20,5 +20,5 @@ http_response_code(200);
 echo json_encode([
     'success' => true,
     'message' => 'spedizioni elaborazioni prelevate',
-    'spedizioni' => array_keys($vg["azioni_elaborazioni"])
+    'spedizioni' => array_keys($vg["elaborazioni"])
 ]);

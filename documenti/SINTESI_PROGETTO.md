@@ -8,7 +8,7 @@ Il progetto offre un servizio di **ordinamento postale dei dati** secondo i para
 - **Posta Massiva**
 - **Raccomandata Market**
 - **Target**
-- Altri prodotti definiti nell'array `azioni_elaborazioni` (file `temp/elab.php`)
+- Altri prodotti definiti nell'array `elaborazioni` (file `temp/elab.php`)
 
 Il sistema consente di:
 1. Importare dati da file Excel/CSV in database MySQL
@@ -21,7 +21,7 @@ Il sistema consente di:
 
 ### Prodotti Postali Disponibili
 
-I prodotti postali sono definiti nel file `temp/elab.php` nell'array `azioni_elaborazioni`:
+I prodotti postali sono definiti nel file `temp/elab.php` nell'array `elaborazioni`:
 
 #### Target
 - **Genera etichette** (endpoint: `genera_etichette.php`)
@@ -326,7 +326,7 @@ Tutti i componenti form sono nella cartella `src/components/forms/` e forniscono
 ### Tipo Spedizione (Prodotto Postale)
 - Definisce il prodotto di Poste Italiane (target, massiva, ecc.)
 - Ogni tipo ha azioni specifiche disponibili
-- Definito in `temp/elab.php` → `azioni_elaborazioni`
+- Definito in `temp/elab.php` → `elaborazioni`
 
 ### Azioni
 - Operazioni eseguibili dopo l'ordinamento
@@ -811,9 +811,9 @@ Le variabili globali servono per fornire alcuni settaggi al progetto utili allo 
 ### Contenuto delle Variabili Globali
 
 Le variabili globali contengono:
-- Array `azioni_elaborazioni`: Definisce prodotti postali e relative azioni
+- Array `elaborazioni`: Definisce prodotti postali e relative azioni
 - Configurazioni database (host, porta, credenziali)
 - Configurazioni FTP Poste Italiane (credenziali, percorsi)
 - Configurazioni email per segnalazioni (SMTP, destinatari)
 
-L'array `azioni_elaborazioni` è la fonte di verità per i prodotti postali disponibili e le loro azioni.
+L'array `elaborazioni` è la fonte di verità per i prodotti postali disponibili e le loro azioni.

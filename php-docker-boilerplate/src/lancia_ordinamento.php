@@ -24,7 +24,7 @@ try {
 
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
     //prelevo dati e configurazioni elaborazione richiesta
@@ -36,24 +36,36 @@ try {
     $configurazione = $configurazione[0];
 
     //crea l'oggetto Elaborazione_postale
+    $nome_elaborazione = "{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}";
     $elab = "indi\\Classes\\Elaborazione_postale_{$elaborazione['tipo_spedizione']}";
     if( ! class_exists($elab))
         throw new \Exception("Tipo di elaborazione non supportato");
-    $elab = new $elab("elab",$elaborazione["id_flusso"],$vg["database_cliente"]);
+    $elab = new $elab("elab",$elaborazione["id_flusso"],$vg["database_cliente"], $log);
     $elab->setta_parametri(array_merge(
         $elaborazione,
         $configurazione,
-        ["tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}"]
+        [
+            "tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}",
+            "elaborazioni"=>[$nome_elaborazione=>[]],
+            "associazione_campi"=>[
+                "cap"=>$elaborazione["campo_cap"],
+                "prov"=>$elaborazione["campo_provincia"],
+                "localita"=>$elaborazione["campo_localita"]
+            ],
+            "elaborazioni"=>[
+                $nome_elaborazione => []
+            ]
+        ]
     ), true);
 
-    if(!$db->esegui_query("update elaborazioni set stato=1 where id={$elaborazione['id']}"))//aggiorno stato "in elaborazione"
+    if(!$db->esegui_query("update elaborazioni set stato=1 where id={$elaborazione['id_elaborazione']}"))//aggiorno stato "in elaborazione"
         throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
 
     //ordino
-    if(!$elab->ordina("{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}"))
+    if(!$elab->ordina_elaborazione($nome_elaborazione))
         throw new \Exception("Errore durante l'ordinamento");
 
-    if(!$db->esegui_query("update elaborazioni set stato=2 where id={$elaborazione['id']}"))//aggiorno stato "elaborazione"
+    if(!$db->esegui_query("update elaborazioni set stato=2 where id={$elaborazione['id_elaborazione']}"))//aggiorno stato "elaborazione"
         throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
 
     // Restituisci una risposta di successo
@@ -62,7 +74,7 @@ try {
         'success' => true,
         'message' => 'Ordinamento completato'
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);
     echo json_encode([

@@ -20,5 +20,5 @@ http_response_code(200);
 echo json_encode([
     'success' => true,
     'message' => 'azioni elaborazioni prelevate',
-    'azioni' => $vg["azioni_elaborazioni"]
+    'azioni' => $vg["elaborazioni"]
 ]);

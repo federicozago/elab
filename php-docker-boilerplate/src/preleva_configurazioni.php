@@ -21,7 +21,7 @@ try{
 
     if(!isset($jsonData["tipo_spedizione"])) throw new \Exception("Manca il tipo di spedizione");
     $tipo_spedizione = $jsonData["tipo_spedizione"];
-    if( ! in_array($tipo_spedizione, array_keys($vg["azioni_elaborazioni"])))
+    if( ! in_array($tipo_spedizione, array_keys($vg["elaborazioni"])))
         throw new \Exception("Tipo di spedizione non valido");
 
     $configurazioni = $db->preleva_da_db("select id as value,nome_configurazione as label from $tipo_spedizione",[],false);
