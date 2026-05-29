@@ -46,7 +46,6 @@ try {
         $configurazione,
         [
             "tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}",
-            "elaborazioni"=>[$nome_elaborazione=>[]],
             "associazione_campi"=>[
                 "cap"=>$elaborazione["campo_cap"],
                 "prov"=>$elaborazione["campo_provincia"],

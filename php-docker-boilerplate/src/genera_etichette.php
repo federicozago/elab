@@ -2,17 +2,21 @@
 namespace indi\Classes;
 require 'vendor/autoload.php';
 
-// Configura gli header CORS se necessario
+// Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
-// Cartella di destinazione per l'upload
-$uploadDir = 'temp/';
+// Gestisci la richiesta preflight OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 // Verifica se la cartella esiste, altrimenti creala
 
 try {
+
     $jsonData = json_decode(file_get_contents('php://input'), true);//da usare quando il front end manda i dati con axios senza headers: { 'Content-Type': 'multipart/form-data' }
 
     // Verifica se è stato inviato un file
@@ -21,30 +25,39 @@ try {
 
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
-
     //prelevo dati e configurazioni elaborazione richiesta
-    if(!$elaborazione = $db->preleva_da_db("select * from elaborazioni elab_join where id_elaborazione = ?", [$jsonData["id_elaborazione"]]))
+    if(!$elaborazione = $db->preleva_da_db("select * from elab_join where id_elaborazione = ?", [$jsonData["id_elaborazione"]]))
         throw new \Exception("Errore durante prelievo elaborazioni");
     $elaborazione = $elaborazione[0];
     if(!$configurazione = $db->preleva_da_db("select * from {$elaborazione['tipo_spedizione']} where id = ?",[$elaborazione['id_configurazione']]))
         throw new \Exception("Errore durante prelievo configurazione");
     $configurazione = $configurazione[0];
 
-    //crea l'oggetto Elaborazione_postale
     $elab = "indi\\Classes\\Elaborazione_postale_{$elaborazione['tipo_spedizione']}";
-    if( ! class_exists($elab))
+    if (!class_exists($elab))
         throw new \Exception("Tipo di elaborazione non supportato");
-    $elab = new $elab("elab",$elaborazione["id_flusso"],$vg["database_cliente"]);
+    $elab = new $elab("elab", $elaborazione["id_flusso"], $vg["database_cliente"], $log);
+    $nome_elaborazione = "{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}";
     $elab->setta_parametri(array_merge(
         $elaborazione,
         $configurazione,
-        ["tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}"]
+        [
+            "tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}",
+            "associazione_campi"=>[
+                "cap"=>$elaborazione["campo_cap"],
+                "prov"=>$elaborazione["campo_provincia"],
+                "localita"=>$elaborazione["campo_localita"]
+            ],
+            "elaborazioni"=>[
+                $nome_elaborazione => []
+            ]
+        ]
     ), true);
 
     //genero etichette
-    if(!$elab->genera_etichette_scatole("{$elaborazione["nome_base_dati"]}_{$elaborazione["id"]}", $elaborazione["folder_cliente"] . $elaborazione["folder_z"]))
+    if(!$elab->genera_etichette_scatole($nome_elaborazione, $elaborazione["folder_cliente"] . $elaborazione["folder_z"]))
         throw new \Exception("Errore durante la generazione delle etichette");
 
     // Restituisci una risposta di successo
@@ -53,7 +66,7 @@ try {
         'success' => true,
         'message' => 'Etichette generate'
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);
     echo json_encode([

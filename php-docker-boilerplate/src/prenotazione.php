@@ -2,15 +2,16 @@
 namespace indi\Classes;
 require 'vendor/autoload.php';
 
-// Configura gli header CORS se necessario
+// Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
-// Cartella di destinazione per l'upload
-$uploadDir = 'temp/';
-
-// Verifica se la cartella esiste, altrimenti creala
+// Gestisci la richiesta preflight OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 try {
     $jsonData = json_decode(file_get_contents('php://input'), true);//da usare quando il front end manda i dati con axios senza headers: { 'Content-Type': 'multipart/form-data' }
@@ -21,8 +22,11 @@ try {
 
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
+    $data_spedizione = \DateTime::createFromFormat('Y/m/d', $jsonData["data_prenotazione"]);
+    $data_spedizione = $data_spedizione->format('Ymd');
+
 
     //prelevo dati e configurazioni elaborazione richiesta
     if(!$elaborazione = $db->preleva_da_db("select * from elab_join where id_elaborazione = ?", [$jsonData["id_elaborazione"]]))
@@ -32,26 +36,31 @@ try {
         throw new \Exception("Errore durante prelievo configurazione");
     $configurazione = $configurazione[0];
 
+    $elab = "indi\\Classes\\Elaborazione_postale_{$elaborazione['tipo_spedizione']}";
+    if (!class_exists($elab))
+        throw new \Exception("Tipo di elaborazione non supportato");
+    $elab = new $elab("elab", $elaborazione["id_flusso"], $vg["database_cliente"], $log);
+    $nome_elaborazione = "{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}";
+    $elab->setta_parametri(array_merge(
+        $elaborazione,
+        $configurazione,
+        [
+            "tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}",
+            "elaborazioni"=>[
+                $nome_elaborazione => []
+            ]
+        ]
+    ), true);
     //crea l'oggetto Elaborazione_postale
     if($configurazione["con_prenotazione"]) {
-        $elab = "indi\\Classes\\Gestione_automatica_{$elaborazione['tipo_spedizione']}";
-        if (!class_exists($elab))
-            throw new \Exception("Tipo di elaborazione non supportato");
-        $elab = new $elab("elab", $elaborazione["id_flusso"], $vg["database_cliente"]);
-        $elab->setta_parametri(array_merge(
-            $elaborazione,
-            $configurazione,
-            ["tabella_ordinamento" => "ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}"]
-        ), true);
-
         //prenotazione
-        if (!$elab->prenotazione($jsonData["data_prenotazione"], "{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}"))
+        if (!$elab->prenotazione($data_spedizione, "{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}"))
             throw new \Exception("Errore durante la generazione delle etichette");
         if (!$db->esegui_query("update elaborazioni set stato=3 where id={$elaborazione['id_elaborazione']}"))//aggiorno stato "elaborazione"
             throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
     }else{
-        $elab = new Gestione_automatica_lavoro_da_ftp("elab", $elaborazione["id_flusso"]);
-        $elab->imposta_data_spedizione($jsonData["data_prenotazione"] , "{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}");
+        if(!$elab->salva_data_spedizione($data_spedizione , $nome_elaborazione))
+            throw new \Exception("Errore durante la generazione delle etichette");
         if (!$db->esegui_query("update elaborazioni set stato=4 where id={$elaborazione['id_elaborazione']}"))//aggiorno stato "elaborazione"
             throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
     }
@@ -62,7 +71,7 @@ try {
         'success' => true,
         'message' => 'Prenotazione eseguita'
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);
     echo json_encode([

@@ -126,7 +126,43 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                             />
                           </div>
                           <div v-if="props.value === 1">In elaborazione</div>
-                          <div v-if="props.value != 0 && props.value != 1">Elaborato</div>
+                          <div v-if="props.value === 2">
+                            <BaseBtn label="Prenota" @click="dialogPrenotazioneVisible = true" />
+
+                            <q-dialog v-model="dialogPrenotazioneVisible">
+                              <q-card flat bordered>
+                                <q-card-section class="row items-center justify-between">
+                                  <div class="text-h6">Azioni</div>
+
+                                  <div class="row q-gutter-sm">
+                                    <BaseBtn
+                                      dense
+                                      flat
+                                      color="negative"
+                                      icon="close"
+                                      label="Chiudi"
+                                      v-close-popup
+                                    ></BaseBtn>
+                                  </div>
+                                </q-card-section>
+
+                                <q-separator></q-separator>
+                                <q-card-section>
+                                  <BaseDatePicker
+                                    v-model="dataPrenotazione[props.row.id_elaborazione]"
+                                    label="Data prenotazione"
+                                  ></BaseDatePicker>
+                                  <BaseBtn
+                                    label="Prenota"
+                                    size="sm"
+                                    @click="lanciaPrenotazione(props.row.id_elaborazione)"
+                                  />
+                                </q-card-section>
+                              </q-card>
+                            </q-dialog>
+                          </div>
+                          <div v-if="props.value === 3">In attesa di ok da Poste</div>
+                          <div v-if="props.value === 4">Prenotato</div>
                         </q-td>
                       </template>
 
@@ -189,23 +225,6 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                         </q-td>
                       </template>
 
-                      <template v-slot:body-cell-da_prenotare="props">
-                        <q-td :props="props">
-                          <div v-if="props.value === 2">
-                            <BaseDatePicker
-                              v-model="dataPrenotazione[props.row.id]"
-                            ></BaseDatePicker>
-                            <BaseBtn
-                              label="Prenota"
-                              size="sm"
-                              @click="lanciaPrenotazione(props.row.id)"
-                            />
-                          </div>
-                          <div v-if="props.value === 3">In attesa di ok da Poste</div>
-                          <div v-if="props.value === 4">Prenotato</div>
-                        </q-td>
-                      </template>
-
                       <template v-slot:body-cell-azioni="props">
                         <q-td :props="props">
                           <BaseBtn label="azioni" @click="dialogAzioniVisible = true"></BaseBtn>
@@ -237,11 +256,11 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                                 >
                                   <base-date-picker
                                     v-if="datiAzione.parametri?.includes('d') ? true : false"
-                                    v-model="dataPrenotazione[props.row.id]"
+                                    v-model="dataAzioni"
                                   ></base-date-picker>
                                   <BaseBtn
                                     :label="nomeAzione"
-                                    @click="lanciaAzione(datiAzione, props.row.id)"
+                                    @click="lanciaAzione(datiAzione, props.row.id_elaborazione)"
                                   ></BaseBtn>
                                 </div>
                               </q-card-section>
@@ -375,14 +394,17 @@ const filterElabConcluse = ref('')
 const dataPrenotazione = ref([])
 const dialogAzioniVisible = ref(false)
 const dialogSqlVisible = ref(false)
+const dialogPrenotazioneVisible = ref(false)
 const elaborazioniInCorso = ref([])
 const elaborazioniConcluse = ref([])
+const dataAzioni = ref({})
 const columnsGruppiElaborazioniInCorso = [
   {
     name: 'nomeGruppo',
     label: 'Nome',
     field: 'nome_lavoro',
     sortable: true,
+    align: 'left',
   },
 ]
 const columnsElaborazioniInCorso = [
@@ -403,8 +425,7 @@ const columnsElaborazioniInCorso = [
   { name: 'folder_z', label: 'Folder Z', field: 'folder_z', sortable: true },
   { name: 'stato', label: 'Stato', field: 'stato', sortable: true },
   { name: 'sql', label: 'Sql', field: 'sql', sortable: false },
-  { name: 'da_prenotare', label: 'Da prenotare', field: 'da_prenotare', sortable: true },
-  { name: 'Azioni', label: 'Azioni', field: 'azioni', sortable: true },
+  { name: 'azioni', label: 'Azioni', field: 'azioni', sortable: true },
   { name: 'chiudi', label: 'Chiudi Elab', field: 'chiudi', sortable: false },
 ]
 
@@ -455,6 +476,11 @@ function prelevaElaborazioniInCorso() {
     .post('/preleva_elaborazioni_in_corso.php')
     .then((response) => {
       elaborazioniInCorso.value = response.data.elaborazioni
+      for (const lavoro of elaborazioniInCorso.value) {
+        for (const elaborazione of lavoro.dettagli) {
+          dataPrenotazione.value[elaborazione.id_elaborazione] = null
+        }
+      }
     })
     .catch((e) => {
       gestioneErrore(
@@ -516,6 +542,8 @@ function lanciaPrenotazione(id_elaborazione) {
       id_elaborazione: id_elaborazione,
     })
     .then(() => {
+      dialogPrenotazioneVisible.value = false
+      prelevaElaborazioniInCorso()
       messaggioPositivo('Prenotazione effettuata')
     })
     .catch((e) => {
@@ -524,23 +552,22 @@ function lanciaPrenotazione(id_elaborazione) {
 }
 
 function lanciaAzione(datiAzione, id_elaborazione) {
-  if (datiAzione.parametri.includes('d')) {
-    if (!dataPrenotazione.value[id_elaborazione]) {
-      gestioneErrore(null, 'Data prenotazione non inserita')
+  if (datiAzione.parametri?.includes('d')){
+    if(dataAzioni.value === null){
+      gestioneErrore(null, 'Data non inserita')
       return
     }
   }
-
-  var dati = {
-    data_spedizione: datiAzione.parametri?.includes('d')
-      ? dataPrenotazione.value[id_elaborazione]
-      : null,
-    id_elaborazione: id_elaborazione,
-  }
+    var dati = {
+      data: dataAzioni.value,
+      id_elaborazione: id_elaborazione,
+    }
 
   api
     .post('/' + datiAzione.endpoint, dati)
     .then(() => {
+      dataAzioni.value = null
+      dialogAzioniVisible.value = false
       messaggioPositivo('Azione eseguita')
     })
     .catch((e) => {
