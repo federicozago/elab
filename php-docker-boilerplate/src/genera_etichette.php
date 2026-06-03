@@ -57,15 +57,37 @@ try {
     ), true);
 
     //genero etichette
-    if(!$elab->genera_etichette_scatole($nome_elaborazione, $elaborazione["folder_cliente"] . $elaborazione["folder_z"] . "/"))
+    $temp_dir = __DIR__ . "/temp_pdf/";
+    if (!is_dir($temp_dir)) mkdir($temp_dir, 0777, true);
+
+    $nome_base = "etic_{$nome_elaborazione}_{$elaborazione['id_flusso']}";
+    $nome_univoco = $nome_base . "_" . uniqid() . ".pdf";
+    $path_temporanea = $temp_dir . $nome_univoco;
+
+    if(!$elab->genera_etichette_scatole($nome_elaborazione, $temp_dir, $nome_univoco))
         throw new \Exception("Errore durante la generazione delle etichette");
 
-    // Restituisci una risposta di successo
-    http_response_code(200);
-    echo json_encode([
-        'success' => true,
-        'message' => 'Etichette generate'
-    ]);
+    if (file_exists($path_temporanea)) {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . $nome_base . '.pdf"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($path_temporanea));
+
+        // Pulizia buffer per evitare corruzione binaria
+        if (ob_get_length()) ob_clean();
+        flush();
+
+        readfile($path_temporanea);
+
+        // Elimina il file dopo l'invio
+        unlink($path_temporanea);
+        exit;
+    } else {
+        throw new \Exception("File PDF non generato");
+    }
 }catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);

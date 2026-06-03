@@ -248,6 +248,23 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
 
                               <q-separator></q-separator>
                               <q-card-section>
+                                <div class="q-mb-md q-pa-sm bg-grey-2 rounded-borders row items-center">
+                                  <div class="col text-caption text-weight-medium">
+                                    Percorso salvataggio suggerito:<br />
+                                    <code style="word-break: break-all">{{
+                                      convertiPathWindows(props.row.folder_cliente + props.row.folder_z)
+                                    }}</code>
+                                  </div>
+                                  <div class="col-auto">
+                                    <BaseBtn
+                                      flat
+                                      round
+                                      dense
+                                      icon="content_copy"
+                                      @click="copiaPercorso(props.row.folder_cliente + props.row.folder_z)"
+                                    />
+                                  </div>
+                                </div>
                                 <div
                                   v-for="(datiAzione, nomeAzione) in azioni[
                                     props.row.tipo_spedizione
@@ -530,6 +547,19 @@ async function copiaQuery(query) {
   }
 }
 
+const convertiPathWindows = (path) => {
+  return path ? path.replace(/\//g, '\\') : ''
+}
+
+const copiaPercorso = async (path) => {
+  try {
+    await navigator.clipboard.writeText(convertiPathWindows(path))
+    messaggioPositivo('Percorso copiato')
+  } catch (e) {
+    gestioneErrore(e, 'Errore durante la copia')
+  }
+}
+
 function lanciaPrenotazione(id_elaborazione) {
   if (!dataPrenotazione.value[id_elaborazione]) {
     gestioneErrore(null, 'Data prenotazione non inserita')
@@ -552,28 +582,50 @@ function lanciaPrenotazione(id_elaborazione) {
 }
 
 function lanciaAzione(datiAzione, id_elaborazione) {
-  if (datiAzione.parametri?.includes('d')){
-    if(dataAzioni.value === null){
+  if (datiAzione.parametri?.includes('d')) {
+    if (dataAzioni.value === null) {
       gestioneErrore(null, 'Data non inserita')
       return
     }
   }
-    var dati = {
-      data: dataAzioni.value,
-      id_elaborazione: id_elaborazione,
-    }
+  var dati = {
+    data: dataAzioni.value,
+    id_elaborazione: id_elaborazione,
+  }
+
+  const isPdf = datiAzione.output === 'pdf'
+  const config = isPdf ? { responseType: 'blob' } : {}
 
   api
-    .post('/' + datiAzione.endpoint, dati)
-    .then(() => {
+    .post('/' + datiAzione.endpoint, dati, config)
+    .then((response) => {
+      if (isPdf) {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        // Cerco di recuperare il nome file dagli header se presente, altrimenti uso un default
+        let filename = 'etichette.pdf'
+        const contentDisposition = response.headers['content-disposition']
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/)
+          if (fileNameMatch.length === 2) filename = fileNameMatch[1]
+        }
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+        messaggioPositivo('Download PDF avviato')
+      } else {
+        messaggioPositivo('Azione eseguita')
+      }
       dataAzioni.value = null
       dialogAzioniVisible.value = false
-      messaggioPositivo('Azione eseguita')
     })
     .catch((e) => {
       gestioneErrore(
         e,
-        'Impossibile eseguire  azione ' + datiAzione.endpoint + ' - ' + e.response.data.message,
+        'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + e.response?.data?.message,
       )
     })
 }

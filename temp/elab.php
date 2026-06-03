@@ -13,6 +13,7 @@ $dati = [
                 "target" => [
                     "Genera etichette" => [
                         "endpoint" => "genera_etichette.php",
+                        "output" => "pdf",
                     ],
                     "Prenotazione" => [
                         "endpoint" => "Prenota.php",
@@ -22,6 +23,7 @@ $dati = [
                 "massiva" => [
                     "Genera etichette" => [
                         "endpoint" => "genera_etichette.php",
+                        "output" => "pdf",
                     ],
                 ]
             ],
