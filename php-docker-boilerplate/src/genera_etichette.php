@@ -57,7 +57,7 @@ try {
     ), true);
 
     //genero etichette
-    if(!$elab->genera_etichette_scatole($nome_elaborazione, $elaborazione["folder_cliente"] . $elaborazione["folder_z"]))
+    if(!$elab->genera_etichette_scatole($nome_elaborazione, $elaborazione["folder_cliente"] . $elaborazione["folder_z"] . "/"))
         throw new \Exception("Errore durante la generazione delle etichette");
 
     // Restituisci una risposta di successo

@@ -34,6 +34,37 @@ Ogni prodotto postale può avere azioni specifiche oltre all'ordinamento base.
 
 ---
 
+## Architettura e Infrastruttura
+
+Il progetto è basato su un'architettura moderna che separa il frontend dal backend, gestita tramite containerizzazione.
+
+### Tecnologie Core
+- **Frontend:** [Vue 3](https://vuejs.org/) con [Quasar Framework](https://quasar.dev/) (Vite).
+- **Backend:** PHP 8.x (API REST).
+- **Database:** MySQL.
+- **Containerizzazione:** [Docker](https://www.docker.com/) con Docker Compose.
+- **Package Management:** [Yarn](https://yarnpkg.com/) (v4+) per il frontend, [Composer](https://getcomposer.org/) per il backend.
+
+### Configurazione Docker
+Il backend e l'ambiente PHP sono isolati all'interno di container Docker definiti nella cartella `php-docker-boilerplate/`.
+- **Dockerfile:** Definisce l'immagine PHP-Apache con le estensioni necessarie (pdo_mysql, zip, gd, ecc.).
+- **docker-compose.yml:** Configura i servizi, i volumi per la persistenza dei dati e la comunicazione tra i container.
+
+### Gestione Frontend (Yarn)
+Il frontend utilizza Yarn come package manager. I comandi principali definiti in `package.json` sono:
+- `yarn dev`: Avvia il server di sviluppo Quasar.
+- `yarn build`: Genera la build di produzione.
+- `yarn lint`: Esegue il controllo del codice con ESLint.
+
+### Struttura dei File di Configurazione
+Tutti i file di configurazione necessari al funzionamento dell'infrastruttura sono presenti nella root del progetto o nelle sottocartelle dedicate:
+- `package.json` / `yarn.lock`: Dipendenze e script frontend.
+- `quasar.config.js`: Configurazione specifica del framework Quasar.
+- `php-docker-boilerplate/`: Contiene `Dockerfile`, `docker-compose.yml` e le configurazioni PHP (`php.ini`).
+- `.env`: Variabili d'ambiente per la configurazione dei servizi Docker.
+
+---
+
 ## Pages (Pagine)
 
 ### 1. **IndexPage.vue** (Pagina Principale)

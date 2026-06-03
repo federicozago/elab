@@ -1185,3 +1185,17 @@ Stack trace:
 [28-May-2026 09:42:52 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0
 [28-May-2026 09:42:52 UTC] PHP Warning:  Module "sockets" is already loaded in Unknown on line 0
 [28-May-2026 09:42:52 UTC] Xdebug: [Config] The setting 'xdebug.remote_connect_back' has been renamed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-xdebug.remote_connect_back (See: https://xdebug.org/docs/errors#CFG-C-CHANGED)
+[29-May-2026 08:23:57 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[29-May-2026 08:23:57 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[29-May-2026 08:23:57 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[29-May-2026 08:23:57 UTC] Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9003 (through xdebug.client_host/xdebug.client_port).
+[29-May-2026 09:12:14 UTC] PHP Fatal error:  Uncaught Error: Call to a member function salva_data_spedizione() on null in /var/www/html/vendor/gestione_automatica_lavoro_da_ftp/gestione_automatica_lavoro_da_ftp/app/Classes/Gestione_automatica_lavoro_da_ftp.php:602
+Stack trace:
+#0 /var/www/html/prenotazione.php(55): indi\Classes\Gestione_automatica_lavoro_da_ftp->imposta_data_spedizione()
+#1 {main}
+  thrown in /var/www/html/vendor/gestione_automatica_lavoro_da_ftp/gestione_automatica_lavoro_da_ftp/app/Classes/Gestione_automatica_lavoro_da_ftp.php on line 602
+[29-May-2026 09:13:13 UTC] PHP Fatal error:  Uncaught Error: Call to a member function salva_data_spedizione() on null in /var/www/html/vendor/gestione_automatica_lavoro_da_ftp/gestione_automatica_lavoro_da_ftp/app/Classes/Gestione_automatica_lavoro_da_ftp.php:602
+Stack trace:
+#0 /var/www/html/prenotazione.php(55): indi\Classes\Gestione_automatica_lavoro_da_ftp->imposta_data_spedizione()
+#1 {main}
+  thrown in /var/www/html/vendor/gestione_automatica_lavoro_da_ftp/gestione_automatica_lavoro_da_ftp/app/Classes/Gestione_automatica_lavoro_da_ftp.php on line 602

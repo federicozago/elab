@@ -7,6 +7,9 @@ RUN apt-get update || (sleep 10 && apt-get update) \
     libzip-dev \
     libcurl4-openssl-dev \
     libssl-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     zip \
     unzip \
     && apt-get clean \
@@ -20,6 +23,8 @@ RUN docker-php-ext-install sockets
 RUN docker-php-ext-install curl
 RUN docker-php-ext-install fileinfo
 RUN docker-php-ext-install mbstring
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd
 
 # Installa Xdebug
 RUN pecl install xdebug \
