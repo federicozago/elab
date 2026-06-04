@@ -14,7 +14,7 @@ Il sistema consente di:
 1. Importare dati da file Excel/CSV in database MySQL
 2. Creare lavori con una o più elaborazioni
 3. Ordinare i dati secondo le regole del prodotto postale selezionato
-4. Eseguire azioni aggiuntive (generazione etichette, distinte, prenotazioni)
+4. Eseguire azioni aggiuntive (generazione etichette con download diretto, distinte, prenotazioni)
 5. Gestire il ciclo di vita delle elaborazioni (attive/concluse)
 
 ---
@@ -92,7 +92,7 @@ Tutti i file di configurazione necessari al funzionamento dell'infrastruttura so
     - Stato ordinamento (pulsante "Ordina" / "In elaborazione" / "Elaborato")
     - Query SQL per visualizzare i dati ordinati
     - Stato prenotazione (pulsante "Prenota" con data / "In attesa" / "Prenotato")
-    - Pulsante "Azioni" per eseguire azioni specifiche del prodotto postale
+    - Pulsante "Azioni" per eseguire azioni specifiche (es. etichette con download diretto e suggerimento cartella di salvataggio)
     - Pulsante "Chiudi Elab" per chiudere l'elaborazione
 
 - **Visualizzazione elaborazioni concluse:**
@@ -359,11 +359,10 @@ Tutti i componenti form sono nella cartella `src/components/forms/` e forniscono
 - Ogni tipo ha azioni specifiche disponibili
 - Definito in `temp/elab.php` → `elaborazioni`
 
-### Azioni
-- Operazioni eseguibili dopo l'ordinamento
-- Esempi: Genera etichette, Genera distinta, Prenotazione
-- Specifiche per ogni prodotto postale
-- Alcune richiedono parametri (es. data per prenotazione)
+- **Note Tecniche:** 
+  - I PDF generati vengono salvati temporaneamente in `php-docker-boilerplate/src/temp_pdf/` e cancellati dopo il download.
+  - La UI del dialog azioni mostra il percorso suggerito (folder_cliente + folder_z) con possibilità di copia rapida.
+  - Il riconoscimento delle azioni PDF avviene tramite la proprietà `output: "pdf"` nell'array delle azioni.
 
 ### Stati Elaborazione
 - **Ordinamento:** 0 = Da ordinare, 1 = In elaborazione, 2+ = Elaborato
@@ -467,7 +466,7 @@ Tutti gli endpoint PHP seguono un pattern comune:
 
 #### **preleva_azioni_elaborazioni.php**
 **Scopo:** Restituisce le azioni disponibili per ogni tipo di spedizione.
-- **Output:** Array associativo `tipo_spedizione => azioni` dal file `temp/elab.php`
+- **Output:** Array associativo `tipo_spedizione => azioni` dall'array `elaborazioni` definito nel file `temp/elab.php`
 - **Utilizzo:** Popola il dialog "Azioni" in IndexPage
 
 #### **preleva_viste.php**
@@ -599,12 +598,14 @@ Tutti gli endpoint PHP seguono un pattern comune:
 - **Libreria utilizzata:** `Gestione_db`, `Ftp`, classi elaborazione postale
 
 #### **genera_etichette.php**
-**Scopo:** Genera etichette per scatole/colli della spedizione.
+**Scopo:** Genera etichette PDF univoche per la spedizione e le invia al browser per il download.
 - **Input:** `id_elaborazione`, `data_spedizione` (opzionale)
 - **Processo:**
-  - Preleva dati ordinati
-  - Genera PDF con etichette
-  - Salva file nella folder Z
+  - Preleva dati ordinati e configurazioni
+  - Genera un nome file univoco con `uniqid()`
+  - Crea il PDF nella cartella temporanea `temp_pdf/`
+  - Invia il PDF come download tramite header HTTP
+  - Elimina il file temporaneo immediatamente dopo l'invio
 - **Libreria utilizzata:** `Pdf_php`, `Gestione_db`
 
 ---
@@ -842,7 +843,7 @@ Le variabili globali servono per fornire alcuni settaggi al progetto utili allo 
 ### Contenuto delle Variabili Globali
 
 Le variabili globali contengono:
-- Array `elaborazioni`: Definisce prodotti postali e relative azioni
+- Array `elaborazioni`: Definisce prodotti postali e relative azioni (es. `output: "pdf"`)
 - Configurazioni database (host, porta, credenziali)
 - Configurazioni FTP Poste Italiane (credenziali, percorsi)
 - Configurazioni email per segnalazioni (SMTP, destinatari)

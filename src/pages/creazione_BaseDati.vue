@@ -31,7 +31,7 @@
           :rules="[required]"
           @update:model-value="uploadFile"
           :loading="isUploading"
-          v-if="formData.intestazione_si_no !== ''"
+          v-if="formData.intestazione_si_no !== null"
         />
 
         <BaseSelect
@@ -40,6 +40,7 @@
           v-model="formData.campo_cap"
           :disable="!intestazione.length"
           :rules="[required]"
+          v-if="formData.intestazione_si_no !== null"
         />
         <BaseSelect
           :options="intestazione"
@@ -47,6 +48,7 @@
           v-model="formData.campo_localita"
           :disable="!intestazione.length"
           :rules="[required]"
+          v-if="formData.intestazione_si_no !== null"
         />
         <BaseSelect
           :options="intestazione"
@@ -54,6 +56,7 @@
           v-model="formData.campo_provincia"
           :disable="!intestazione.length"
           :rules="[required]"
+          v-if="formData.intestazione_si_no !== null"
         />
       </BaseForm>
     </div>
@@ -88,7 +91,7 @@ const formData = ref({
   campo_cap: '',
   campo_localita: '',
   campo_provincia: '',
-  intestazione_si_no: '',
+  intestazione_si_no: null,
   test: null,
 })
 
@@ -110,7 +113,17 @@ function baseDatiCambiata(idBaseDati) {
     })
     .then((response) => {
       Object.keys(response.data.base_dati).forEach((key) => {
-        if (key in formData.value) formData.value[key] = response.data.base_dati[key]
+        if (key === 'intestazione_si_no') {
+          if (response.data.base_dati[key] === 1) {
+            formData.value[key] = true
+          } else {
+            formData.value[key] = false
+          }
+        } else if (key === 'file_base_dati') {
+          formData.value[key] = [response.data.base_dati[key]]
+        } else if (key in formData.value) {
+          formData.value[key] = response.data.base_dati[key]
+        }
       })
     })
     .catch((e) => {

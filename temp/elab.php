@@ -9,22 +9,30 @@ $dati = [
             "user_db" => "copygraph",
             "pass_db" => "C0pyGr@ph",
             "database_cliente"=> "elab",
-            "azioni_elaborazioni" => [
+            "elaborazioni" => [
                 "target" => [
                     "Genera etichette" => [
                         "endpoint" => "genera_etichette.php",
-                        "output" => "pdf",
+                        "output"=>"pdf"
                     ],
-                    "Prenotazione" => [
-                        "endpoint" => "Prenota.php",
-                        "parametri" => ["d"]
+                    "Chiudi lavoro"=>[
+                        "endpoint"=>"chiudi_lavoro.php",
+                        "output"=>"7z"
                     ]
+//                    "Prenotazione" => [
+//                        "endpoint" => "Prenota.php",
+//                        "parametri" => ["d"]
+//                    ]
                 ],
                 "massiva" => [
                     "Genera etichette" => [
                         "endpoint" => "genera_etichette.php",
-                        "output" => "pdf",
+                        "output"=>"pdf"
                     ],
+                    "Chiudi lavoro"=>[
+                        "endpoint"=>"chiudi_lavoro.php",
+                        "output"=>"7z"
+                    ]
                 ]
             ],
 

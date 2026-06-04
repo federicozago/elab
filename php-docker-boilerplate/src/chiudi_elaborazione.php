@@ -7,11 +7,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Cartella di destinazione per l'upload
-$uploadDir = 'temp/';
-
-// Verifica se la cartella esiste, altrimenti creala
-
 try {
     $jsonData = json_decode(file_get_contents('php://input'), true);//da usare quando il front end manda i dati con axios senza headers: { 'Content-Type': 'multipart/form-data' }
 
@@ -23,7 +18,6 @@ try {
     $vg = $vg->get_variabili_globali("elab");
     $log = new Segnalazioni_e_log($vg["id_flusso"]);
     $db = new Gestione_db("elab", $log);
-
 
     if(!$elaborazione = $db->preleva_da_db("select * from elab_join where id_elaborazione = ?", [$jsonData["id_elaborazione"]]))
         throw new \Exception("Errore durante prelievo elaborazioni");
@@ -54,7 +48,7 @@ try {
         throw new \Exception("Errore durante chiusura file");
 
     //faccio dump ordinati light se ci sono
-    if($elaborazione['tipo_spedizione'] == "light") {
+    /*if($elaborazione['tipo_spedizione'] == "light") {
         $dati = $db->preleva_da_db("select * from ordinati_light_{$elaborazione['nome_base_dati']} where nome_elaborazione='{$elaborazione['nome_base_dati']}_{$elaborazione['id']}'");
         if ($dati === false)
             throw new \Exception("Errore durante prelievo dati ordinati");
@@ -68,7 +62,7 @@ try {
             if (!$csv->chiudi())
                 throw new \Exception("Errore durante chiusura file");
         }
-    }
+    }*/
 
     //segno elaborazione come chiusa
     if(!$db->esegui_query("update elaborazioni set stato=255 where id={$jsonData['id_elaborazione']}"))//aggiorno stato "elaborazione"

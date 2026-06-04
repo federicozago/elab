@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title> Elab </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
@@ -12,7 +12,7 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header> Opzioni </q-item-label>
 
         <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
       </q-list>
@@ -25,54 +25,35 @@
 </template>
 
 <script setup>
-
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 //import { api } from 'boot/axios.js'
 
 const linksList = [
   {
-    title: 'Configurazioni',
+    title: 'Home',
+    caption: 'Pagina iniziale',
+    icon: 'home',
+    link: '/',
+  },
+  {
+    title: 'Lavori',
+    caption: 'Lista e modifica lavori',
+    icon: 'work',
+    link: '/modifica_lavoro',
+  },
+  {
+    title: 'Configurazioni postali',
     caption: 'Lista e modifica configurazioni',
-    icon: 'school',
-    link: '/creazconfigurazioni',
+    icon: 'local_post_office',
+    link: '/creazione_configurazione',
   },
   {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
+    title: 'Basi dati',
+    caption: 'Lista basi dati',
+    icon: 'storage',
+    link: '/creazione_BaseDati',
+  }
 ]
 
 const leftDrawerOpen = ref(false)
@@ -96,5 +77,4 @@ function toggleLeftDrawer() {
       console.error('Errore:', error.message);
     }
   });*/
-
 </script>
