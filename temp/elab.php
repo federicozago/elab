@@ -15,9 +15,9 @@ $dati = [
                         "endpoint" => "genera_etichette.php",
                         "output"=>"pdf"
                     ],
-                    "Chiudi lavoro"=>[
-                        "endpoint"=>"chiudi_lavoro.php",
-                        "output"=>"7z"
+                    "Chiudi elaborazione"=>[
+                        "endpoint"=>"chiudi_elaborazione.php",
+                        "output"=>"zip"
                     ]
 //                    "Prenotazione" => [
 //                        "endpoint" => "Prenota.php",
@@ -29,9 +29,9 @@ $dati = [
                         "endpoint" => "genera_etichette.php",
                         "output"=>"pdf"
                     ],
-                    "Chiudi lavoro"=>[
-                        "endpoint"=>"chiudi_lavoro.php",
-                        "output"=>"7z"
+                    "Chiudi elaborazione"=>[
+                        "endpoint"=>"chiudi_elaborazione.php",
+                        "output"=>"zip"
                     ]
                 ]
             ],

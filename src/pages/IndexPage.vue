@@ -248,11 +248,15 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
 
                               <q-separator></q-separator>
                               <q-card-section>
-                                <div class="q-mb-md q-pa-sm bg-grey-2 rounded-borders row items-center">
+                                <div
+                                  class="q-mb-md q-pa-sm bg-grey-2 rounded-borders row items-center"
+                                >
                                   <div class="col text-caption text-weight-medium">
                                     Percorso salvataggio suggerito:<br />
                                     <code style="word-break: break-all">{{
-                                      convertiPathWindows(props.row.folder_cliente + props.row.folder_z)
+                                      convertiPathWindows(
+                                        props.row.folder_cliente + props.row.folder_z,
+                                      )
                                     }}</code>
                                   </div>
                                   <div class="col-auto">
@@ -261,7 +265,9 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                                       round
                                       dense
                                       icon="content_copy"
-                                      @click="copiaPercorso(props.row.folder_cliente + props.row.folder_z)"
+                                      @click="
+                                        copiaPercorso(props.row.folder_cliente + props.row.folder_z)
+                                      "
                                     />
                                   </div>
                                 </div>
@@ -308,9 +314,29 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               row-key="id"
               :filter="filterElabConcluse"
             >
-              <template v-slot:body-cell-riapri="props">
+              <template v-slot:body-cell-azioni="props">
                 <q-td :props="props">
-                  <BaseBtn label="Riapri" size="sm" @click="riapriElaborazione(props.row.id)" />
+                  <q-btn flat round color="primary" icon="download" @click="riesporta(props.row)">
+                    <q-tooltip>Riesporta (ZIP)</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    flat
+                    round
+                    color="negative"
+                    icon="delete"
+                    @click="confermaElimina(props.row)"
+                  >
+                    <q-tooltip>ELIMINA DATI</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    flat
+                    round
+                    color="orange"
+                    icon="refresh"
+                    @click="riapriElaborazione(props.row.id_elaborazione)"
+                  >
+                    <q-tooltip>Riapri</q-tooltip>
+                  </q-btn>
                 </q-td>
               </template>
             </q-table>
@@ -336,7 +362,7 @@ import BaseDatePicker from 'components/forms/BaseDatePicker.vue'
 import { maxLength, required } from 'src/composables/rules.js'
 import BaseInput from 'components/forms/BaseInput.vue'
 import BaseFile from 'components/forms/BaseFile.vue'
-const { gestioneErrore, messaggioPositivo } = useCassettaAttrezzi()
+const { gestioneErrore, messaggioPositivo,richiediConferma } = useCassettaAttrezzi()
 import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
@@ -450,7 +476,7 @@ const columnsElaborazioniConcluse = [
   {
     name: 'id',
     label: 'ID',
-    field: 'id',
+    field: 'id_elaborazione',
     sortable: true,
   },
   {
@@ -460,7 +486,7 @@ const columnsElaborazioniConcluse = [
     sortable: true,
   },
   { name: 'tipo_spedizione', label: 'Tipo spedizione', field: 'tipo_spedizione', sortable: true },
-  { name: 'Azioni', label: 'Azioni', field: 'azioni', sortable: true },
+  { name: 'azioni', label: 'Azioni', field: 'azioni', sortable: true },
 ]
 
 onMounted(() => {
@@ -581,6 +607,29 @@ function lanciaPrenotazione(id_elaborazione) {
     })
 }
 
+function riesporta(row) {
+  // Richiama l'endpoint di chiusura/esportazione
+  const datiAzione = {
+    endpoint: 'chiudi_elaborazione.php',
+    output: 'zip'
+  }
+  lanciaAzione(datiAzione, row.id_elaborazione)
+}
+
+function confermaElimina(row) {
+  richiediConferma(`Sei sicuro di voler eliminare i dati dell'elaborazione ${row.nome_elaborazione}? L'operazione è irreversibile e i dati verranno rimossi dal database.`)
+    .onOk(() => {
+      api.post('/elimina_elaborazione.php', { id_elaborazione: row.id_elaborazione })
+        .then(() => {
+          messaggioPositivo('Dati eliminati con successo')
+          prelevaElaborazioniConcluse()
+        })
+        .catch((e) => {
+          gestioneErrore(e, 'Errore durante l\'eliminazione dati')
+        })
+  })
+}
+
 function lanciaAzione(datiAzione, id_elaborazione) {
   if (datiAzione.parametri?.includes('d')) {
     if (dataAzioni.value === null) {
@@ -594,38 +643,61 @@ function lanciaAzione(datiAzione, id_elaborazione) {
   }
 
   const isPdf = datiAzione.output === 'pdf'
-  const config = isPdf ? { responseType: 'blob' } : {}
+  const isZip = datiAzione.output === 'zip'
+  const config = (isPdf || isZip) ? { responseType: 'blob' } : {}
 
   api
     .post('/' + datiAzione.endpoint, dati, config)
     .then((response) => {
-      if (isPdf) {
+      if (isPdf || isZip) {
         const url = window.URL.createObjectURL(new Blob([response.data]))
         const link = document.createElement('a')
         link.href = url
-        // Cerco di recuperare il nome file dagli header se presente, altrimenti uso un default
-        let filename = 'etichette.pdf'
-        const contentDisposition = response.headers['content-disposition']
+
+        let filename = isZip ? 'esportazione.zip' : 'etichette.pdf'
+        const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition']
+
         if (contentDisposition) {
-          const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/)
-          if (fileNameMatch.length === 2) filename = fileNameMatch[1]
+          // Questa regex intercetta sia filename= che filename*= gestendo UTF-8 e apici
+          const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i);
+          if (fileNameMatch && fileNameMatch[1]) {
+            // decodeURIComponent trasforma %20 in spazio e gestisce gli altri caratteri codificati
+            filename = decodeURIComponent(fileNameMatch[1]);
+          }
         }
+
         link.setAttribute('download', filename)
         document.body.appendChild(link)
         link.click()
         link.remove()
         window.URL.revokeObjectURL(url)
-        messaggioPositivo('Download PDF avviato')
+
+        if (datiAzione.endpoint === 'chiudi_elaborazione.php') {
+          prelevaElaborazioniInCorso()
+          prelevaElaborazioniConcluse()
+        }
       } else {
         messaggioPositivo('Azione eseguita')
       }
       dataAzioni.value = null
       dialogAzioniVisible.value = false
     })
-    .catch((e) => {
+    .catch(async (e) => {
+      let messaggio = 'Errore sconosciuto';
+
+      // Se la risposta è un Blob (caso errore con responseType: 'blob')
+      if (e.response?.data instanceof Blob && config?.responseType === 'blob') {
+        const text = await e.response.data.text();
+        const errorData = JSON.parse(text);
+        messaggio = errorData.message;
+      } else {
+        // Caso standard (JSON già decodificato o altri errori)
+        messaggio = e.response?.data?.message || e.message;
+      }
+
       gestioneErrore(
         e,
-        'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + e.response?.data?.message,
+        'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + messaggio,
       )
     })
 }

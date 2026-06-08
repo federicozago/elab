@@ -98,13 +98,17 @@ Tutti i file di configurazione necessari al funzionamento dell'infrastruttura so
 - **Visualizzazione elaborazioni concluse:**
   - Tabella con lavori chiusi
   - Possibilità di riaprire elaborazioni concluse
+  - **Riesporta:** Pulsante per riesportare il database in formato ZIP (richiama `chiudi_elaborazione.php`)
+  - **ELIMINA DATI:** Pulsante per eliminare i record dell'elaborazione sia dalla tabella dati che dalla tabella ordinati (richiama `elimina_elaborazione.php`)
 
 - **Azioni disponibili:**
   - `lanciaElaborazione()`: Avvia l'ordinamento dei dati
   - `lanciaPrenotazione()`: Prenota la spedizione con data
-  - `lanciaAzione()`: Esegue azioni specifiche (etichette, distinte, ecc.)
+  - `lanciaAzione()`: Esegue azioni specifiche (etichette, distinte, chiusura lavoro con download ZIP, ecc.)
   - `chiudiElaborazione()`: Chiude un'elaborazione (non più visibile in "in corso")
   - `riapriElaborazione()`: Riapre un'elaborazione chiusa
+  - `riesporta()`: Riesporta un'elaborazione conclusa in formato ZIP
+  - `confermaElimina()`: Elimina i dati relativi a un'elaborazione specifica
   - `copiaQuery()`: Copia la query SQL negli appunti
 
 ---
@@ -549,9 +553,15 @@ Tutti gli endpoint PHP seguono un pattern comune:
 - **Processo:** Aggiorna record nella tabella del tipo spedizione
 
 #### **chiudi_elaborazione.php**
-**Scopo:** Chiude un'elaborazione (non più visibile in "elaborazioni in corso").
+**Scopo:** Esporta i dati dell'elaborazione (anagrafica, ordinati e light) in CSV filtrati per `nome_elaborazione` e `id_flusso`, li archivia in un file ZIP (usando `ZipStream` per compatibilità con l'ambiente Docker) e segna l'elaborazione come conclusa.
 - **Input:** `id_elaborazione`
-- **Processo:** Aggiorna campo stato/chiuso nella tabella `elaborazioni`
+- **Processo:**
+  - Genera file CSV temporanei dai dati del database (tabelle anagrafica, ordinati ed eventualmente light) filtrando per `nome_elaborazione` e `id_flusso`.
+  - Archivia i CSV in un file .zip tramite la libreria `ZipStream`.
+  - Invia il file .zip al frontend per il download tramite streaming HTTP.
+  - Elimina i file CSV temporanei dal server dopo l'archiviazione.
+  - Aggiorna lo stato dell'elaborazione a conclusa (stato 255).
+- **Libreria utilizzata:** `Csv`, `ZipStream`, `Gestione_db`
 
 #### **riapri_elaborazione.php**
 **Scopo:** Riapre un'elaborazione precedentemente chiusa.
@@ -569,6 +579,17 @@ Tutti gli endpoint PHP seguono un pattern comune:
   - Elimina tabella MySQL della base dati
   - Elimina record dalla tabella `base_dati`
   - Verifica che non ci siano lavori attivi che la utilizzano
+
+#### **elimina_elaborazione.php**
+**Scopo:** Elimina i record relativi a un'elaborazione specifica identificata da ID e ID Flusso.
+- **Input:** `id_elaborazione`
+- **Processo:**
+  - Recupera i dettagli dell'elaborazione per ottenere `id_flusso` e nomi tabelle.
+  - Elimina i record dalla tabella dati originale filtrando per `id_elaborazione` e `id_flusso`.
+  - Elimina i record dalla tabella `ordinati` corrispondente filtrando per `nome_elaborazione` e `id_flusso`.
+  - Elimina eventuali record dalla tabella `ordinati_light`.
+  - Utilizza transazioni DB per garantire l'integrità dei dati.
+- **Libreria utilizzata:** `Gestione_db`
 
 ---
 

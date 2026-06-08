@@ -58,9 +58,19 @@ export function useCassettaAttrezzi() {
     })
   }
 
+  const richiediConferma = (msg: string) => {
+    return $q.dialog({
+      title: 'Conferma',
+      message: msg,
+      cancel: true,
+      persistent: true,
+    })
+  }
+
   return{
     gestioneErrore,
-    messaggioPositivo
+    messaggioPositivo,
+    richiediConferma,
   }
 }
 
