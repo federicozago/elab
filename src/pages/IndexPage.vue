@@ -127,39 +127,13 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                           </div>
                           <div v-if="props.value === 1">In elaborazione</div>
                           <div v-if="props.value === 2">
-                            <BaseBtn label="Prenota" @click="dialogPrenotazioneVisible = true" />
-
-                            <q-dialog v-model="dialogPrenotazioneVisible">
-                              <q-card flat bordered>
-                                <q-card-section class="row items-center justify-between">
-                                  <div class="text-h6">Azioni</div>
-
-                                  <div class="row q-gutter-sm">
-                                    <BaseBtn
-                                      dense
-                                      flat
-                                      color="negative"
-                                      icon="close"
-                                      label="Chiudi"
-                                      v-close-popup
-                                    ></BaseBtn>
-                                  </div>
-                                </q-card-section>
-
-                                <q-separator></q-separator>
-                                <q-card-section>
-                                  <BaseDatePicker
-                                    v-model="dataPrenotazione[props.row.id_elaborazione]"
-                                    label="Data prenotazione"
-                                  ></BaseDatePicker>
-                                  <BaseBtn
-                                    label="Prenota"
-                                    size="sm"
-                                    @click="lanciaPrenotazione(props.row.id_elaborazione)"
-                                  />
-                                </q-card-section>
-                              </q-card>
-                            </q-dialog>
+                            <BaseBtn
+                              label="Prenota"
+                              @click="
+                                selectedRowPrenotazione = props.row;
+                                dialogPrenotazioneVisible = true
+                              "
+                            />
                           </div>
                           <div v-if="props.value === 3">In attesa di ok da Poste</div>
                           <div v-if="props.value === 4">Prenotato</div>
@@ -169,126 +143,26 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                       <template v-slot:body-cell-sql="props">
                         <q-td :props="props">
                           <div>
-                            <BaseBtn label="sql" @click="dialogSqlVisible = true" />
-
-                            <q-dialog v-model="dialogSqlVisible">
-                              <q-card style="max-width: 700px">
-                                <q-card-section class="row items-center justify-between">
-                                  <div class="text-h6">Query MySql</div>
-
-                                  <div class="row q-gutter-sm">
-                                    <BaseBtn
-                                      dense
-                                      flat
-                                      color="primary"
-                                      icon="content_copy"
-                                      label="Copia"
-                                      @click="
-                                        copiaQuery(
-                                          'SELECT * FROM `' +
-                                            props.row.nome_base_dati +
-                                            '_' +
-                                            props.row.nome_elaborazione +
-                                            '` e JOIN `ordinati_' +
-                                            props.row.tipo_spedizione +
-                                            '_' +
-                                            props.row.nome_base_dati +
-                                            '` o ON e.id=o.c1 ORDER BY progr',
-                                        )
-                                      "
-                                    ></BaseBtn>
-                                    <BaseBtn
-                                      dense
-                                      flat
-                                      color="negative"
-                                      icon="close"
-                                      label="Chiudi"
-                                      v-close-popup
-                                    ></BaseBtn>
-                                  </div>
-                                </q-card-section>
-
-                                <q-separator></q-separator>
-
-                                <q-card-section>
-                                  <pre class="sql-code">
-  SELECT * FROM `{{ props.row.nome_base_dati }}_{{ props.row.nome_elaborazione }}` e
-      JOIN `ordinati_{{ props.row.tipo_spedizione }}_{{ props.row.nome_base_dati }}` o
-           ON e.id=o.c1
-  ORDER BY progr
-                              </pre
-                                  >
-                                </q-card-section>
-                              </q-card>
-                            </q-dialog>
+                            <BaseBtn
+                              label="sql"
+                              @click="
+                                selectedRowSql = props.row;
+                                dialogSqlVisible = true
+                              "
+                            />
                           </div>
                         </q-td>
                       </template>
 
                       <template v-slot:body-cell-azioni="props">
                         <q-td :props="props">
-                          <BaseBtn label="azioni" @click="dialogAzioniVisible = true"></BaseBtn>
-
-                          <q-dialog v-model="dialogAzioniVisible">
-                            <q-card flat bordered>
-                              <q-card-section class="row items-center justify-between">
-                                <div class="text-h6">Azioni</div>
-
-                                <div class="row q-gutter-sm">
-                                  <BaseBtn
-                                    dense
-                                    flat
-                                    color="negative"
-                                    icon="close"
-                                    label="Chiudi"
-                                    v-close-popup
-                                  ></BaseBtn>
-                                </div>
-                              </q-card-section>
-
-                              <q-separator></q-separator>
-                              <q-card-section>
-                                <div
-                                  class="q-mb-md q-pa-sm bg-grey-2 rounded-borders row items-center"
-                                >
-                                  <div class="col text-caption text-weight-medium">
-                                    Percorso salvataggio suggerito:<br />
-                                    <code style="word-break: break-all">{{
-                                      convertiPathWindows(
-                                        props.row.folder_cliente + props.row.folder_z,
-                                      )
-                                    }}</code>
-                                  </div>
-                                  <div class="col-auto">
-                                    <BaseBtn
-                                      flat
-                                      round
-                                      dense
-                                      icon="content_copy"
-                                      @click="
-                                        copiaPercorso(props.row.folder_cliente + props.row.folder_z)
-                                      "
-                                    />
-                                  </div>
-                                </div>
-                                <div
-                                  v-for="(datiAzione, nomeAzione) in azioni[
-                                    props.row.tipo_spedizione
-                                  ]"
-                                  :key="nomeAzione"
-                                >
-                                  <base-date-picker
-                                    v-if="datiAzione.parametri?.includes('d') ? true : false"
-                                    v-model="dataAzioni"
-                                  ></base-date-picker>
-                                  <BaseBtn
-                                    :label="nomeAzione"
-                                    @click="lanciaAzione(datiAzione, props.row.id_elaborazione)"
-                                  ></BaseBtn>
-                                </div>
-                              </q-card-section>
-                            </q-card>
-                          </q-dialog>
+                          <BaseBtn
+                            label="azioni"
+                            @click="
+                              selectedRowAzioni = props.row;
+                              dialogAzioniVisible = true
+                            "
+                          ></BaseBtn>
                         </q-td>
                       </template>
                     </q-table>
@@ -344,6 +218,114 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         </q-tab-panels>
       </q-card>
     </div>
+
+    <!-- Dialog esterni alla tabella -->
+    <q-dialog v-model="dialogSqlVisible" @hide="selectedRowSql = null">
+      <q-card style="max-width: 700px" v-if="selectedRowSql">
+        <q-card-section class="row items-center justify-between">
+          <div class="text-h6">Query MySql</div>
+          <div class="row q-gutter-sm">
+            <BaseBtn
+              dense
+              flat
+              color="primary"
+              icon="content_copy"
+              label="Copia"
+              @click="
+                copiaQuery(
+                  'SELECT * FROM `' +
+                    selectedRowSql.nome_base_dati +
+                    '_' +
+                    selectedRowSql.nome_elaborazione +
+                    '` e JOIN `ordinati_' +
+                    selectedRowSql.tipo_spedizione +
+                    '_' +
+                    selectedRowSql.nome_base_dati +
+                    '` o ON e.id=o.c1 ORDER BY progr',
+                )
+              "
+            ></BaseBtn>
+            <BaseBtn dense flat color="negative" icon="close" label="Chiudi" v-close-popup></BaseBtn>
+          </div>
+        </q-card-section>
+        <q-separator></q-separator>
+        <q-card-section>
+          <pre class="sql-code">
+SELECT * FROM `{{ selectedRowSql.nome_base_dati }}_{{ selectedRowSql.nome_elaborazione }}` e
+    JOIN `ordinati_{{ selectedRowSql.tipo_spedizione }}_{{ selectedRowSql.nome_base_dati }}` o
+         ON e.id=o.c1
+ORDER BY progr
+          </pre>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="dialogPrenotazioneVisible" @hide="selectedRowPrenotazione = null">
+      <q-card flat bordered v-if="selectedRowPrenotazione">
+        <q-card-section class="row items-center justify-between">
+          <div class="text-h6">Azioni</div>
+          <div class="row q-gutter-sm">
+            <BaseBtn dense flat color="negative" icon="close" label="Chiudi" v-close-popup></BaseBtn>
+          </div>
+        </q-card-section>
+        <q-separator></q-separator>
+        <q-card-section>
+          <BaseDatePicker
+            v-model="dataPrenotazione[selectedRowPrenotazione.id_elaborazione]"
+            label="Data prenotazione"
+          ></BaseDatePicker>
+          <BaseBtn
+            label="Prenota"
+            size="sm"
+            @click="lanciaPrenotazione(selectedRowPrenotazione.id_elaborazione)"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="dialogAzioniVisible" @hide="selectedRowAzioni = null">
+      <q-card flat bordered v-if="selectedRowAzioni">
+        <q-card-section class="row items-center justify-between">
+          <div class="text-h6">Azioni</div>
+          <div class="row q-gutter-sm">
+            <BaseBtn dense flat color="negative" icon="close" label="Chiudi" v-close-popup></BaseBtn>
+          </div>
+        </q-card-section>
+        <q-separator></q-separator>
+        <q-card-section>
+          <div class="q-mb-md q-pa-sm bg-grey-2 rounded-borders row items-center">
+            <div class="col text-caption text-weight-medium">
+              Percorso salvataggio suggerito:<br />
+              <code style="word-break: break-all">{{
+                convertiPathWindows(selectedRowAzioni.folder_cliente + selectedRowAzioni.folder_z)
+              }}</code>
+            </div>
+            <div class="col-auto">
+              <BaseBtn
+                flat
+                round
+                dense
+                icon="content_copy"
+                @click="copiaPercorso(selectedRowAzioni.folder_cliente + selectedRowAzioni.folder_z)"
+              />
+            </div>
+          </div>
+          <div
+            v-for="(datiAzione, nomeAzione) in azioni[selectedRowAzioni.tipo_spedizione]"
+            :key="nomeAzione"
+          >
+            <base-date-picker
+              v-if="datiAzione.parametri?.includes('d')"
+              v-model="dataAzioni"
+            ></base-date-picker>
+            <BaseBtn
+              :label="nomeAzione"
+              @click="lanciaAzione(datiAzione, selectedRowAzioni.id_elaborazione)"
+            ></BaseBtn>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -438,6 +420,9 @@ const dataPrenotazione = ref([])
 const dialogAzioniVisible = ref(false)
 const dialogSqlVisible = ref(false)
 const dialogPrenotazioneVisible = ref(false)
+const selectedRowSql = ref(null)
+const selectedRowPrenotazione = ref(null)
+const selectedRowAzioni = ref(null)
 const elaborazioniInCorso = ref([])
 const elaborazioniConcluse = ref([])
 const dataAzioni = ref({})
