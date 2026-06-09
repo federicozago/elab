@@ -19,11 +19,18 @@
           :rules="[required, maxLength(100), notInArray(basiDati)]"
         />
 
+        <BaseInput
+          v-model="formData.separatore"
+          label="Separatore CSV/Testo"
+          :rules="[required]"
+        />
+
         <BaseToggle
           label="Intestazione presente"
           v-model="formData.intestazione_si_no"
           :rules="[required]"
         />
+
 
         <BaseFile
           v-model="formData.file_base_dati"
@@ -92,6 +99,7 @@ const formData = ref({
   campo_localita: '',
   campo_provincia: '',
   intestazione_si_no: null,
+  separatore: ';',
   test: null,
 })
 
@@ -142,6 +150,7 @@ const uploadFile = async (file) => {
 
   const uploadData = new FormData()
   uploadData.append('file_to_upload', formData.value.file_base_dati) // Nome del campo che PHP cercherà
+  uploadData.append('separatore', formData.value.separatore)
   uploadData.append('intestazione_si_no', formData.value.intestazione_si_no)
   isUploading.value = true
   try {
@@ -154,7 +163,7 @@ const uploadFile = async (file) => {
     intestazione.value = response.data.intestazione //se il file ha intestazione torna la prima riga altrimenti torna colonna 1,2 ecc....
     isUploading.value = false
   } catch (e) {
-    gestioneErrore(e, 'Impossibile salvare la configurazione, controllare i dati inseriti')
+    gestioneErrore(e, 'Impossibile salvare la configurazione, controllare i dati inseriti - ' + e.response.data.message)
   }
 }
 

@@ -14,16 +14,12 @@
       v-model="model.buste_min"
       label="Minimo pezzi (*)"
       type="number"
-      min="0"
-      max="1000"
       :rules="[required, minValue(1), maxValue(1000)]"
     />
     <BaseInput
       v-model="model.buste_max"
       label="Massimo pezzi (*)"
       type="number"
-      min="0"
-      max="1000"
       :rules="[required, minValue(1), maxValue(1000)]"
     />
 
@@ -34,14 +30,6 @@
       :rules="[required]"
     />
 
-    <BaseToggle label="Etichette uppate" v-model="model.etichetta_n_up" />
-
-    <BaseRadio
-      label="N etichette per foglio (*)"
-      v-model="model.etichette_per_foglio"
-      :rules="[required]"
-      :elementi="[2, 3]"
-    />
 
     <BaseToggle label="Contiene gadget" v-model="model.contiene_gadget">
       <q-tooltip>Compare solo nelle etichette bancale</q-tooltip>

@@ -57,19 +57,30 @@ try {
 
     //apertura file
     $estensione_file = pathinfo($targetPath, PATHINFO_EXTENSION);
-    if($estensione_file == "csv"){
-        $file = new Csv($log);
-    }elseif($estensione_file == "xlsx" or $estensione_file == "xls"){
+    if($estensione_file == "xlsx" or $estensione_file == "xls"){
         $file = new Excel($log);
+        $file->setta_parametri([
+            "intestazione"=>$dati_lavoro["intestazione_si_no"]
+        ]);
+        if(!$file->apri($targetPath, $dati_lavoro["intestazione_si_no"]))
+            throw new \Exception("Errore durante l'apertura del file");
     }else{
-        throw new \Exception("Tipo di file non supportato");
-    }
-    $file->setta_parametri([
-        "intestazione"=>$dati_lavoro["intestazione_si_no"]
-    ]);
+        // sostituzione caratteri di ritorno a capo (php 8 non permette più di usare @ini_set("auto_detect_line_endings", true);
+        $content = file_get_contents($targetPath);
+        $content = str_replace(["\r\n", "\r"], "\n", $content);
+        file_put_contents($targetPath, $content);
 
-    if(!$file->apri($targetPath, $dati_lavoro["intestazione_si_no"]))
-        throw new \Exception("Errore durante l'apertura del file");
+        $file = new Csv($log);
+        $file->setta_parametri([
+            "intestazione"=>$dati_lavoro["intestazione_si_no"]
+        ]);
+        if(!$file->apri($targetPath, $dati_lavoro["intestazione_si_no"]))
+            throw new \Exception("Errore durante l'apertura del file");
+        $file->setta_parametri([
+            "separatore" => $dati_lavoro["separatore"] ?? ";"
+        ], true);
+    }
+
 
     $intestazione_temp = explode("|", $dati_lavoro["intestazione"]);
     $intestazione = [];

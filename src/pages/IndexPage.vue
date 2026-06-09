@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pa-md">
     <div class="q-gutter-y-md">
-      <BaseForm :formData="formData" @submit="creaElaborazione" labelInvia="Elabora">
+      <BaseForm :formData="formData" @submit="creaElaborazione" labelInvia="Importa dati">
         <div class="row q-gutter-x-md items-start">
           <div class="col">
             <BaseSelect

@@ -38,6 +38,7 @@ try {
 
     $file = $_FILES['file_to_upload'];
     $intestazioneSiNo = $_POST['intestazione_si_no'];//converte in booleano
+    $separatore = $_POST['separatore'] ?? ';';
 
     // Verifica eventuali errori durante l'upload
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -55,17 +56,25 @@ try {
 
     $vg=new Variabili_globali_import();
     $vg=$vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
 
     //apertura file
     $estensione_file = pathinfo($targetPath, PATHINFO_EXTENSION);
-    if($estensione_file == "csv"){
-        $file = new Csv($log);
-    }else{
+    if($estensione_file == "xls" or $estensione_file == "xlsx"){
         $file = new Excel($log);
+        if(!$file->apri($targetPath, $intestazioneSiNo))
+            throw new \Exception("Errore durante l'apertura del file");
+    }else{
+        // sostituzione caratteri di ritorno a capo (php 8 non permette più di usare @ini_set("auto_detect_line_endings", true);
+        $content = file_get_contents($targetPath);
+        $content = str_replace(["\r\n", "\r"], "\n", $content);
+        file_put_contents($targetPath, $content);
+
+        $file = new Csv($log);
+        if(!$file->apri($targetPath, $intestazioneSiNo))
+            throw new \Exception("Errore durante l'apertura del file");
+        $file->setta_parametri(['separatore' => $separatore],sovrascrivi: true);
     }
-    if(!$file->apri($targetPath, $intestazioneSiNo))
-        throw new \Exception("Errore durante l'apertura del file");
 
     //estrazione intestazione (inizialmente estraggo prima riga, anche se non è l'intestazione
     if (!$intestazione_temp = $file->estrai_intestazione())

@@ -27,10 +27,6 @@
         {{ configurazioneEdit ? 'Modifica' : 'Nuova' }} Configurazione {{ props.tipoSpedizione }}
         {{ idConfigurazioneSelezionata ? idConfigurazioneSelezionata.label : '' }}
       </h3>
-      <component
-        :is="formAttuale"
-        v-model="formData[props.tipoSpedizione]"
-      /><!--Il parametro :is dice a Vue: "Non renderizzare un tag HTML standard, ma renderizza il componente che ti sto passando in questa variabile".-->
 
       <h6>Dettagli configurazione</h6>
       <BaseInput
@@ -66,27 +62,6 @@
         label="Sap (*)"
         :rules="[required, maxLength(8), minLength(8)]"
       />
-
-      <BaseInput label="Peso busta (*)" v-model="formData.peso_busta" :rules="[minValue(0)]">
-        <q-tooltip
-          >Inserire 0 se non c'è busta ma è solo autoimbustante (ad es. suzuki). Inserire il peso in
-          peso inserto</q-tooltip
-        >
-      </BaseInput>
-
-      <div class="row q-gutter-x-md items-center">
-        <div class="col-auto">
-          <BaseToggle label="Inserto" v-model="formData.contiene_inserto" />
-        </div>
-        <div class="col">
-          <BaseInput
-            v-if="formData.contiene_inserto"
-            label="Peso inserto (*)"
-            v-model="formData.peso_inserto"
-            :rules="[required, minValue(0)]"
-          />
-        </div>
-      </div>
 
       <BaseToggle label="Gestione bancali" v-model="formData.gestione_bancali"></BaseToggle>
       <BaseInput
@@ -277,6 +252,46 @@
         label="Autorizzazione postale"
         v-model="formData.autorizzazione_postale"
       ></BaseInput>
+
+      <BaseRadio
+        label="N etichette per foglio (*)"
+        v-model="formData.etichette_per_foglio"
+        :rules="[required]"
+        :elementi="[2, 3]"
+      />
+
+      <BaseToggle label="Etichette uppate" v-model="formData.etichetta_n_up" />
+
+      <BaseInput
+        label="Peso busta vuota(*)"
+        v-model="formData.peso_busta_vuota"
+        :rules="[minValue(0)]"
+      >
+        <q-tooltip
+          >Inserire 0 se non c'è busta ma è solo autoimbustante (ad es. suzuki). Se c'è l'inserto
+          inserire il relativo peso in "peso inserto"</q-tooltip
+        >
+      </BaseInput>
+
+      <div class="row q-gutter-x-md items-center">
+        <div class="col-auto">
+          <BaseToggle label="Inserto" v-model="formData.contiene_inserto" />
+        </div>
+        <div class="col">
+          <BaseInput
+            v-if="formData.contiene_inserto"
+            label="Peso inserto (*)"
+            v-model="formData.peso_inserto"
+            :rules="[required, minValue(0)]"
+          />
+        </div>
+      </div>
+
+      <!-- dettagli configurazione tipo spedizione specifica (target, massiva...)-->
+      <component
+        :is="formAttuale"
+        v-model="formData[props.tipoSpedizione]"
+      /><!--Il parametro :is dice a Vue: "Non renderizzare un tag HTML standard, ma renderizza il componente che ti sto passando in questa variabile".-->
     </BaseForm>
   </div>
 </template>
@@ -292,6 +307,8 @@ import { useCassettaAttrezzi } from 'src/composables/cassettaAttrezzi.ts'
 const { gestioneErrore, messaggioPositivo } = useCassettaAttrezzi()
 import BaseForm from 'components/forms/BaseForm.vue'
 import BaseToggle from 'components/forms/BaseToggle.vue'
+import NewConfigMassiva from 'components/NewConfigMassiva.vue'
+import BaseRadio from 'components/forms/BaseRadio.vue'
 
 const idConfigurazioneSelezionata = ref('')
 const configurazioni = ref([])
@@ -379,6 +396,7 @@ let tipo_prodotto_postale_consigliato = ''
 
 const componentiForm = {
   target: NewConfigTarget,
+  massiva: NewConfigMassiva,
 }
 
 const formAttuale = computed(() => componentiForm[props.tipoSpedizione])
@@ -429,7 +447,7 @@ function getInitialFormData() {
     contiene_inserto: false,
     nome_configurazione: props.nomeConfigurazione ? props.nomeConfigurazione : '',
     ragione_sociale_cliente_estesa: '',
-    peso_busta: 5,
+    peso_busta_vuota: 5,
     peso_inserto: 0,
     descrizione_tipo_spedizione: props.nomeConfigurazione ? props.nomeConfigurazione : '',
     tipo_formato_postale: 'P',
@@ -456,15 +474,19 @@ function getInitialFormData() {
     codice_identificativo_stampatore: 'BC',
     barcode_campi_cliente: 'id_tabella',
     autorizzazione_postale: '',
+    etichette_per_foglio: 3,
+    etichetta_n_up: true,
 
     target: {
       prodotto_target: '',
       buste_min: 0,
       buste_max: 0,
       plichi: '',
-      etichetta_n_up: true,
-      etichette_per_foglio: 3,
       contiene_gadget: false,
+    },
+    massiva: {
+      peso_scatola_min: 0,
+      peso_scatola_max: 0,
     },
     time: {
       prodotto_time: '',

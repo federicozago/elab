@@ -165,6 +165,7 @@ Tutti i file di configurazione necessari al funzionamento dell'infrastruttura so
 - **Creazione nuova base dati:**
   - **Nome base dati:** Nome univoco per la nuova base dati
   - **Intestazione presente:** Toggle per indicare se il file ha intestazione
+  - **Separatore CSV/Testo:** Carattere separatore (default: punto e virgola `;`), modificabile dall'utente.
   - **Upload file:** Caricamento file Excel/CSV
     - Upload immediato per analizzare l'intestazione
     - Mostra i campi disponibili dopo l'upload
@@ -484,7 +485,7 @@ Tutti gli endpoint PHP seguono un pattern comune:
 
 #### **crea_base_dati.php**
 **Scopo:** Crea una nuova base dati MySQL importando i dati da file Excel/CSV.
-- **Input:** `nome_base_dati`, `file_base_dati` (nome file già caricato), `intestazione_si_no`, `campo_cap`, `campo_localita`, `campo_provincia`, `intestazione`
+- **Input:** `nome_base_dati`, `file_base_dati` (nome file già caricato), `intestazione_si_no`, `separatore`, `campo_cap`, `campo_localita`, `campo_provincia`, `intestazione`
 - **Processo:**
   - Legge il file temporaneo caricato precedentemente
   - Crea tabella MySQL con struttura dinamica basata sull'intestazione
@@ -528,7 +529,7 @@ Tutti gli endpoint PHP seguono un pattern comune:
 
 #### **upload_file_per_nuova_base_dati.php**
 **Scopo:** Upload preliminare del file per analizzare l'intestazione prima di creare la base dati.
-- **Input:** `file_to_upload` (FormData), `intestazione_si_no`
+- **Input:** `file_to_upload` (FormData), `intestazione_si_no`, `separatore`
 - **Processo:**
   - Salva file temporaneamente
   - Legge la prima riga (se intestazione presente) o genera nomi colonne (Colonna 1, 2, ...)

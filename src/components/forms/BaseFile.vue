@@ -13,7 +13,6 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
       outlined
       dense
       hide-bottom-space
-      accept=".xlsx,.xls,.csv"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
