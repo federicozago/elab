@@ -7,6 +7,7 @@
         :options="basiDati"
         label="Basi dati create"
         @update:model-value="baseDatiCambiata"
+        v-if="!creazioneLavoroInCorso"
       />
 
       <h3>Crea base dati</h3>
@@ -163,6 +164,7 @@ const uploadFile = async (file) => {
     intestazione.value = response.data.intestazione //se il file ha intestazione torna la prima riga altrimenti torna colonna 1,2 ecc....
     isUploading.value = false
   } catch (e) {
+    console.log(e)
     gestioneErrore(e, 'Impossibile salvare la configurazione, controllare i dati inseriti - ' + e.response.data.message)
   }
 }

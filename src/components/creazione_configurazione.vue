@@ -449,7 +449,7 @@ function getInitialFormData() {
     ragione_sociale_cliente_estesa: '',
     peso_busta_vuota: 5,
     peso_inserto: 0,
-    descrizione_tipo_spedizione: props.nomeConfigurazione ? props.nomeConfigurazione : '',
+    descrizione_tipo_spedizione: props.tipoSpedizione,
     tipo_formato_postale: 'P',
     cmp: 'CMP VERONA',
     n_conto_contrattuale: '',
