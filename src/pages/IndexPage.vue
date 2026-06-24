@@ -327,8 +327,8 @@ ORDER BY o.progr
             ></base-date-picker>
             <BaseBtn
               :label="nomeAzione"
-              @click="lanciaAzione(datiAzione, selectedRowAzioni.id_elaborazione)"
-              :loading="isActionSubmitting"
+              @click="lanciaAzione(datiAzione, selectedRowAzioni.id_elaborazione, nomeAzione)"
+              :loading="isActionSubmitting === nomeAzione"
             ></BaseBtn>
           </div>
         </q-card-section>
@@ -357,7 +357,7 @@ import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
 const isSubmitting = ref(false)
-const isActionSubmitting = ref(false)
+const isActionSubmitting = ref(null)
 
 const formData = ref({
   lavoro: route.query.id_lavoro
@@ -610,7 +610,7 @@ function riesporta(row) {
     endpoint: 'chiudi_elaborazione.php',
     output: 'zip'
   }
-  lanciaAzione(datiAzione, row.id_elaborazione)
+  lanciaAzione(datiAzione, row.id_elaborazione, 'Riesporta')
 }
 
 function confermaElimina(row) {
@@ -631,8 +631,9 @@ function confermaElimina(row) {
  * lancia un azione qualsiasi fra quelle presenti in var globali. se è presente il parametro d in var globali aggiunge un datapicker. gestisce il tipo di output in base a se l'azione deve restituire un pdf, un zip o altro (specificato sempre in variabili globali
  * @param datiAzione
  * @param id_elaborazione
+ * @param nomeAzione
  */
-async function lanciaAzione(datiAzione, id_elaborazione) {
+async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
   if (datiAzione.parametri?.includes('d')) {
     if (dataAzioni.value === null) {
       gestioneErrore(null, 'Data non inserita')
@@ -640,7 +641,7 @@ async function lanciaAzione(datiAzione, id_elaborazione) {
     }
   }
 
-  isActionSubmitting.value = true
+  isActionSubmitting.value = nomeAzione || true
   var dati = {
     data: dataAzioni.value,
     id_elaborazione: id_elaborazione,
@@ -706,7 +707,7 @@ async function lanciaAzione(datiAzione, id_elaborazione) {
       'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + messaggio,
     )
   } finally {
-    isActionSubmitting.value = false
+    isActionSubmitting.value = null
   }
 }
 
