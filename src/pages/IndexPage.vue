@@ -128,6 +128,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                               label="Ordina"
                               size="sm"
                               @click="lanciaElaborazione(props.row.id_elaborazione)"
+                              :loading="isSortingSubmitting === props.row.id_elaborazione"
                             />
                           </div>
                           <div v-if="props.value === 1">In elaborazione</div>
@@ -358,6 +359,7 @@ const fileStore = useFileStore()
 
 const isSubmitting = ref(false)
 const isActionSubmitting = ref(null)
+const isSortingSubmitting = ref(null)
 
 const formData = ref({
   lavoro: route.query.id_lavoro
@@ -540,25 +542,19 @@ function prelevaElaborazioniConcluse() {
     })
 }
 
-function lanciaElaborazione(id_elaborazione) {
-  api
-    .post('/lancia_ordinamento.php', {
+async function lanciaElaborazione(id_elaborazione) {
+  isSortingSubmitting.value = id_elaborazione
+  try {
+    await api.post('/lancia_ordinamento.php', {
       id_elaborazione: id_elaborazione,
     })
-    .catch((e) => {
-      gestioneErrore(e, 'Impossibile lanciare ordinamento - ' + e.response.data.message)
-    })
-  //setto stato a 1
-  //console.log(elaborazioniInCorso.value)
-  for (const lavoro of elaborazioniInCorso.value) {
-    for (const elaborazione of lavoro.dettagli) {
-      if (elaborazione.id_elaborazione === id_elaborazione) {
-        elaborazione.stato = 1
-        break
-      }
-    }
+    messaggioPositivo('Ordinamento avviato con successo')
+    prelevaElaborazioniInCorso()
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile lanciare ordinamento - ' + (e.response?.data?.message || e.message))
+  } finally {
+    isSortingSubmitting.value = null
   }
-  //elaborazioniInCorso.value.filter((lavoro) => lavoro.nome === id_elaborazione)[0].stato = 1
 }
 
 async function copiaQuery(query) {
