@@ -38,7 +38,7 @@
 
       <h3>{{ isModifica ? 'Modifica lavoro' : 'Crea lavoro' }}</h3>
 
-      <BaseForm :formData="formData" @submit="creaLavoro" labelInvia="Salva lavoro">
+      <BaseForm :formData="formData" @submit="creaLavoro" labelInvia="Salva lavoro" :loading="isSubmitting">
         <div class="row q-gutter-x-md items-start">
           <div class="col">
             <!--select base dati (quando cambia, se sotto è indicata un elaborazione sola autocompilo nome_elaborazione e nome lavoro-->
@@ -165,6 +165,7 @@ import ConfigurazioneForm from 'components/creazione_configurazione.vue'
 
 const indiceElaborazioneInCorso = ref(null)
 const dialogConfigurazioneVisible = ref(false)
+const isSubmitting = ref(false)
 const tipoSpedizioneScelta = ref(null)
 const configurazioneCorrente = ref(null)
 const formData = ref({
@@ -324,40 +325,41 @@ onMounted(() => {
   }
 })
 
-function creaLavoro() {
+async function creaLavoro() {
   //creazione/salvataggio lavoro
-  api
-    .post(isModifica.value ? '/aggiorna_lavoro.php' : '/crea_lavoro.php', {
+  isSubmitting.value = true
+  try {
+    const response = await api.post(isModifica.value ? '/aggiorna_lavoro.php' : '/crea_lavoro.php', {
       id_base_dati: formData.value.id_base_dati.value,
       nome_lavoro: formData.value.nome_lavoro,
       //elaborazioni: JSON.stringify(formData.value.elaborazioni),
       elaborazioni: formData.value.elaborazioni,
       id_lavoro: isModifica.value ? lavoro.value.value : null,
     })
-    .then((response) => {
-      messaggioPositivo(
-        isModifica.value
-          ? 'Elaborazione aggiornata con successo'
-          : 'Elaborazione caricata con successo',
-      )
-      if (!isModifica.value) {
-        router.replace({
-          path: '/',
-          query: {
-            id_lavoro: response.data.id_lavoro,
-            nome_lavoro: formData.value.nome_lavoro,
-          },
-        })
-      }
-    })
-    .catch((e) => {
-      gestioneErrore(
-        e,
-        isModifica.value
-          ? 'Impossibile aggiornare il lavoro - ' + e.response.data.message
-          : 'Impossibile creare  il lavoro - ' + e.response.data.message,
-      )
-    })
+    messaggioPositivo(
+      isModifica.value
+        ? 'Elaborazione aggiornata con successo'
+        : 'Elaborazione caricata con successo',
+    )
+    if (!isModifica.value) {
+      router.replace({
+        path: '/',
+        query: {
+          id_lavoro: response.data.id_lavoro,
+          nome_lavoro: formData.value.nome_lavoro,
+        },
+      })
+    }
+  } catch (e) {
+    gestioneErrore(
+      e,
+      isModifica.value
+        ? 'Impossibile aggiornare il lavoro - ' + e.response.data.message
+        : 'Impossibile creare  il lavoro - ' + e.response.data.message,
+    )
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 function nuovaBaseDati() {

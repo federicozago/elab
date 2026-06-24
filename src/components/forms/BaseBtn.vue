@@ -6,7 +6,17 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
 
   <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
 
-    <q-btn :label="label" v-bind="$attrs" :class="$attrs.class" :type="$attrs.type"></q-btn>
+    <q-btn
+      :label="label"
+      v-bind="$attrs"
+      :class="$attrs.class"
+      :type="$attrs.type"
+      :loading="loading"
+    >
+      <template v-slot:loading>
+        <q-spinner-gears />
+      </template>
+    </q-btn>
 
   <!--
     Grazie all'uso di v-bind="$attrs" che abbiamo inserito nel tuo BaseInput.vue: Tutto quello che scrivi su BaseInput (come type="number", maxlength="50", step="1", ecc.) viene "passato" automaticamente al q-input interno di Quasar.
@@ -22,5 +32,6 @@ hide-bottom-space: Normalmente Quasar lascia uno spazio vuoto sotto l'input per 
 
 defineProps({
   label: String,
+  loading: Boolean,
 })
 </script>

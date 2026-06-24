@@ -12,9 +12,10 @@ per questo aggiungo il watch-->
       type="submit"
       :label="labelInvia ? labelInvia : 'Invia'"
       :class="{ 'pulse-error': showValidationError }"
+      :loading="loading"
     />
 
-    <BaseBtn @click="onReset" label="Reset" v-if="showResetButton" />
+    <BaseBtn @click="onReset" label="Reset" v-if="showResetButton && !loading" />
   </q-form>
 </template>
 
@@ -39,6 +40,7 @@ defineProps({
   formData: { type: Object, required: true },
   labelInvia: { type: String, required: false },
   showResetButton: { type: Boolean, required: false },
+  loading: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['submit', 'update:valido', 'validation-failed', 'reset'])

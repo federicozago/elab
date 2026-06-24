@@ -13,7 +13,12 @@
       <h3>Crea base dati</h3>
 
       <!-- form creazione base dati -->
-      <BaseForm :formData="formData" @submit="creaBaseDati" labelInvia="Crea base dati">
+      <BaseForm
+        :formData="formData"
+        @submit="creaBaseDati"
+        labelInvia="Crea base dati"
+        :loading="isSubmitting"
+      >
         <BaseInput
           v-model="formData.nome_base_dati"
           label="Nome nuova base dati"
@@ -93,6 +98,7 @@ const creazioneLavoroInCorso = route.query?.creazioneLavoroInCorso == 'true' ? t
 const basiDati = ref([])
 const idBaseDati = ref(null)
 const isUploading = ref(false)
+const isSubmitting = ref(false)
 const formData = ref({
   nome_base_dati: '',
   file_base_dati: null,
@@ -169,31 +175,32 @@ const uploadFile = async (file) => {
   }
 }
 
-function creaBaseDati() {
+async function creaBaseDati() {
   //se bisogna importare i dati
+  isSubmitting.value = true
   const dati = { ...formData.value, intestazione: intestazione.value }
   dati.file_base_dati = dati.file_base_dati.name
 
-  api
-    .post('/crea_base_dati.php', dati)
-    .then((response) => {
-      messaggioPositivo('Base dati creata con successo')
-      //ritorno alla pagina di creazione elaborazione
-      if (creazioneLavoroInCorso) {
-        router.replace({
-          path: '/creazione_lavoro/',
-          query: {
-            id_base_dati: response.data.id_base_dati,
-            nome_base_dati: response.data.nome_base_dati,
-            intestazione: response.data.intestazione,
-          },
-        })
-      }
-    })
-    .catch((e) => {
-      gestioneErrore(e, 'Impossibile creare la base dati - ' + e.response.data.message)
-      return false
-    })
+  try {
+    const response = await api.post('/crea_base_dati.php', dati)
+    messaggioPositivo('Base dati creata con successo')
+    //ritorno alla pagina di creazione elaborazione
+    if (creazioneLavoroInCorso) {
+      router.replace({
+        path: '/creazione_lavoro/',
+        query: {
+          id_base_dati: response.data.id_base_dati,
+          nome_base_dati: response.data.nome_base_dati,
+          intestazione: response.data.intestazione,
+        },
+      })
+    }
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile creare la base dati - ' + e.response.data.message)
+    return false
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 

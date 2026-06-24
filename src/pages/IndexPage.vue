@@ -1,7 +1,12 @@
 <template>
   <q-page class="q-pa-md">
     <div class="q-gutter-y-md">
-      <BaseForm :formData="formData" @submit="creaElaborazione" labelInvia="Importa dati">
+      <BaseForm
+        :formData="formData"
+        @submit="creaElaborazione"
+        labelInvia="Importa dati"
+        :loading="isSubmitting"
+      >
         <div class="row q-gutter-x-md items-start">
           <div class="col">
             <BaseSelect
@@ -350,6 +355,8 @@ const { gestioneErrore, messaggioPositivo,richiediConferma } = useCassettaAttrez
 import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
+const isSubmitting = ref(false)
+
 const formData = ref({
   lavoro: route.query.id_lavoro
     ? { value: route.query.id_lavoro, label: route.query.nome_lavoro }
@@ -394,24 +401,25 @@ function creaNuovoLavoro() {
   })
 }
 
-function creaElaborazione() {
+async function creaElaborazione() {
+  isSubmitting.value = true
   const uploadData = new FormData()
   uploadData.append('file_to_upload', formData.value.fileBaseDati) //(se non è già stato caricato quando si è creato la base dati che allora è ancora sul server viene caricata solo la stringa della path del file sul server che andrà in automatico nell'array $_POST e non nell'array $_FILES
   uploadData.append('folder_z', formData.value.folder_z)
   uploadData.append('id_flusso', formData.value.id_flusso)
   uploadData.append('id_lavoro', formData.value.lavoro.value)
   //creazione elaborazione
-  api
-    .post('/crea_elaborazione.php', uploadData, {
+  try {
+    await api.post('/crea_elaborazione.php', uploadData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    .then(() => {
-      messaggioPositivo('Elaborazione creata')
-      prelevaElaborazioniInCorso()
-    })
-    .catch((e) => {
-      gestioneErrore(e, 'Impossibile creare elaborazione - ' + e.response.data.message)
-    })
+    messaggioPositivo('Elaborazione creata')
+    prelevaElaborazioniInCorso()
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile creare elaborazione - ' + e.response.data.message)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 const tab = ref('elaborazioni')

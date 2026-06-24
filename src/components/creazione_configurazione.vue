@@ -21,6 +21,7 @@
       labelInvia="SALVA CONFIGURAZIONE"
       @reset="reset"
       :showResetButton="true"
+      :loading="isSubmitting"
       v-if="props.tipoSpedizione"
     >
       <h3>
@@ -315,6 +316,7 @@ import BaseRadio from 'components/forms/BaseRadio.vue'
 const idConfigurazioneSelezionata = ref('')
 const configurazioni = ref([])
 const configurazioneEdit = ref(false)
+const isSubmitting = ref(false)
 
 const baseFormRef = ref(null)
 
@@ -583,7 +585,7 @@ watch(
   { immediate: true }, // immediate: true serve a farlo eseguire anche al primo caricamento (onMounted)
 )
 
-function inviaDati() {
+async function inviaDati() {
   const datiDaInviare = { ...formData.value }
   datiDaInviare.age = age.value
   datiDaInviare.tipo_spedizione = props.tipoSpedizione
@@ -618,44 +620,38 @@ function inviaDati() {
     delete datiDaInviare.peso_inserto
   }
 
-  if (configurazioneEdit.value) {
-    if (idConfigurazioneSelezionata.value === '') throw new Error('Selezionare una configurazione')
-    datiDaInviare.id_configurazione = idConfigurazioneSelezionata.value.value
-    api
-      .post('/aggiorna_configurazione.php', datiDaInviare)
-      .then((response) => {
-        messaggioPositivo('Configurazione aggiornata con successo')
-        emit('saved', {
-          value: response.data.id_configurazione,
-          label: response.data.nome_configurazione,
-        })
+  isSubmitting.value = true
+  try {
+    if (configurazioneEdit.value) {
+      if (idConfigurazioneSelezionata.value === '') throw new Error('Selezionare una configurazione')
+      datiDaInviare.id_configurazione = idConfigurazioneSelezionata.value.value
+      const response = await api.post('/aggiorna_configurazione.php', datiDaInviare)
+      messaggioPositivo('Configurazione aggiornata con successo')
+      emit('saved', {
+        value: response.data.id_configurazione,
+        label: response.data.nome_configurazione,
       })
-      .catch((e) => {
-        gestioneErrore(
-          e,
-          'Impossibile aggiornare la configurazione, controllare i dati inseriti - ' +
-            e.response.data.message,
-        )
+    } else {
+      const response = await api.post('/crea_configurazione.php', datiDaInviare)
+      messaggioPositivo('Configurazione creata con successo')
+      emit('saved', {
+        value: response.data.id_configurazione,
+        label: response.data.nome_configurazione,
       })
-  } else {
-    api
-      .post('/crea_configurazione.php', datiDaInviare)
-      .then((response) => {
-        messaggioPositivo('Configurazione creata con successo')
-        emit('saved', {
-          value: response.data.id_configurazione,
-          label: response.data.nome_configurazione,
-        })
-      })
-      .catch((e) => {
-        gestioneErrore(
-          e,
-          'Impossibile salvare la configurazione, controllare i dati inseriti - ' +
-            e.response.data.message,
-        )
-      })
+    }
+    emit('update:modelValue', formData.value)
+  } catch (e) {
+    gestioneErrore(
+      e,
+      (configurazioneEdit.value
+        ? 'Impossibile aggiornare la configurazione'
+        : 'Impossibile salvare la configurazione') +
+        ', controllare i dati inseriti - ' +
+        (e.response?.data?.message || e.message || 'errore sconosciuto'),
+    )
+  } finally {
+    isSubmitting.value = false
   }
-  emit('update:modelValue', formData.value)
 }
 
 function reset() {
