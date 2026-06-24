@@ -328,6 +328,7 @@ ORDER BY o.progr
             <BaseBtn
               :label="nomeAzione"
               @click="lanciaAzione(datiAzione, selectedRowAzioni.id_elaborazione)"
+              :loading="isActionSubmitting"
             ></BaseBtn>
           </div>
         </q-card-section>
@@ -356,6 +357,7 @@ import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
 const isSubmitting = ref(false)
+const isActionSubmitting = ref(false)
 
 const formData = ref({
   lavoro: route.query.id_lavoro
@@ -625,13 +627,20 @@ function confermaElimina(row) {
   })
 }
 
-function lanciaAzione(datiAzione, id_elaborazione) {
+/**
+ * lancia un azione qualsiasi fra quelle presenti in var globali. se è presente il parametro d in var globali aggiunge un datapicker. gestisce il tipo di output in base a se l'azione deve restituire un pdf, un zip o altro (specificato sempre in variabili globali
+ * @param datiAzione
+ * @param id_elaborazione
+ */
+async function lanciaAzione(datiAzione, id_elaborazione) {
   if (datiAzione.parametri?.includes('d')) {
     if (dataAzioni.value === null) {
       gestioneErrore(null, 'Data non inserita')
       return
     }
   }
+
+  isActionSubmitting.value = true
   var dati = {
     data: dataAzioni.value,
     id_elaborazione: id_elaborazione,
@@ -641,60 +650,64 @@ function lanciaAzione(datiAzione, id_elaborazione) {
   const isZip = datiAzione.output === 'zip'
   const config = (isPdf || isZip) ? { responseType: 'blob' } : {}
 
-  api
-    .post('/' + datiAzione.endpoint, dati, config)
-    .then((response) => {
-      if (isPdf || isZip) {
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
+  try {
+    const response = await api.post('/' + datiAzione.endpoint, dati, config)
+    if (isPdf || isZip) {
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
 
-        let filename = isZip ? 'esportazione.zip' : 'etichette.pdf'
-        const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition']
+      let filename = isZip ? 'esportazione.zip' : 'etichette.pdf'
+      const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition']
 
-        if (contentDisposition) {
-          // Questa regex intercetta sia filename= che filename*= gestendo UTF-8 e apici
-          const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i);
-          if (fileNameMatch && fileNameMatch[1]) {
-            // decodeURIComponent trasforma %20 in spazio e gestisce gli altri caratteri codificati
-            filename = decodeURIComponent(fileNameMatch[1]);
-          }
+      if (contentDisposition) {
+        // Questa regex intercetta sia filename= che filename*= gestendo UTF-8 e apici
+        const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i);
+        if (fileNameMatch && fileNameMatch[1]) {
+          // decodeURIComponent trasforma %20 in spazio e gestisce gli altri caratteri codificati
+          filename = decodeURIComponent(fileNameMatch[1]);
         }
-
-        link.setAttribute('download', filename)
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        window.URL.revokeObjectURL(url)
-
-        if (datiAzione.endpoint === 'chiudi_elaborazione.php') {
-          prelevaElaborazioniInCorso()
-          prelevaElaborazioniConcluse()
-        }
-      } else {
-        messaggioPositivo('Azione eseguita')
       }
-      dataAzioni.value = null
-      dialogAzioniVisible.value = false
-    })
-    .catch(async (e) => {
-      let messaggio = 'Errore sconosciuto';
 
-      // Se la risposta è un Blob (caso errore con responseType: 'blob')
-      if (e.response?.data instanceof Blob && config?.responseType === 'blob') {
-        const text = await e.response.data.text();
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+      if (datiAzione.endpoint === 'chiudi_elaborazione.php') {
+        prelevaElaborazioniInCorso()
+        prelevaElaborazioniConcluse()
+      }
+    } else {
+      messaggioPositivo('Azione eseguita')
+    }
+    dataAzioni.value = null
+    dialogAzioniVisible.value = false
+  } catch (e) {
+    let messaggio = 'Errore sconosciuto';
+
+    // Se la risposta è un Blob (caso errore con responseType: 'blob')
+    if (e.response?.data instanceof Blob && config?.responseType === 'blob') {
+      const text = await e.response.data.text();
+      try {
         const errorData = JSON.parse(text);
         messaggio = errorData.message;
-      } else {
-        // Caso standard (JSON già decodificato o altri errori)
-        messaggio = e.response?.data?.message || e.message;
+      } catch {
+        messaggio = text;
       }
+    } else {
+      // Caso standard (JSON già decodificato o altri errori)
+      messaggio = e.response?.data?.message || e.message;
+    }
 
-      gestioneErrore(
-        e,
-        'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + messaggio,
-      )
-    })
+    gestioneErrore(
+      e,
+      'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + messaggio,
+    )
+  } finally {
+    isActionSubmitting.value = false
+  }
 }
 
 function chiudiElaborazione(id_elaborazione) {
