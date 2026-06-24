@@ -101,6 +101,7 @@ try {
     $dati = $a->array_add_column($dati, "id_flusso", $id_flusso);
     $dati = $a->array_add_column($dati, "folder_z", $folder_z);
     $dati = $a->array_add_column($dati, "lavoro", $dati_lavoro["nome_lavoro"]);
+    $dati = array_rename_col($dati,["id"=>"id2"]);//in crea_base_dati.php l'eventuale colonna id viene rinominata in id2
     if(!$db->carica_a_db($dati, "`{$dati_lavoro["nome_base_dati"]}`"))
         throw new \Exception("Errore durante l'inserimento nella tabella dati");
 
@@ -147,7 +148,7 @@ try {
         'message' => 'Elaborazione creata con successo',
         'id_flusso'=>$id_flusso
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     if(file_exists($targetPath))
         unlink($targetPath);
     if(isset($db))

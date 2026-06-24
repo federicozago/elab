@@ -15,6 +15,7 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
       hide-bottom-space
       @update:model-value="updateSuggestion"
     >
+      <!-- gestione suggerimenti in caso di props suggestions compilata -->
       <template v-slot:append v-if="currentSuggestion">
         <q-chip dense size="sm" color="grey-3" text-color="grey-7">
           {{ currentSuggestion }}
@@ -43,7 +44,7 @@ const model = defineModel()
 const props = defineProps({
   label: String,
   rules: { type: Array, default: () => [] },
-  suggestions: { type: Array, default: () => []}
+  suggestions: { type: Array, default: () => []}//array di stringhe per dare suggerimenti all'utente sull'inserimento
 })
 
 const currentSuggestion = ref('')

@@ -41,15 +41,16 @@ try {
         }
 
         //se è da prenotare
-        if($elaborazione["stato"] == 2){//elaborazione già ordinata
+        /*if($elaborazione["stato"] == 2){//elaborazione già ordinata
             $da_prenotare = $db->preleva_da_db_un_singolo_valore("select da_prenotare from {$elaborazione['tipo_spedizione']} where id={$elaborazione['id_configurazione']}");
+            if($da_prenotare === false) throw new \Exception("Errore durante prelievo elaborazioni");
             if($da_prenotare)
                 if(!$da_prenotare = $db->verifica_presenza_record("select * from ordinati_{$elaborazione["tipo_spedizione"]}_{$elaborazione["nome_base_dati"]} where id_flusso='{$elaborazione["id_flusso"]}' and nome_elaborazione='{$elaborazione["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}' and data_spedizione is null"))
                     throw new \Exception("Errore durante prelievo elaborazioni");
             $elaborazione["da_prenotare"] = $da_prenotare;
         }else{
             $elaborazione["da_prenotare"] = 0;
-        }
+        }*/
 
         //creo il gruppo e alimento la relativa tabella dettagli
         $elaborazione["row-id"] = $indice_riga++;

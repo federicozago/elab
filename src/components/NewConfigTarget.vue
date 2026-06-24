@@ -10,6 +10,14 @@
       :rules="[required]"
     />
 
+    <BaseSelect
+      v-model="model.tipo_formato_creative"
+      label="Tipo formato creative (*)"
+      id="tipo-formato-creative"
+      :options="['NORMALIZZATO','COMPATTO','VOLUMINOSO']"
+      :rules="[required]"
+      />
+
     <BaseInput
       v-model="model.buste_min"
       label="Minimo pezzi (*)"

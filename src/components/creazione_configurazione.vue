@@ -253,6 +253,8 @@
         v-model="formData.autorizzazione_postale"
       ></BaseInput>
 
+      <BaseInput label="Omologa" v-model="formData.omologa"></BaseInput>
+
       <BaseRadio
         label="N etichette per foglio (*)"
         v-model="formData.etichette_per_foglio"
@@ -474,6 +476,7 @@ function getInitialFormData() {
     codice_identificativo_stampatore: 'BC',
     barcode_campi_cliente: 'id_tabella',
     autorizzazione_postale: '',
+    omologa: '',
     etichette_per_foglio: 3,
     etichetta_n_up: true,
 
@@ -483,6 +486,7 @@ function getInitialFormData() {
       buste_max: 0,
       plichi: '',
       contiene_gadget: false,
+      tipo_formato_creative:'NORMALIZZATO',
     },
     massiva: {
       peso_scatola_min: 0,

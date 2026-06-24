@@ -4,7 +4,6 @@ Immagina di avere 50 input nel tuo progetto. Se un giorno decidessi che tutti gl
 Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta tutte le proprietà di q-input, usi un'interfaccia più semplice e pulita che hai creato tu, esponendo solo quello che ti serve davvero.
 -->
   <div class="form-field q-pb-md">
-    <!-- q-pb-md aggiunge un po' di spazio vuoto sotto il componente per evitare che i campi siano appiccicati l'uno all'altro.-->
     <q-select
       :label="label"
       v-bind="$attrs"
@@ -13,23 +12,55 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
       outlined
       dense
       hide-bottom-space
+      use-input
+      fill-input
+      hide-selected
+      input-debounce="0"
+      :options="filteredOptions"
+      @filter="filterFn"
     >
+      <template v-slot:no-option>
+        <q-item>
+          <q-item-section class="text-grey">
+            Nessun risultato
+          </q-item-section>
+        </q-item>
+      </template>
       <slot></slot>
-    </q-select
-    ><!--
-    Grazie all'uso di v-bind="$attrs" che abbiamo inserito nel tuo BaseInput.vue: Tutto quello che scrivi su BaseInput (come type="number", maxlength="50", step="1", ecc.) viene "passato" automaticamente al q-input interno di Quasar.
-    outlined: Disegna un bordo completo attorno all'input (invece della sola linea in basso).
-dense: Riduce l'altezza dell'input e i margini interni, rendendo il form più compatto (molto utile se hai tanti campi).
-hide-bottom-space: Normalmente Quasar lascia uno spazio vuoto sotto l'input per mostrare eventuali messaggi di errore. Se non ci sono errori, quello spazio rimane vuoto e "allunga" il form inutilmente. Questa proprietà nasconde quello spazio, facendolo apparire solo se c'è effettivamente un errore da mostrare.-->
+    </q-select>
   </div>
 </template>
 
 <script setup>
-//defineProps (Sola Lettura): Serve per ricevere dati dal padre che il figlio non deve modificare. È come un regalo che ricevi: puoi guardarlo e usarlo, ma non puoi cambiarlo per chi te lo ha regalato.
-//defineModel (Bidirezionale): Serve per creare un legame "scrivibile". Se il figlio cambia il valore, quel valore cambia automaticamente anche nel padre. È quello che si usa quasi sempre per gli input dei form (v-model), perché l'obiettivo è proprio che il componente scriva dei dati nel formData del genitore.
+import { ref, watch } from 'vue'
+
 const model = defineModel()
-defineProps({
+const props = defineProps({
   label: String,
   rules: { type: Array, default: () => [] },
+  options: { type: Array, default: () => [] }
 })
+
+const filteredOptions = ref(props.options)
+
+// Sincronizza filteredOptions se le opzioni originali cambiano
+watch(() => props.options, (newOptions) => {
+  filteredOptions.value = newOptions
+})
+
+const filterFn = (val, update) => {
+  if (val === '') {
+    update(() => {
+      filteredOptions.value = props.options
+    })
+    return
+  }
+
+  update(() => {
+    const needle = val.toLowerCase()
+    filteredOptions.value = props.options.filter(
+      v => (v.label || v).toLowerCase().indexOf(needle) > -1
+    )
+  })
+}
 </script>

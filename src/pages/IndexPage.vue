@@ -241,7 +241,8 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                     selectedRowSql.tipo_spedizione +
                     '_' +
                     selectedRowSql.nome_base_dati +
-                    '` o ON e.id=o.c1 ORDER BY progr',
+                    '` o ON e.id=o.c1 ' +
+                    'where e.id_flusso = \'' + selectedRowSql.id_flusso + '\' ORDER BY o.progr'
                 )
               "
             ></BaseBtn>
@@ -254,7 +255,8 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
 SELECT * FROM `{{ selectedRowSql.nome_base_dati }}_{{ selectedRowSql.nome_elaborazione }}` e
     JOIN `ordinati_{{ selectedRowSql.tipo_spedizione }}_{{ selectedRowSql.nome_base_dati }}` o
          ON e.id=o.c1
-ORDER BY progr
+WHERE e.id_flusso = '{{ selectedRowSql.id_flusso }}'
+ORDER BY o.progr
           </pre>
         </q-card-section>
       </q-card>
