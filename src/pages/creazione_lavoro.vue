@@ -82,6 +82,8 @@
           "
         />
 
+        <BaseToggle v-model="isMultiElaborazione" label="Multi elaborazione" />
+
         <div
           style="border: 0.5px lightgrey solid; border-radius: 5px"
           class="q-pa-sm q-mb-sm"
@@ -91,11 +93,8 @@
           <BaseInput
             v-model="elaborazione.nome_elaborazione"
             label="Nome sotto elaborazione"
-            :rules="
-              formData.elaborazioni.length > 1
-                ? [required, maxLength(50)]
-                : [required, maxLength(50)]
-            "
+            :disable="!isMultiElaborazione"
+            :rules="[required, maxLength(50)]"
           /><!-- se c'è una multi elaborazione allora il php creerà una vista, e quindi controllo in questo caso che non venga inserita una vista già esistente -->
 
           <BaseSelect
@@ -140,7 +139,7 @@
             v-if="formData.elaborazioni.length > 1"
           ></BaseBtn>
 
-          <BaseBtn label="Aggiungi" @click="aggiungiElaborazione"></BaseBtn>
+          <BaseBtn label="Aggiungi" @click="aggiungiElaborazione" v-if="isMultiElaborazione"></BaseBtn>
         </div>
       </BaseForm>
     </div>
@@ -162,18 +161,20 @@ import BaseSelect from 'components/forms/BaseSelect.vue'
 import { required, sqlSafe, maxLength } from 'src/composables/rules.js'
 import BaseInput from 'components/forms/BaseInput.vue'
 import ConfigurazioneForm from 'components/creazione_configurazione.vue'
+import BaseToggle from 'components/forms/BaseToggle.vue'
 
 const indiceElaborazioneInCorso = ref(null)
 const dialogConfigurazioneVisible = ref(false)
 const isSubmitting = ref(false)
 const tipoSpedizioneScelta = ref(null)
 const configurazioneCorrente = ref(null)
+const isMultiElaborazione = ref(false)
 const formData = ref({
   id_base_dati: null, //se ritorno dalla pagina creazione_base_dati potrei voler importare i dati precedenti
   nome_lavoro: route.query.nome_base_dati ? route.query.nome_base_dati : '',
   elaborazioni: [
     {
-      nome_elaborazione: route.query.nome_base_dati ? route.query.nome_base_dati : '',
+      nome_elaborazione: 'elab',
       where: '',
       tipo_spedizione: '',
       id_configurazione: '',
@@ -191,6 +192,20 @@ watch(
     baseDatiSelezionata.value = newVal
   },
 )
+
+//verifica se il togle multi elaborazione è attivo e serve per fare in modo che il nome elaborazione sia fisso a elab quando disattivato
+watch(isMultiElaborazione, (newVal) => {
+  if (!newVal) {
+    // Se disattivato, resetta a una sola elaborazione e imposta nome fisso
+    if (formData.value.elaborazioni.length > 1) {
+      formData.value.elaborazioni = [formData.value.elaborazioni[0]]
+    }
+    formData.value.elaborazioni[0].nome_elaborazione = 'elab'
+  } else {
+    // Se attivato, svuota il nome per permettere la definizione utente
+    formData.value.elaborazioni[0].nome_elaborazione = ''
+  }
+})
 const idElaborazionePagina = ref(0)
 const tipi_spedizioni = ref([])
 const nomeElaborazioneScelta = ref('')
@@ -314,6 +329,15 @@ onMounted(() => {
 })
 
 async function creaLavoro() {
+  // Controllo multi elaborazione
+  if (isMultiElaborazione.value && formData.value.elaborazioni.length <= 1) {
+    gestioneErrore(
+      null,
+      'Per un lavoro multi elaborazione è necessario aggiungere almeno due elaborazioni',
+    )
+    return
+  }
+
   //creazione/salvataggio lavoro
   isSubmitting.value = true
   try {

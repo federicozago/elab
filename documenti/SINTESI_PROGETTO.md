@@ -298,6 +298,63 @@ Tutti i componenti form sono nella cartella `src/components/forms/` e forniscono
 
 ---
 
+## Struttura Database
+
+Il sistema utilizza un database MySQL per gestire la persistenza dei dati, le configurazioni e lo stato delle elaborazioni. La struttura è composta da tabelle di sistema e tabelle dinamiche create durante l'importazione dei dati.
+
+### Tabelle di Sistema
+
+#### 1. `base_dati`
+Memorizza i metadati relativi ai file caricati che fungono da sorgente dati.
+- `id`: Identificativo univoco.
+- `nome_base_dati`: Nome della tabella fisica creata per ospitare i record (es. `clienti_2024`).
+- `intestazione`: Stringa JSON o delimitata che rappresenta le colonne originali.
+- `campo_cap`, `campo_localita`, `campo_provincia`: Mappatura dei campi obbligatori per l'ordinamento postale.
+- `separatore`: Carattere utilizzato nei file CSV.
+
+#### 2. `lavori`
+Rappresenta un progetto o un raggruppamento logico di spedizioni.
+- `id`: Identificativo univoco.
+- `nome_lavoro`: Nome descrittivo del lavoro.
+- `id_base_dati`: FK verso `base_dati.id`. Indica quale sorgente dati utilizzare.
+
+#### 3. `elaborazioni_lavoro` (Definizioni)
+Definisce come un lavoro deve essere suddiviso (es. in base a filtri SQL).
+- `id`: Identificativo univoco.
+- `id_lavoro`: FK verso `lavori.id`.
+- `nome_elaborazione`: Nome della sotto-elaborazione.
+- `tipo_spedizione`: Prodotto postale (es. `target`, `massiva`).
+- `id_configurazione`: ID della configurazione specifica per l'ordinamento.
+- `where`: Clausola SQL utilizzata per filtrare i record dalla base dati sorgente.
+
+#### 4. `elaborazioni` (Istanze/Log)
+Registra le singole esecuzioni (upload di nuovi file) per un determinato lavoro.
+- `id`: Identificativo univoco.
+- `id_lavoro`: FK verso `lavori.id`.
+- `id_flusso`: Identificativo della commessa/lotto (spesso indicato come "commessa").
+- `folder_z`: Percorso di output per i file prodotti.
+- `stato`: Stato dell'elaborazione (0: da ordinare, 1: in corso, 2: elaborato, 255: chiuso).
+
+#### 5. Tabelle Configurazioni (`target`, `massiva`, ecc.)
+Ogni tipo di spedizione ha una propria tabella per memorizzare i parametri tecnici di ordinamento (es. affrancatura, formato, tipologia cliente).
+
+### Tabelle Dinamiche
+
+Il sistema genera tabelle e viste dinamicamente per gestire i dati degli utenti:
+
+- **Tabelle Dati (`[nome_base_dati]`):** Create durante l'importazione del file Excel/CSV. Contengono tutti i record originali più colonne di sistema (`id`, `id_flusso`, `id_elaborazione`, `lavoro`, `folder_z`).
+- **Viste Elaborazione (`[nome_lavoro]_[nome_elaborazione]`):** Viste SQL che filtrano la tabella dati sorgente in base alla clausola `WHERE` definita in `elaborazioni_lavoro`.
+- **Tabelle Ordinati (`ordinati_[tipo]_[nome_base_dati]`):** Create dopo l'esecuzione dell'ordinamento. Contengono i record ordinati secondo le regole postali, collegati alla tabella dati originale tramite il campo `c1` (che corrisponde all'ID del record).
+
+### Relazioni Principali (ER)
+
+1. **Lavoro -> Base Dati:** Un lavoro appartiene a una sola base dati.
+2. **Lavoro -> Elaborazioni Lavoro:** Un lavoro può avere più definizioni di sotto-elaborazione (1:N).
+3. **Lavoro -> Elaborazioni (Istanze):** Un lavoro può essere eseguito più volte con file diversi (1:N).
+4. **Base Dati -> Tabella Fisica:** `nome_base_dati` punta direttamente a una tabella MySQL creata `ad hoc`.
+
+---
+
 ## Flusso di Lavoro Tipico
 
 ### Scenario 1: Creazione Nuovo Lavoro Completo
@@ -592,6 +649,17 @@ Tutti gli endpoint PHP seguono un pattern comune:
   - Elimina eventuali record dalla tabella `ordinati_light`.
   - Utilizza transazioni DB per garantire l'integrità dei dati.
 - **Libreria utilizzata:** `Gestione_db`
+
+#### **elimina_lavoro.php**
+**Scopo:** Elimina un lavoro e tutte le sue definizioni e istanze associate.
+- **Input:** `id_lavoro`
+- **Processo:**
+  - Verifica che non ci siano istanze nella tabella `elaborazioni` con stato diverso da 255 (non concluse). Se presenti, l'eliminazione viene bloccata.
+  - Se tutte le elaborazioni sono concluse (o non ce ne sono):
+    - Elimina i record dalla tabella `elaborazioni` associati alle definizioni del lavoro.
+    - Elimina i record dalla tabella `elaborazioni_lavoro` (definizioni delle elaborazioni).
+    - Elimina il record principale dalla tabella `lavori`.
+- **Note:** Garantisce la pulizia del database evitando orfani, ma richiede che il lavoro sia "chiuso" operativamente.
 
 ---
 
