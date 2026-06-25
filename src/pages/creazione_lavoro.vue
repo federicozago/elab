@@ -93,7 +93,7 @@
             label="Nome sotto elaborazione"
             :rules="
               formData.elaborazioni.length > 1
-                ? [required, maxLength(50), notInArray(visteEsistenti)]
+                ? [required, maxLength(50)]
                 : [required, maxLength(50)]
             "
           /><!-- se c'è una multi elaborazione allora il php creerà una vista, e quindi controllo in questo caso che non venga inserita una vista già esistente -->
@@ -159,7 +159,7 @@ import { api } from 'boot/axios.js'
 import BaseForm from 'components/forms/BaseForm.vue'
 import BaseBtn from 'components/forms/BaseBtn.vue'
 import BaseSelect from 'components/forms/BaseSelect.vue'
-import { required, sqlSafe, maxLength, notInArray } from 'src/composables/rules.js'
+import { required, sqlSafe, maxLength } from 'src/composables/rules.js'
 import BaseInput from 'components/forms/BaseInput.vue'
 import ConfigurazioneForm from 'components/creazione_configurazione.vue'
 
@@ -184,7 +184,6 @@ const formData = ref({
 //svuoto array query per non far comparire sul menu la base dati creata in precedenza
 const listaConfigurazioni = ref([])
 const basiDati = ref([])
-const visteEsistenti = ref([])
 const baseDatiSelezionata = ref(null)
 watch(
   () => formData.value.id_base_dati,
@@ -289,17 +288,6 @@ onMounted(() => {
     })
     .catch((e) => {
       gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
-    })
-
-  //prelevo le viste già esistenti (per non inserire doppioni di elaborazione
-
-  api
-    .post('/preleva_viste.php')
-    .then((response) => {
-      visteEsistenti.value = response.data.viste
-    })
-    .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare viste - ' + e.response.data.message)
     })
 
   //prelevo le spedizioni possibili

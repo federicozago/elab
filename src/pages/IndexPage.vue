@@ -240,7 +240,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               @click="
                 copiaQuery(
                   'SELECT * FROM `' +
-                    selectedRowSql.nome_base_dati +
+                    selectedRowSql.nome_lavoro +
                     '_' +
                     selectedRowSql.nome_elaborazione +
                     '` e JOIN `ordinati_' +
@@ -258,7 +258,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         <q-separator></q-separator>
         <q-card-section>
           <pre class="sql-code">
-SELECT * FROM `{{ selectedRowSql.nome_base_dati }}_{{ selectedRowSql.nome_elaborazione }}` e
+SELECT * FROM `{{ selectedRowSql.nome_lavoro }}_{{ selectedRowSql.nome_elaborazione }}` e
     JOIN `ordinati_{{ selectedRowSql.tipo_spedizione }}_{{ selectedRowSql.nome_base_dati }}` o
          ON e.id=o.c1
 WHERE e.id_flusso = '{{ selectedRowSql.id_flusso }}'

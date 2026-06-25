@@ -142,7 +142,7 @@ Tutti i file di configurazione necessari al funzionamento dell'infrastruttura so
   - **Modifica:** Modifica un lavoro esistente (selezionabile da dropdown)
 
 - **Validazioni:**
-  - Controllo che i nomi delle elaborazioni non siano duplicati
+  - Controllo che il nome del lavoro sia univoco
   - Controllo che le viste non esistano già
   - Validazione SQL sicura per il campo WHERE
 
@@ -344,7 +344,7 @@ Tutti i componenti form sono nella cartella `src/components/forms/` e forniscono
 ### Lavoro
 - Contenitore logico per una o più elaborazioni
 - Associato a una base dati specifica
-- Ha un nome identificativo
+- Ha un nome identificativo univoco
 - Può essere chiuso/riaperto
 
 ### Elaborazione
@@ -352,6 +352,7 @@ Tutti i componenti form sono nella cartella `src/components/forms/` e forniscono
 - Seleziona parte dei dati tramite clausola WHERE
 - Associata a un tipo spedizione (prodotto postale)
 - Associata a una configurazione di ordinamento
+- Il nome dell'elaborazione può essere duplicato all'interno del lavoro
 - Se ci sono più elaborazioni nello stesso lavoro, viene creata una vista MySQL
 
 ### Configurazione
