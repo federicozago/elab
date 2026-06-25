@@ -28,17 +28,34 @@
         </q-card>
       </q-dialog>
 
-      <BaseSelect
-        label="Lista lavori esistenti"
-        v-model="lavoro"
-        :options="lavori"
-        @update:model-value="lavoroCambiato"
-        v-if="isModifica"
-      ></BaseSelect>
+      <div class="row items-center q-gutter-x-md">
+        <div class="col">
+          <BaseSelect
+            label="Lista lavori esistenti"
+            v-model="lavoro"
+            :options="lavori"
+            @update:model-value="lavoroCambiato"
+            v-if="isModifica"
+          ></BaseSelect>
+        </div>
+        <div class="col-auto" v-if="isModifica && lavoro">
+          <BaseBtn
+            label="Elimina lavoro"
+            color="negative"
+            icon="delete"
+            @click="confermaEliminaLavoro"
+          />
+        </div>
+      </div>
 
       <h3>{{ isModifica ? 'Modifica lavoro' : 'Crea lavoro' }}</h3>
 
-      <BaseForm :formData="formData" @submit="creaLavoro" labelInvia="Salva lavoro" :loading="isSubmitting">
+      <BaseForm
+        :formData="formData"
+        @submit="creaLavoro"
+        labelInvia="Salva lavoro"
+        :loading="isSubmitting"
+      >
         <div class="row q-gutter-x-md items-start">
           <div class="col">
             <!--select base dati (quando cambia, se sotto è indicata un elaborazione sola autocompilo nome_elaborazione e nome lavoro-->
@@ -139,7 +156,11 @@
             v-if="formData.elaborazioni.length > 1"
           ></BaseBtn>
 
-          <BaseBtn label="Aggiungi" @click="aggiungiElaborazione" v-if="isMultiElaborazione"></BaseBtn>
+          <BaseBtn
+            label="Aggiungi"
+            @click="aggiungiElaborazione"
+            v-if="isMultiElaborazione"
+          ></BaseBtn>
         </div>
       </BaseForm>
     </div>
@@ -153,7 +174,7 @@ const router = useRouter()
 import { useRoute } from 'vue-router'
 const route = useRoute()
 import { useCassettaAttrezzi } from 'src/composables/cassettaAttrezzi'
-const { gestioneErrore, messaggioPositivo } = useCassettaAttrezzi()
+const { gestioneErrore, messaggioPositivo, richiediConferma } = useCassettaAttrezzi()
 import { api } from 'boot/axios.js'
 import BaseForm from 'components/forms/BaseForm.vue'
 import BaseBtn from 'components/forms/BaseBtn.vue'
@@ -213,8 +234,12 @@ const isModifica = computed(() => route.path.includes('/modifica_lavoro'))
 const lavori = ref([])
 const lavoro = ref(null)
 
-if(route.query.id_base_dati)
-  formData.value.id_base_dati = { label: route.query.nome_base_dati, value: route.query.id_base_dati, intestazione: route.query.intestazione }
+if (route.query.id_base_dati)
+  formData.value.id_base_dati = {
+    label: route.query.nome_base_dati,
+    value: route.query.id_base_dati,
+    intestazione: route.query.intestazione,
+  }
 router.replace({
   path: route.path,
   query: {},
@@ -328,6 +353,35 @@ onMounted(() => {
   }
 })
 
+async function confermaEliminaLavoro() {
+  if (!lavoro.value) return
+
+  richiediConferma(
+    `Sei sicuro di voler eliminare il lavoro "${lavoro.value.label}"? L'operazione eliminerà anche tutte le definizioni e i dati associati.`,
+  ).onOk(() => {
+    eliminaLavoro()
+  })
+}
+
+async function eliminaLavoro() {
+  try {
+    isSubmitting.value = true
+    const response = await api.post('/elimina_lavoro.php', {
+      id_lavoro: lavoro.value.value,
+    })
+
+    if (response.data.success) {
+      messaggioPositivo('Lavoro eliminato con successo')
+      // Reset del form o reindirizzamento
+      router.push('/')
+    }
+  } catch (error) {
+    gestioneErrore(error, "Errore durante l'eliminazione del lavoro - " + error.response.data.message)
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
 async function creaLavoro() {
   // Controllo multi elaborazione
   if (isMultiElaborazione.value && formData.value.elaborazioni.length <= 1) {
@@ -341,13 +395,16 @@ async function creaLavoro() {
   //creazione/salvataggio lavoro
   isSubmitting.value = true
   try {
-    const response = await api.post(isModifica.value ? '/aggiorna_lavoro.php' : '/crea_lavoro.php', {
-      id_base_dati: formData.value.id_base_dati.value,
-      nome_lavoro: formData.value.nome_lavoro,
-      //elaborazioni: JSON.stringify(formData.value.elaborazioni),
-      elaborazioni: formData.value.elaborazioni,
-      id_lavoro: isModifica.value ? lavoro.value.value : null,
-    })
+    const response = await api.post(
+      isModifica.value ? '/aggiorna_lavoro.php' : '/crea_lavoro.php',
+      {
+        id_base_dati: formData.value.id_base_dati.value,
+        nome_lavoro: formData.value.nome_lavoro,
+        //elaborazioni: JSON.stringify(formData.value.elaborazioni),
+        elaborazioni: formData.value.elaborazioni,
+        id_lavoro: isModifica.value ? lavoro.value.value : null,
+      },
+    )
     messaggioPositivo(
       isModifica.value
         ? 'Elaborazione aggiornata con successo'

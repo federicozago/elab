@@ -651,15 +651,17 @@ Tutti gli endpoint PHP seguono un pattern comune:
 - **Libreria utilizzata:** `Gestione_db`
 
 #### **elimina_lavoro.php**
-**Scopo:** Elimina un lavoro e tutte le sue definizioni e istanze associate.
+**Scopo:** Elimina un lavoro e tutte le sue definizioni, istanze e viste associate.
 - **Input:** `id_lavoro`
 - **Processo:**
   - Verifica che non ci siano istanze nella tabella `elaborazioni` con stato diverso da 255 (non concluse). Se presenti, l'eliminazione viene bloccata.
   - Se tutte le elaborazioni sono concluse (o non ce ne sono):
+    - Recupera i nomi delle elaborazioni e del lavoro per identificare le viste MySQL.
+    - Elimina le viste MySQL associate: `[nome_lavoro]_[nome_elaborazione]` e `[nome_lavoro]_[nome_elaborazione]_elaborato`.
     - Elimina i record dalla tabella `elaborazioni` associati alle definizioni del lavoro.
     - Elimina i record dalla tabella `elaborazioni_lavoro` (definizioni delle elaborazioni).
     - Elimina il record principale dalla tabella `lavori`.
-- **Note:** Garantisce la pulizia del database evitando orfani, ma richiede che il lavoro sia "chiuso" operativamente.
+- **Note:** Garantisce la pulizia completa del database (tabelle e viste) evitando orfani, ma richiede che il lavoro sia "chiuso" operativamente.
 
 ---
 
