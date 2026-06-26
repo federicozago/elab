@@ -1,12 +1,26 @@
 <template>
   <div>
-    <BaseSelect
-      label="Lista configurazioni esistenti"
-      v-model="idConfigurazioneSelezionata"
-      :options="configurazioni"
-      @update:model-value="configurazioneCambiata"
-      :disable="!props.tipoSpedizione"
-    ></BaseSelect>
+    <div class="row items-center q-gutter-x-sm">
+      <BaseSelect
+        class="col"
+        label="Lista configurazioni esistenti"
+        v-model="idConfigurazioneSelezionata"
+        :options="configurazioni"
+        @update:model-value="configurazioneCambiata"
+        :disable="!props.tipoSpedizione"
+      ></BaseSelect>
+      <div class="col-auto q-mb-md" v-if="idConfigurazioneSelezionata">
+        <q-btn
+          color="negative"
+          icon="delete"
+          round
+          flat
+          @click="confermaEliminaConfigurazione"
+        >
+          <q-tooltip>Elimina questa configurazione</q-tooltip>
+        </q-btn>
+      </div>
+    </div>
     <BaseToggle
       v-model="configurazioneEdit"
       label="Modifica configurazione"
@@ -307,7 +321,7 @@ import NewConfigTarget from 'components/NewConfigTarget.vue'
 import { required, minLength, maxLength, minValue, maxValue } from 'src/composables/rules.js'
 import { api } from 'boot/axios.js'
 import { useCassettaAttrezzi } from 'src/composables/cassettaAttrezzi.ts'
-const { gestioneErrore, messaggioPositivo } = useCassettaAttrezzi()
+const { gestioneErrore, messaggioPositivo, richiediConferma } = useCassettaAttrezzi()
 import BaseForm from 'components/forms/BaseForm.vue'
 import BaseToggle from 'components/forms/BaseToggle.vue'
 import NewConfigMassiva from 'components/NewConfigMassiva.vue'
@@ -656,5 +670,36 @@ async function inviaDati() {
 
 function reset() {
   formData.value = getInitialFormData()
+}
+
+async function confermaEliminaConfigurazione() {
+  if (!idConfigurazioneSelezionata.value) return
+
+  richiediConferma(`Sei sicuro di voler eliminare la configurazione "${idConfigurazioneSelezionata.value.label}"?`)
+    .onOk(async () => {
+      try {
+        const response = await api.post('/elimina_configurazione_postale.php', {
+          id_configurazione: idConfigurazioneSelezionata.value.value,
+          tipo_spedizione: props.tipoSpedizione
+        })
+
+        if (response.data.success) {
+          messaggioPositivo('Configurazione eliminata con successo')
+
+          // Ricarica la lista delle configurazioni
+          const res = await api.post('/preleva_configurazioni.php', { tipo_spedizione: props.tipoSpedizione })
+          configurazioni.value = res.data.configurazioni
+
+          // Reset selezione e form
+          idConfigurazioneSelezionata.value = ''
+          reset()
+        }
+      } catch (e) {
+        gestioneErrore(
+          e,
+          'Errore durante l\'eliminazione della configurazione: ' + (e.response?.data?.message || e.message)
+        )
+      }
+    })
 }
 </script>
