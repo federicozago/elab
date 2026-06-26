@@ -37,7 +37,15 @@
           :rules="[required, maxLength(100), notInArray(basiDati)]"
         />
 
+        <BaseRadio
+          v-model="formData.tipo_file"
+          label="Tipo di file"
+          :elementi="['CSV/Testo', 'Excel']"
+          :rules="[required]"
+        />
+
         <BaseInput
+          v-if="formData.tipo_file === 'CSV/Testo'"
           v-model="formData.separatore"
           label="Separatore CSV/Testo"
           :rules="[required]"
@@ -58,6 +66,15 @@
           :loading="isUploading"
           v-if="formData.intestazione_si_no !== null"
         />
+
+        <div v-if="intestazione.length > 0" class="q-pa-sm q-mb-md bg-grey-2 rounded-borders border-grey-4 shadow-1">
+          <div class="text-caption text-grey-8 q-mb-xs">Intestazione rilevata nel file:</div>
+          <div class="row q-gutter-xs">
+            <q-badge v-for="campo in intestazione" :key="campo" color="secondary" label-color="white" class="q-pa-xs">
+              {{ campo }}
+            </q-badge>
+          </div>
+        </div>
 
         <BaseSelect
           :options="intestazione"
@@ -91,6 +108,7 @@
 <script setup>
 import BaseSelect from 'components/forms/BaseSelect.vue'
 import BaseInput from 'components/forms/BaseInput.vue'
+import BaseRadio from 'components/forms/BaseRadio.vue'
 import BaseFile from 'components/forms/BaseFile.vue'
 import { api } from 'boot/axios.js'
 import { maxLength, required, notInArray } from 'src/composables/rules.js'
@@ -119,6 +137,7 @@ const formData = ref({
   campo_provincia: '',
   intestazione_si_no: null,
   separatore: ';',
+  tipo_file: 'CSV/Testo',
   test: null,
 })
 
@@ -185,6 +204,7 @@ async function confermaEliminaBaseDati() {
             campo_provincia: '',
             intestazione_si_no: null,
             separatore: ';',
+            tipo_file: 'CSV/Testo',
             test: null,
           }
           intestazione.value = []
