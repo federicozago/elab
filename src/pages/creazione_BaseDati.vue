@@ -1,14 +1,26 @@
 <template>
   <q-page class="q-pa-md">
     <div class="q-gutter-y-md">
-      <!-- menu di selezione base dati esistente -->
+    <div class="row items-center q-gutter-x-sm" v-if="!creazioneLavoroInCorso">
       <BaseSelect
+        class="col"
         v-model="idBaseDati"
         :options="basiDati"
         label="Basi dati create"
         @update:model-value="baseDatiCambiata"
-        v-if="!creazioneLavoroInCorso"
       />
+      <div class="col-auto q-mb-md" v-if="idBaseDati">
+        <q-btn
+          color="negative"
+          icon="delete"
+          round
+          flat
+          @click="confermaEliminaBaseDati"
+        >
+          <q-tooltip>Elimina questa base dati</q-tooltip>
+        </q-btn>
+      </div>
+    </div>
 
       <h3>Crea base dati</h3>
 
@@ -85,7 +97,7 @@ import { maxLength, required, notInArray } from 'src/composables/rules.js'
 import BaseForm from 'components/forms/BaseForm.vue'
 import { onMounted, ref } from 'vue'
 import { useCassettaAttrezzi } from 'src/composables/cassettaAttrezzi'
-const { gestioneErrore, messaggioPositivo } = useCassettaAttrezzi()
+const { gestioneErrore, messaggioPositivo, richiediConferma } = useCassettaAttrezzi()
 import { useFileStore } from 'src/stores/fileStore'
 import { useRoute, useRouter } from 'vue-router'
 import BaseToggle from 'components/forms/BaseToggle.vue'
@@ -143,6 +155,46 @@ function baseDatiCambiata(idBaseDati) {
     })
     .catch((e) => {
       gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
+    })
+}
+
+async function confermaEliminaBaseDati() {
+  if (!idBaseDati.value) return
+
+  richiediConferma(`Sei sicuro di voler eliminare la base dati "${idBaseDati.value.label}"? Tutti i dati associati verranno rimossi permanentemente.`)
+    .onOk(async () => {
+      try {
+        const response = await api.post('/elimina_base_dati.php', {
+          id_base_dati: idBaseDati.value.value
+        })
+
+        if (response.data.success) {
+          messaggioPositivo('Base dati eliminata con successo')
+
+          // Ricarica la lista delle basi dati
+          const res = await api.post('/preleva_basi_dati.php')
+          basiDati.value = res.data.basi_dati
+
+          // Reset selezione e form
+          idBaseDati.value = null
+          formData.value = {
+            nome_base_dati: '',
+            file_base_dati: null,
+            campo_cap: '',
+            campo_localita: '',
+            campo_provincia: '',
+            intestazione_si_no: null,
+            separatore: ';',
+            test: null,
+          }
+          intestazione.value = []
+        }
+      } catch (e) {
+        gestioneErrore(
+          e,
+          'Errore durante l\'eliminazione della base dati: ' + (e.response?.data?.message || 'errore sconosciuto')
+        )
+      }
     })
 }
 
