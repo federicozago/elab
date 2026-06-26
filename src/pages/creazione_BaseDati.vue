@@ -158,6 +158,22 @@ function baseDatiCambiata(idBaseDati) {
       id_base_dati: idBaseDati,
     })
     .then((response) => {
+      // VALORIZZAZIONE INTESTAZIONE (Aggiunta per Piano 10, aggiornata Piano 11)
+      if (response.data.base_dati.intestazione) {
+        const rawIntestazione = response.data.base_dati.intestazione
+        // Se è una stringa, la divido usando il separatore '|' (Piano 11)
+        if (typeof rawIntestazione === 'string') {
+          intestazione.value = rawIntestazione.split('|').filter((item) => item !== '')
+        } else if (Array.isArray(rawIntestazione)) {
+          intestazione.value = rawIntestazione
+        } else {
+          intestazione.value = []
+        }
+      } else {
+        intestazione.value = []
+      }
+
+      //vado a valorizzare i dati del form (devo verificare i tipi di dati per gestire flag o testi
       Object.keys(response.data.base_dati).forEach((key) => {
         if (key === 'intestazione_si_no') {
           if (response.data.base_dati[key] === 1) {

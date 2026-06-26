@@ -28,10 +28,17 @@ if(!$base_dati = $db->preleva_da_db("select * from base_dati where id = ? ",[$js
         'message' => 'Impossibile prelevare le basi dati'
     ]);
 }else {
+    $risultato = $base_dati[0];
+    
+    // Se è una stringa, la divido usando il separatore '|' (Piano 11)
+    if (isset($risultato['intestazione']) && is_string($risultato['intestazione']) && $risultato['intestazione'] !== '') {
+        $risultato['intestazione'] = explode('|', $risultato['intestazione']);
+    }
+
     http_response_code(200);
     echo json_encode([
         'success' => true,
         'message' => 'Basi dati prelevate',
-        'base_dati'=>$base_dati[0]
+        'base_dati'=>$risultato
     ]);
 }

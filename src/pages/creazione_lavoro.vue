@@ -140,6 +140,7 @@
             </div>
           </div>
           <BaseInput
+            v-if="isMultiElaborazione"
             v-model="elaborazione.where"
             label="Sql vista (solo contenuto where)"
             :suggestions="baseDatiSelezionata?.intestazione.split('|')"
@@ -300,6 +301,17 @@ function lavoroCambiato(val) {
 }
 
 function apriDialogConfigurazione(indexElaborazione) {
+  // Prelevo il nome dell'elaborazione corrente
+  const nomeElab = formData.value.elaborazioni.find((e) => e.id === indexElaborazione).nome_elaborazione
+
+  // Se il nome è "elab", passo stringa vuota, altrimenti passo il nome attuale
+  nomeElaborazioneScelta.value = nomeElab === 'elab' ? '' : nomeElab
+
+  // Imposto il tipo di spedizione per la configurazione
+  tipoSpedizioneScelta.value = formData.value.elaborazioni.find(
+    (e) => e.id === indexElaborazione,
+  ).tipo_spedizione
+
   dialogConfigurazioneVisible.value = true
   indiceElaborazioneInCorso.value = indexElaborazione
 }
