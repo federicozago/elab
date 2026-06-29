@@ -14,6 +14,7 @@ Puoi nascondere la complessità di Quasar. Invece di dover ricordare ogni volta 
       dense
       hide-bottom-space
       @update:model-value="updateSuggestion"
+      @keydown="handleKeydown"
     >
       <!-- gestione suggerimenti in caso di props suggestions compilata -->
       <template v-slot:append v-if="currentSuggestion">
@@ -49,31 +50,43 @@ const props = defineProps({
 
 const currentSuggestion = ref('')
 
-function updateSuggestion(val){
-  if(!val || props.suggestions.length === 0){
-    currentSuggestion.value=''
+function updateSuggestion(val) {
+  if (!val || props.suggestions.length === 0) {
+    currentSuggestion.value = ''
     return
   }
 
-  const match = props.suggestions.find(s=>
-    s.toLowerCase().startsWith(val.toLowerCase())&&
-    s.toLowerCase() !== val.toLowerCase()
+  // Dividiamo il testo in parole e prendiamo l'ultima
+  const words = val.split(' ')
+  const lastWord = words[words.length - 1]
+
+  if (!lastWord) {
+    currentSuggestion.value = ''
+    return
+  }
+
+  // Cerchiamo un match per l'ultima parola
+  const match = props.suggestions.find(s =>
+    s.toLowerCase().startsWith(lastWord.toLowerCase()) &&
+    s.toLowerCase() !== lastWord.toLowerCase()
   )
 
   currentSuggestion.value = match || ''
 }
 
 //gestione tasto tab per accettare suggerimento
-function handleKeydown(e){
-  if(e.key === 'Tab' && currentSuggestion.value){
+function handleKeydown(e) {
+  if (e.key === 'Tab' && currentSuggestion.value) {
     e.preventDefault()
-    model.value = currentSuggestion.value
+
+    const words = model.value.split(' ')
+    words[words.length - 1] = currentSuggestion.value
+
+    model.value = words.join(' ')
     currentSuggestion.value = ''
   }
 }
 
 //aggiunta listner per il tasto tab
-if(typeof window !== 'undefined'){
-  window.addEventListener('keydown',handleKeydown)
-}
+// Rimosso window.addEventListener perché ora gestito da @keydown su q-input
 </script>
