@@ -97,10 +97,10 @@ try {
 
     //importo i dati
     $a = new Array_php();
-    $dati = $a->array_add_column($dati, "nome_file_idx_input", basename($targetPath));
-    $dati = $a->array_add_column($dati, "id_flusso", $id_flusso);
-    $dati = $a->array_add_column($dati, "folder_z", $folder_z);
-    $dati = $a->array_add_column($dati, "lavoro", $dati_lavoro["nome_lavoro"]);
+    $a->array_add_column($dati, "nome_file_idx_input", basename($targetPath));
+    $a->array_add_column($dati, "id_flusso", $id_flusso);
+    $a->array_add_column($dati, "folder_z", $folder_z);
+    $a->array_add_column($dati, "lavoro", $dati_lavoro["nome_lavoro"]);
     if(isset($dati[0]["id"]))
         $dati = array_rename_col($dati,["id"=>"id2"]);//in crea_base_dati.php l'eventuale colonna id viene rinominata in id2
     if(!$db->carica_a_db($dati, "`{$dati_lavoro["nome_base_dati"]}`"))
