@@ -19,7 +19,7 @@ try {
     $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
-    $dati = $db->preleva_da_db("select *  from elab_join where stato != 255 order by id_lavoro,id_elaborazione",[],false);//se stato è maggiore di zero allora è già ordinato
+    $dati = $db->preleva_da_db("select *  from elab_join where stato != 255 order by id_lavoro,id_elaborazione",[],false);//ordine necessario solo per il raggruppamento a scorrimento
     if($dati === false)
         throw new \Exception("Errore durante prelievo elaborazioni");
 
@@ -36,6 +36,7 @@ try {
             $dati_out[$indice_dati_out] = [
                 "nome_lavoro" => $elaborazione["nome_lavoro"],
                 "row-id" => $indice_riga++,//viene assegnato 0 al primo ciclo
+                "id_ultima_elaborazione" => 0, // tiene traccia dell'id_elaborazione più alto del gruppo
                 "dettagli" => []
             ];
         }
@@ -56,9 +57,20 @@ try {
         $elaborazione["row-id"] = $indice_riga++;
         $dati_out[$indice_dati_out]["dettagli"][] = $elaborazione;
 
+        //aggiorno l'id più alto (= elaborazione più recente) del gruppo corrente
+        $dati_out[$indice_dati_out]["id_ultima_elaborazione"] = max(
+            $dati_out[$indice_dati_out]["id_ultima_elaborazione"],
+            $elaborazione["id_elaborazione"]
+        );
+
         $nome_lavoro = $elaborazione["nome_lavoro"];
 
     }
+
+    //riordino i lavori mettendo per primo quello con l'elaborazione inserita più di recente
+    usort($dati_out, function ($a, $b) {
+        return $b["id_ultima_elaborazione"] <=> $a["id_ultima_elaborazione"];
+    });
 
     // Restituisci una risposta di successo
     http_response_code(200);

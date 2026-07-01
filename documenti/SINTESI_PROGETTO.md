@@ -490,9 +490,12 @@ Tutti gli endpoint PHP seguono un pattern comune:
 - **Utilizzo:** Caricamento dati per modifica lavoro esistente
 
 #### **preleva_elaborazioni_in_corso.php**
-**Scopo:** Restituisce tutte le elaborazioni attive raggruppate per lavoro.
+**Scopo:** Restituisce tutte le elaborazioni attive (`stato != 255`) raggruppate per lavoro.
+- **Query:** `select * from elab_join where stato != 255 order by id_lavoro, id_elaborazione` — l'ordinamento per `id_lavoro, id_elaborazione` serve solo a rilevare il cambio di gruppo durante il ciclo PHP (le righe dello stesso lavoro sono consecutive nel resultset).
+- **Raggruppamento:** Il PHP scorre il resultset una sola volta e, ogni volta che cambia `nome_lavoro`, crea un nuovo elemento in `$dati_out` con struttura `{ nome_lavoro, row-id, dettagli: [...] }`; le elaborazioni con lo stesso `nome_lavoro` vengono accumulate in `dettagli`.
+- **Ordinamento del risultato (nota):** poiché la query ordina per `id_lavoro`, l'array risultante è attualmente ordinato per ordine di creazione del lavoro e non per data/ordine di inserimento dell'ultima elaborazione. Un piano di modifica per ordinare i lavori in base all'elaborazione inserita più di recente (`MAX(id_elaborazione)` per lavoro) è descritto in `documenti/14_PIANO_AZIONE_ORDINAMENTO_ELABORAZIONI_PER_ULTIMA_INSERITA.md`.
 - **Output:** Array di lavori con dettagli elaborazioni (stato ordinamento, prenotazione, folder Z, ecc.)
-- **Utilizzo:** Popola la tabella "Elaborazioni in corso" in IndexPage
+- **Utilizzo:** Popola la tabella "Elaborazioni in corso" in IndexPage; il frontend non applica un ordinamento di default, quindi mostra i lavori esattamente nell'ordine restituito dal backend.
 
 #### **preleva_elaborazioni_concluse.php**
 **Scopo:** Restituisce tutte le elaborazioni chiuse/concluse.
