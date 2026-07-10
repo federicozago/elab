@@ -97,6 +97,12 @@ try {
 
     //importo i dati
     $a = new Array_php();
+    foreach($dati as $key => &$record){
+        if(!isset($record[$dati_lavoro["campo_cap"]]))
+            throw new \Exception("Errore durante importazione dati, campo cap non trovato");
+        $record[$dati_lavoro["campo_cap"]] = str_pad($record[$dati_lavoro["campo_cap"]], 5, '0', STR_PAD_LEFT);
+    }
+    unset($record);
     $a->array_add_column($dati, "nome_file_idx_input", basename($targetPath));
     $a->array_add_column($dati, "id_flusso", $id_flusso);
     $a->array_add_column($dati, "folder_z", $folder_z);

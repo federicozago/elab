@@ -59,11 +59,11 @@
       </BaseInput>
 
       <BaseInput
-        label="Descrizione spedizione (*)"
+        label="Descrizione prodotto spedizione (*)"
         v-model="formData.descrizione_tipo_spedizione"
         :rules="[required, maxLength(255)]"
       >
-        <q-tooltip>Compare nelle etichette scatole</q-tooltip>
+        <q-tooltip>Compare nelle etichette scatole e bancale</q-tooltip>
       </BaseInput>
 
       <BaseInput
