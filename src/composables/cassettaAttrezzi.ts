@@ -1,6 +1,8 @@
 import {useQuasar} from 'quasar'
+import {useNotificationHistoryStore} from 'src/stores/notificationHistoryStore'
 export function useCassettaAttrezzi() {
   const $q = useQuasar()
+  const notificationHistory = useNotificationHistoryStore()
   const gestioneErrore = (error: any, msg: string) => {
       let timeoutId: NodeJS.Timeout | null = null
       let dismiss: (() => void) | null = null
@@ -38,6 +40,8 @@ export function useCassettaAttrezzi() {
       // Avvia il timeout iniziale
       startTimeout()
 
+      notificationHistory.addEvent('negative', msg)
+
     if (error.response) {
       console.log('Dati errore:', error.response.data)
       console.log('Status:', error.response.status)
@@ -56,6 +60,7 @@ export function useCassettaAttrezzi() {
       timeout:2500,
       actions: [{ icon: 'close', color: 'white', round: true }],
     })
+    notificationHistory.addEvent('positive', msg)
   }
 
   const richiediConferma = (msg: string) => {

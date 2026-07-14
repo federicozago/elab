@@ -6,6 +6,10 @@
 
         <q-toolbar-title> Elab </q-toolbar-title>
 
+        <q-btn flat dense round icon="notifications" aria-label="Cronologia notifiche" @click="showEventsDialog = true">
+          <q-badge v-if="eventCount > 0" color="red" floating>{{ eventCount }}</q-badge>
+        </q-btn>
+
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
@@ -21,12 +25,40 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-dialog v-model="showEventsDialog">
+      <q-card style="min-width: 400px; max-width: 90vw">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Cronologia notifiche (sessione corrente)</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section style="max-height: 60vh" class="scroll">
+          <q-list separator v-if="events.length > 0">
+            <q-item
+              v-for="event in events"
+              :key="event.id"
+              :class="event.type === 'positive' ? 'bg-green-2' : 'bg-red-2'"
+            >
+              <q-item-section>
+                <q-item-label>{{ event.message }}</q-item-label>
+                <q-item-label caption>{{ formatTimestamp(event.timestamp) }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+          <div v-else class="text-grey text-center q-pa-md">Nessuna notifica in questa sessione.</div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import EssentialLink from 'components/EssentialLink.vue'
+import { useNotificationHistoryStore } from 'src/stores/notificationHistoryStore'
 //import { api } from 'boot/axios.js'
 
 const linksList = [
@@ -60,6 +92,15 @@ const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
+}
+
+const notificationHistory = useNotificationHistoryStore()
+const { events, eventCount } = storeToRefs(notificationHistory)
+
+const showEventsDialog = ref(false)
+
+function formatTimestamp(date) {
+  return new Date(date).toLocaleTimeString()
 }
 
 /*api.get("test.php")
