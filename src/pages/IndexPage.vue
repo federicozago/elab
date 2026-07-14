@@ -319,18 +319,27 @@ ORDER BY o.progr
             </div>
           </div>
           <div
-            v-for="(datiAzione, nomeAzione) in azioni[selectedRowAzioni.tipo_spedizione]"
-            :key="nomeAzione"
+            v-for="(azioniSezione, nomeSezione, indexSezione) in azioni[selectedRowAzioni.tipo_spedizione]"
+            :key="nomeSezione"
           >
-            <base-date-picker
-              v-if="datiAzione.parametri?.includes('d')"
-              v-model="dataAzioni"
-            ></base-date-picker>
-            <BaseBtn
-              :label="nomeAzione"
-              @click="lanciaAzione(datiAzione, selectedRowAzioni.id_elaborazione, nomeAzione)"
-              :loading="isActionSubmitting === nomeAzione"
-            ></BaseBtn>
+            <q-separator v-if="indexSezione > 0" class="q-my-md" />
+            <div class="text-subtitle2 text-weight-bold text-grey-8 q-mb-sm">
+              {{ nomeSezione }}
+            </div>
+            <div
+              v-for="(datiAzione, nomeAzione) in azioniSezione"
+              :key="nomeAzione"
+            >
+              <base-date-picker
+                v-if="datiAzione.parametri?.includes('d')"
+                v-model="dataAzioni"
+              ></base-date-picker>
+              <BaseBtn
+                :label="nomeAzione"
+                @click="lanciaAzione(datiAzione, selectedRowAzioni.id_elaborazione, nomeAzione)"
+                :loading="isActionSubmitting === nomeAzione"
+              ></BaseBtn>
+            </div>
           </div>
         </q-card-section>
       </q-card>
