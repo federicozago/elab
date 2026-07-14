@@ -645,16 +645,17 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
 
   const isPdf = datiAzione.output === 'pdf'
   const isZip = datiAzione.output === 'zip'
-  const config = (isPdf || isZip) ? { responseType: 'blob' } : {}
+  const isExcel = datiAzione.output === 'xlsx'
+  const config = (isPdf || isZip || isExcel) ? { responseType: 'blob' } : {}
 
   try {
     const response = await api.post('/' + datiAzione.endpoint, dati, config)
-    if (isPdf || isZip) {
+    if (isPdf || isZip || isExcel) {
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
 
-      let filename = isZip ? 'esportazione.zip' : 'etichette.pdf'
+      let filename = isZip ? 'esportazione.zip' : (isExcel ? 'report_bancali.xlsx' : 'etichette.pdf')
       const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition']
 
       if (contentDisposition) {
