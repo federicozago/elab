@@ -148,7 +148,7 @@ onMounted(() => {
       basiDati.value = response.data.basi_dati
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile prelevare base dati')
     })
 })
 
@@ -189,7 +189,7 @@ function baseDatiCambiata(idBaseDati) {
       })
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile prelevare base dati')
     })
 }
 
@@ -228,7 +228,7 @@ async function confermaEliminaBaseDati() {
       } catch (e) {
         gestioneErrore(
           e,
-          'Errore durante l\'eliminazione della base dati: ' + (e.response?.data?.message || 'errore sconosciuto')
+          'Errore durante l\'eliminazione della base dati'
         )
       }
     })
@@ -259,7 +259,7 @@ const uploadFile = async (file) => {
     isUploading.value = false
   } catch (e) {
     console.log(e)
-    gestioneErrore(e, 'Impossibile salvare la configurazione, controllare i dati inseriti - ' + e.response.data.message)
+    gestioneErrore(e, 'Impossibile salvare la configurazione, controllare i dati inseriti')
   }
 }
 
@@ -271,6 +271,10 @@ async function creaBaseDati() {
 
   try {
     const response = await api.post('/crea_base_dati.php', dati)
+    // il backend può rispondere 200 con body vuoto/non valido (es. errore intercettato
+    // da un handler che interrompe lo script): non trattarlo come successo.
+    if (!response.data || response.data.success !== true)
+      throw new Error(response.data?.message || 'La base dati non è stata creata (risposta non valida dal server)')
     messaggioPositivo('Base dati creata con successo')
     //ritorno alla pagina di creazione elaborazione
     if (creazioneLavoroInCorso) {
@@ -284,7 +288,7 @@ async function creaBaseDati() {
       })
     }
   } catch (e) {
-    gestioneErrore(e, 'Impossibile creare la base dati - ' + e.response.data.message)
+    gestioneErrore(e, 'Impossibile creare la base dati')
     return false
   } finally {
     isSubmitting.value = false

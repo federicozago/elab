@@ -24,7 +24,7 @@ try{
     $tipo_spedizione = $jsonData["tipo_spedizione"];
 
     if(!$configurazione = $db->preleva_da_db("select * from $tipo_spedizione where id = ?", [$jsonData["id_configurazione"]]))
-        throw new \Exception("Errore durante prelievo configurazioni -  " . $db->get_errori());
+        throw new \Exception("Errore durante prelievo configurazioni -  " . implode(", ", $db->get_errori()));
 
     http_response_code(200);
     echo json_encode([

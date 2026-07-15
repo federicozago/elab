@@ -429,7 +429,7 @@ async function creaElaborazione() {
     messaggioPositivo('Elaborazione creata')
     prelevaElaborazioniInCorso()
   } catch (e) {
-    gestioneErrore(e, 'Impossibile creare elaborazione - ' + e.response.data.message)
+    gestioneErrore(e, 'Impossibile creare elaborazione')
   } finally {
     isSubmitting.value = false
   }
@@ -504,7 +504,7 @@ onMounted(() => {
       lavori.value = response.data.lavori
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare lavori - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile prelevare lavori')
     })
 
   prelevaElaborazioniInCorso()
@@ -516,10 +516,7 @@ onMounted(() => {
       azioni.value = response.data.azioni
     })
     .catch((e) => {
-      gestioneErrore(
-        e,
-        'Impossibile prelevare le azioni delle elaborazioni - ' + e.response.data.message,
-      )
+      gestioneErrore(e, 'Impossibile prelevare le azioni delle elaborazioni')
     })
 })
 function prelevaElaborazioniInCorso() {
@@ -534,10 +531,7 @@ function prelevaElaborazioniInCorso() {
       }
     })
     .catch((e) => {
-      gestioneErrore(
-        e,
-        'Impossibile prelevare le elaborazioni in corso - ' + e.response.data.message,
-      )
+      gestioneErrore(e, 'Impossibile prelevare le elaborazioni in corso')
     })
 }
 function prelevaElaborazioniConcluse() {
@@ -547,7 +541,7 @@ function prelevaElaborazioniConcluse() {
       elaborazioniConcluse.value = response.data.elaborazioni
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare elaborazioni concluse - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile prelevare elaborazioni concluse')
     })
 }
 
@@ -560,7 +554,7 @@ async function lanciaElaborazione(id_elaborazione) {
     messaggioPositivo('Ordinamento avviato con successo')
     prelevaElaborazioniInCorso()
   } catch (e) {
-    gestioneErrore(e, 'Impossibile lanciare ordinamento - ' + (e.response?.data?.message || e.message))
+    gestioneErrore(e, 'Impossibile lanciare ordinamento')
   } finally {
     isSortingSubmitting.value = null
   }
@@ -605,7 +599,7 @@ function lanciaPrenotazione(id_elaborazione) {
       messaggioPositivo('Prenotazione effettuata')
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile lanciare prenotazione - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile lanciare prenotazione')
     })
 }
 
@@ -708,10 +702,7 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
       messaggio = e.response?.data?.message || e.message;
     }
 
-    gestioneErrore(
-      e,
-      'Impossibile eseguire azione ' + datiAzione.endpoint + ' - ' + messaggio,
-    )
+    gestioneErrore(e, 'Impossibile eseguire azione ' + datiAzione.endpoint, messaggio)
   } finally {
     isActionSubmitting.value = null
   }
@@ -726,7 +717,7 @@ function chiudiElaborazione(id_elaborazione) {
       prelevaElaborazioniConcluse()
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile chiudere elaborazione - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile chiudere elaborazione')
     })
 }
 
@@ -739,7 +730,7 @@ function riapriElaborazione(id_elaborazione) {
       prelevaElaborazioniConcluse()
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile riaprire elaborazione - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile riaprire elaborazione')
     })
 }
 </script>

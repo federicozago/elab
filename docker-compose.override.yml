@@ -1,0 +1,15 @@
+# docker-compose.override.yml — SOLO sviluppo.
+# Docker Compose lo applica automaticamente sopra docker-compose.yml quando lanci
+# `docker-compose up` in locale (non serve indicarlo).
+#
+# Monta il backend PHP dall'host dentro il container su /api: così puoi modificare
+# i file .php e vedere subito le modifiche SENZA ricostruire l'immagine.
+# È un mount a runtime: NON viene copiato nell'immagine e NON ne aumenta il peso.
+#
+# NB: il frontend (SPA) resta quello compilato dentro l'immagine; per le modifiche
+# al frontend usa `quasar dev` (porta 9000) oppure ricostruisci l'immagine.
+services:
+  php:
+    volumes:
+      - ./php-docker-boilerplate/src:/var/www/html/api
+      - variabili_globali://172.21.15.15/c/

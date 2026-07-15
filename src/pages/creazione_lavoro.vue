@@ -292,11 +292,7 @@ function lavoroCambiato(val) {
       })
     })
     .catch((e) => {
-      gestioneErrore(
-        e,
-        'Impossibile prelevare la configurazione, controllare i dati inseriti - ' +
-          e.response?.data?.message || 'errore sconosciuto',
-      )
+      gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
     })
 }
 
@@ -339,7 +335,7 @@ onMounted(() => {
       basiDati.value = response.data.basi_dati
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare base dati - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile prelevare base dati')
     })
 
   //prelevo le spedizioni possibili
@@ -350,7 +346,7 @@ onMounted(() => {
       tipi_spedizioni.value = response.data.spedizioni
     })
     .catch((e) => {
-      gestioneErrore(e, 'Impossibile prelevare tipi spedizione - ' + e.response.data.message)
+      gestioneErrore(e, 'Impossibile prelevare tipi spedizione')
     })
 
   if (isModifica.value) {
@@ -360,7 +356,7 @@ onMounted(() => {
         lavori.value = response.data.lavori
       })
       .catch((e) => {
-        gestioneErrore(e, 'Impossibile prelevare lavori - ' + e.response.data.message)
+        gestioneErrore(e, 'Impossibile prelevare lavori')
       })
   }
 })
@@ -388,7 +384,7 @@ async function eliminaLavoro() {
       router.push('/')
     }
   } catch (error) {
-    gestioneErrore(error, "Errore durante l'eliminazione del lavoro - " + error.response.data.message)
+    gestioneErrore(error, "Errore durante l'eliminazione del lavoro")
   } finally {
     isSubmitting.value = false
   }
@@ -434,9 +430,7 @@ async function creaLavoro() {
   } catch (e) {
     gestioneErrore(
       e,
-      isModifica.value
-        ? 'Impossibile aggiornare il lavoro - ' + e.response.data.message
-        : 'Impossibile creare  il lavoro - ' + e.response.data.message,
+      isModifica.value ? 'Impossibile aggiornare il lavoro' : 'Impossibile creare il lavoro',
     )
   } finally {
     isSubmitting.value = false

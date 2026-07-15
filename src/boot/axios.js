@@ -7,8 +7,14 @@ import axios from 'axios'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
+// baseURL '/api/' sia in dev che in produzione:
+// - in produzione la SPA e il backend sono serviti dalla stessa origine, con il
+//   backend sotto /api (vedi Dockerfile / apache-vhost.conf);
+// - in sviluppo il dev-server Quasar (porta 9000) inoltra /api al backend Docker
+//   su :9001 tramite il proxy in quasar.config.js (nessuna chiamata cross-origin,
+//   quindi nessun problema di CORS).
 const api = axios.create({
-  baseURL: process.env.DEV ? 'http://localhost:9001' : '/api/',
+  baseURL: '/api/',
 })
 
 export default defineBoot(({ app }) => {

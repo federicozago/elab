@@ -3,7 +3,27 @@ import {useNotificationHistoryStore} from 'src/stores/notificationHistoryStore'
 export function useCassettaAttrezzi() {
   const $q = useQuasar()
   const notificationHistory = useNotificationHistoryStore()
-  const gestioneErrore = (error: any, msg: string) => {
+  // Estrae in modo sicuro il dettaglio di un errore axios/JS. Ritorna null quando
+  // non c'è un dettaglio utile (così i messaggi di sola validazione non vengono
+  // "sporcati"). NB: non legge i Blob (responseType 'blob'): in quel caso il
+  // chiamante deve leggere il blob e passare il testo come 3° argomento.
+  const dettaglioErrore = (error: any): string | null => {
+    if (!error) return null
+    const data = error?.response?.data
+    if (data && typeof data === 'object' && typeof data.message === 'string' && data.message.length)
+      return data.message
+    if (typeof error?.message === 'string' && error.message.length) return error.message
+    return null
+  }
+
+  // contesto: descrizione dell'operazione (es. "Impossibile creare elaborazione").
+  // Il dettaglio dell'errore viene ricavato in automatico e in sicurezza; per casi
+  // particolari (es. risposta Blob) lo si può passare esplicitamente come 3° arg.
+  const gestioneErrore = (error: any, contesto: string = '', dettaglioEsplicito: string | null = null) => {
+      const dettaglio = dettaglioEsplicito ?? dettaglioErrore(error)
+      const msg = contesto
+        ? (dettaglio ? `${contesto} - ${dettaglio}` : contesto)
+        : (dettaglio || 'Errore sconosciuto')
       let timeoutId: NodeJS.Timeout | null = null
       let dismiss: (() => void) | null = null
       const timeoutDuration = 2500
@@ -42,13 +62,13 @@ export function useCassettaAttrezzi() {
 
       notificationHistory.addEvent('negative', msg)
 
-    if (error.response) {
+    if (error?.response) {
       console.log('Dati errore:', error.response.data)
       console.log('Status:', error.response.status)
       console.log('Headers:', error.response.headers)
-    } else if (error.request) {
+    } else if (error?.request) {
       console.log('Errore richiesta:', error.request)
-    } else {
+    } else if (error) {
       console.log('Errore:', error.message)
     }
   }
@@ -74,6 +94,7 @@ export function useCassettaAttrezzi() {
 
   return{
     gestioneErrore,
+    dettaglioErrore,
     messaggioPositivo,
     richiediConferma,
   }

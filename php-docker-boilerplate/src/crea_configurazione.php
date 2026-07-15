@@ -26,11 +26,11 @@ try{
 
     //salvo la configurazione
     if(!$db->carica_a_db($jsonData,$tipo_spedizione,null,true))
-        throw new \Exception('Impossibile creare la configurazione, errore: ' . $db->get_errori());
+        throw new \Exception('Impossibile creare la configurazione, errore: ' . implode(", ", $db->get_errori()));
     //prelevo la configurazione creata
     $id = $db->get_ultimo_id_inserito();
     if(!$conf_inserita = $db->preleva_da_db("select id,nome_configurazione from $tipo_spedizione where id_tabella=$id "))
-        throw new \Exception('Impossibile prelevare la nuova configurazione - ' . $db->get_errori());
+        throw new \Exception('Impossibile prelevare la nuova configurazione - ' . implode(", ", $db->get_errori()));
 
     http_response_code(200);
     echo json_encode([

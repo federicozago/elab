@@ -76,11 +76,12 @@ export default defineConfig((/* ctx */) => {
     devServer: {
       // https: true,
       proxy:{
+        // Il backend Docker (porta 9001) serve gli endpoint PHP sotto /api,
+        // quindi NON va rimosso il prefisso: /api/foo.php -> :9001/api/foo.php.
         '/api': {
           target: 'http://localhost:9001',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '')
         }
       },
       open: {

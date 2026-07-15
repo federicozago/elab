@@ -395,11 +395,7 @@ function configurazioneCambiata(val) {
       })
     })
     .catch((e) => {
-      gestioneErrore(
-        e,
-        'Impossibile prelevare la configurazione, controllare i dati inseriti - ' +
-          e.response.data.message,
-      )
+      gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
     })
 }
 
@@ -588,11 +584,7 @@ watch(
         .post('/preleva_configurazioni.php', { tipo_spedizione: props.tipoSpedizione })
         .then((response) => (configurazioni.value = response.data.configurazioni))
         .catch((e) => {
-          gestioneErrore(
-            e,
-            'Impossibile prelevare la configurazione, controllare i dati inseriti - ' +
-              e.response.data.message,
-          )
+          gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
         })
     }
   },
@@ -659,9 +651,7 @@ async function inviaDati() {
       e,
       (configurazioneEdit.value
         ? 'Impossibile aggiornare la configurazione'
-        : 'Impossibile salvare la configurazione') +
-        ', controllare i dati inseriti - ' +
-        (e.response?.data?.message || e.message || 'errore sconosciuto'),
+        : 'Impossibile salvare la configurazione') + ', controllare i dati inseriti',
     )
   } finally {
     isSubmitting.value = false
@@ -695,10 +685,7 @@ async function confermaEliminaConfigurazione() {
           reset()
         }
       } catch (e) {
-        gestioneErrore(
-          e,
-          'Errore durante l\'eliminazione della configurazione: ' + (e.response?.data?.message || e.message)
-        )
+        gestioneErrore(e, 'Errore durante l\'eliminazione della configurazione')
       }
     })
 }

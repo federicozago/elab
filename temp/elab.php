@@ -18,6 +18,10 @@ $dati = [
                     "Chiudi elaborazione"=>[
                         "endpoint"=>"chiudi_elaborazione.php",
                         "output"=>"zip"
+                    ],
+                    "Report bancali" => [
+                        "endpoint" => "genera_report_bancali.php",
+                        "output" => "xlsx"
                     ]
 //                    "Prenotazione" => [
 //                        "endpoint" => "Prenota.php",
@@ -32,6 +36,10 @@ $dati = [
                     "Chiudi elaborazione"=>[
                         "endpoint"=>"chiudi_elaborazione.php",
                         "output"=>"zip"
+                    ],
+                    "Report bancali" => [
+                        "endpoint" => "genera_report_bancali.php",
+                        "output" => "xlsx"
                     ]
                 ]
             ],

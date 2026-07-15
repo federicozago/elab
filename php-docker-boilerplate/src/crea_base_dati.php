@@ -73,12 +73,12 @@ try {
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
 
     if(!$db->esegui_query($sql_tab))
-        throw new \Exception("Errore durante la creazione della tabella - " . $db->get_errori());
+        throw new \Exception("Errore durante la creazione della tabella - " . implode(", ", $db->get_errori()));
 
     //salvo record base_dati
     $jsonData["intestazione"] = implode("|", $jsonData["intestazione"]);
     if(!$db->carica_a_db($jsonData, "base_dati", null,true))
-        throw new \Exception("Errore durante l'inserimento nella tabella base dati - " . $db->get_errori());
+        throw new \Exception("Errore durante l'inserimento nella tabella base dati - " . implode(", ", $db->get_errori()));
 
     $id = $db->get_ultimo_id_inserito();
         // Restituisci una risposta di successo
