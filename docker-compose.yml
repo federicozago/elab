@@ -1,0 +1,30 @@
+#questo file serve per lanciare l'immagine (frontend SPA + backend PHP insieme)
+
+name: elab
+
+volumes:
+  # Condivisione di rete (CIFS) montata nel container: contiene variabili_globali.php
+  # e le cartelle di lavoro lette/scritte dal backend.
+  #   - device  = server SMB fisico da cui leggere la share
+  #   - il TARGET del mount (vedi sotto) deve coincidere con root_progr_php
+  variabili_globali:
+    driver_opts:
+      type: cifs
+      o: username=administrator,password=C0pyGr@ph,vers=3.0,file_mode=0777,dir_mode=0777
+      device: "//172.21.15.15/c/"
+
+# Un solo servizio: l'immagine del Dockerfile serve la SPA su "/" e le API su "/api".
+services:
+  php:
+    build:
+      context: .
+    environment: #variabili di ambiente
+      - PHP_IDE_CONFIG=serverName=docker_xdebug
+      - root_progr_php=//172.21.15.15/c/
+    volumes:
+      # NB: niente bind mount di ./src o ./php.ini: SPA, backend e php.ini sono
+      # già dentro l'immagine (montarli sopra /var/www/html la sovrascriverebbe).
+      # Si monta solo la share di rete, nel percorso atteso dal codice (== root_progr_php).
+      - variabili_globali://172.21.15.15/c/
+    ports:
+      - 9001:80
