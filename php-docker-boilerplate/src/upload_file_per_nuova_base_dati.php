@@ -89,9 +89,13 @@ try {
         $intestazione = $intestazione_temp;
         foreach ($intestazione as $key => $c) {
             // Rimuove tutto ciò che non è lettere, numeri o underscore
-            $intestazione[$key] = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $c);
-            if(!isSqlSafe($c))
-                throw new \Exception("Cambiare nomi di campo, sono presenti comandi sql");
+            if($c) {
+                $intestazione[$key] = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $c);
+                if (!isSqlSafe($c))
+                    throw new \Exception("Cambiare nomi di campo, sono presenti comandi sql");
+            }else{
+                unset($intestazione[$key]);
+            }
         }
     }
 
