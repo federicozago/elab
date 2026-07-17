@@ -58,12 +58,17 @@ try {
     $vg=$vg->get_variabili_globali("elab");
     $log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore: false);
 
-    //apertura file
-    $estensione_file = pathinfo($targetPath, PATHINFO_EXTENSION);
+    //apertura file ed estrazione della SOLA prima riga (intestazione)
+    $estensione_file = strtolower(pathinfo($targetPath, PATHINFO_EXTENSION));
     if($estensione_file == "xls" or $estensione_file == "xlsx"){
+        // Uso la classe Excel della cassetta_attrezzi. estrai_intestazione() rileva
+        // da sé xls/xlsx e legge SOLO la prima riga senza caricare l'intero foglio
+        // (streaming per gli .xlsx): rapidissima anche su file grandi, in modo
+        // trasparente per il chiamante.
         $file = new Excel($log);
-        if(!$file->apri($targetPath, $intestazioneSiNo))
-            throw new \Exception("Errore durante l'apertura del file");
+        $intestazione_temp = $file->estrai_intestazione($targetPath);
+        if ($intestazione_temp === false)
+            throw new \Exception("Errore durante la lettura dell'intestazione del file");
     }else{
         // sostituzione caratteri di ritorno a capo (php 8 non permette più di usare @ini_set("auto_detect_line_endings", true);
         $content = file_get_contents($targetPath);
@@ -74,10 +79,16 @@ try {
         if(!$file->apri($targetPath, $intestazioneSiNo))
             throw new \Exception("Errore durante l'apertura del file");
         $file->setta_parametri(['separatore' => $separatore],sovrascrivi: true);
+
+        //estrazione intestazione (inizialmente estraggo prima riga, anche se non è l'intestazione
+        if (!$intestazione_temp = $file->estrai_intestazione())
+            throw new \Exception("Errore durante l'estrazione dell'intestazione");
+
+        if(!$file->chiudi())
+            throw new \Exception("Errore durante chiusura file");
     }
 
-    //estrazione intestazione (inizialmente estraggo prima riga, anche se non è l'intestazione
-    if (!$intestazione_temp = $file->estrai_intestazione())
+    if (!$intestazione_temp)
         throw new \Exception("Errore durante l'estrazione dell'intestazione");
 
     if( ! $intestazioneSiNo){
@@ -98,9 +109,6 @@ try {
             }
         }
     }
-
-    if(!$file->chiudi())
-        throw new \Exception("Errore durante chiusura file");
 
     if(!unlink($targetPath))
         throw new \Exception("Errore durante eliminazione file temporaneo");

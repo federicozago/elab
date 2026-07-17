@@ -239,27 +239,36 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               label="Copia"
               @click="
                 copiaQuery(
-                  'SELECT * FROM `' +
+                  'SELECT * FROM `elab`.`' +
                     selectedRowSql.nome_lavoro +
                     '_' +
                     selectedRowSql.nome_elaborazione +
-                    '` e JOIN `ordinati_' +
+                    '` e JOIN `elab`.`ordinati_' +
                     selectedRowSql.tipo_spedizione +
                     '_' +
                     selectedRowSql.nome_base_dati +
                     '` o ON e.id=o.c1 ' +
-                    'where e.id_flusso = \'' + selectedRowSql.id_flusso + '\' ORDER BY o.progr'
+                    'where e.id_flusso = \'' +
+                    selectedRowSql.id_flusso +
+                    '\' ORDER BY o.progr',
                 )
               "
             ></BaseBtn>
-            <BaseBtn dense flat color="negative" icon="close" label="Chiudi" v-close-popup></BaseBtn>
+            <BaseBtn
+              dense
+              flat
+              color="negative"
+              icon="close"
+              label="Chiudi"
+              v-close-popup
+            ></BaseBtn>
           </div>
         </q-card-section>
         <q-separator></q-separator>
         <q-card-section>
           <pre class="sql-code">
-SELECT * FROM `{{ selectedRowSql.nome_lavoro }}_{{ selectedRowSql.nome_elaborazione }}` e
-    JOIN `ordinati_{{ selectedRowSql.tipo_spedizione }}_{{ selectedRowSql.nome_base_dati }}` o
+SELECT * FROM `elab`.`{{ selectedRowSql.nome_lavoro }}_{{ selectedRowSql.nome_elaborazione }}` e
+    JOIN `elab`.`ordinati_{{ selectedRowSql.tipo_spedizione }}_{{ selectedRowSql.nome_base_dati }}` o
          ON e.id=o.c1
 WHERE e.id_flusso = '{{ selectedRowSql.id_flusso }}'
 ORDER BY o.progr
@@ -273,7 +282,14 @@ ORDER BY o.progr
         <q-card-section class="row items-center justify-between">
           <div class="text-h6">Azioni</div>
           <div class="row q-gutter-sm">
-            <BaseBtn dense flat color="negative" icon="close" label="Chiudi" v-close-popup></BaseBtn>
+            <BaseBtn
+              dense
+              flat
+              color="negative"
+              icon="close"
+              label="Chiudi"
+              v-close-popup
+            ></BaseBtn>
           </div>
         </q-card-section>
         <q-separator></q-separator>
@@ -296,7 +312,14 @@ ORDER BY o.progr
         <q-card-section class="row items-center justify-between">
           <div class="text-h6">Azioni</div>
           <div class="row q-gutter-sm">
-            <BaseBtn dense flat color="negative" icon="close" label="Chiudi" v-close-popup></BaseBtn>
+            <BaseBtn
+              dense
+              flat
+              color="negative"
+              icon="close"
+              label="Chiudi"
+              v-close-popup
+            ></BaseBtn>
           </div>
         </q-card-section>
         <q-separator></q-separator>
@@ -314,22 +337,23 @@ ORDER BY o.progr
                 round
                 dense
                 icon="content_copy"
-                @click="copiaPercorso(selectedRowAzioni.folder_cliente + selectedRowAzioni.folder_z)"
+                @click="
+                  copiaPercorso(selectedRowAzioni.folder_cliente + selectedRowAzioni.folder_z)
+                "
               />
             </div>
           </div>
           <div
-            v-for="(azioniSezione, nomeSezione, indexSezione) in azioni[selectedRowAzioni.tipo_spedizione]"
+            v-for="(azioniSezione, nomeSezione, indexSezione) in azioni[
+              selectedRowAzioni.tipo_spedizione
+            ]"
             :key="nomeSezione"
           >
             <q-separator v-if="indexSezione > 0" class="q-my-md" />
             <div class="text-subtitle2 text-weight-bold text-grey-8 q-mb-sm">
               {{ nomeSezione }}
             </div>
-            <div
-              v-for="(datiAzione, nomeAzione) in azioniSezione"
-              :key="nomeAzione"
-            >
+            <div v-for="(datiAzione, nomeAzione) in azioniSezione" :key="nomeAzione">
               <base-date-picker
                 v-if="datiAzione.parametri?.includes('d')"
                 v-model="dataAzioni"
@@ -340,6 +364,43 @@ ORDER BY o.progr
                 :loading="isActionSubmitting === nomeAzione"
               ></BaseBtn>
             </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="dialogReportVisible" @hide="reportRighe = []">
+      <q-card flat bordered>
+        <q-card-section class="row items-center justify-between">
+          <div class="text-h6">Report per criterio</div>
+          <div class="row q-gutter-sm">
+            <BaseBtn
+              dense
+              flat
+              icon="content_copy"
+              label="Copia"
+              @click="copiaReport"
+            ></BaseBtn>
+            <BaseBtn
+              dense
+              flat
+              color="negative"
+              icon="close"
+              label="Chiudi"
+              v-close-popup
+            ></BaseBtn>
+          </div>
+        </q-card-section>
+        <q-separator></q-separator>
+        <q-card-section>
+          <div class="row q-py-xs q-mb-sm">
+            <div class="col-2 text-weight-bold">Totale:</div>
+            <div class="col text-weight-bold">{{ totaleReport }}</div>
+          </div>
+          <q-separator class="q-mb-sm" />
+          <div v-for="riga in reportRighe" :key="riga.criterio" class="row q-py-xs">
+            <div class="col-2 text-weight-bold">{{ riga.criterio }}:</div>
+            <div class="col">{{ riga.conteggio }}</div>
           </div>
         </q-card-section>
       </q-card>
@@ -356,13 +417,13 @@ import BaseBtn from 'components/forms/BaseBtn.vue'
 import BaseSelect from 'components/forms/BaseSelect.vue'
 import BaseForm from 'components/forms/BaseForm.vue'
 import { api } from 'boot/axios.js'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useCassettaAttrezzi } from 'src/composables/cassettaAttrezzi'
 import BaseDatePicker from 'components/forms/BaseDatePicker.vue'
 import { maxLength, required } from 'src/composables/rules.js'
 import BaseInput from 'components/forms/BaseInput.vue'
 import BaseFile from 'components/forms/BaseFile.vue'
-const { gestioneErrore, messaggioPositivo,richiediConferma } = useCassettaAttrezzi()
+const { gestioneErrore, messaggioPositivo, richiediConferma } = useCassettaAttrezzi()
 import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
@@ -443,9 +504,11 @@ const dataPrenotazione = ref([])
 const dialogAzioniVisible = ref(false)
 const dialogSqlVisible = ref(false)
 const dialogPrenotazioneVisible = ref(false)
+const dialogReportVisible = ref(false)
 const selectedRowSql = ref(null)
 const selectedRowPrenotazione = ref(null)
 const selectedRowAzioni = ref(null)
+const reportRighe = ref([])
 const elaborazioniInCorso = ref([])
 const elaborazioniConcluse = ref([])
 const dataAzioni = ref({})
@@ -582,6 +645,22 @@ const copiaPercorso = async (path) => {
   }
 }
 
+const totaleReport = computed(() =>
+  reportRighe.value.reduce((somma, riga) => somma + Number(riga.conteggio), 0),
+)
+
+async function copiaReport() {
+  // Solo i conteggi, uno per riga, nello stesso ordine mostrato (A-E): il totale
+  // non va copiato.
+  const testo = reportRighe.value.map((riga) => riga.conteggio).join('\n')
+  try {
+    await navigator.clipboard.writeText(testo)
+    messaggioPositivo('Report copiato negli appunti')
+  } catch (e) {
+    gestioneErrore(e, 'Errore durante la copia del report')
+  }
+}
+
 function lanciaPrenotazione(id_elaborazione) {
   if (!dataPrenotazione.value[id_elaborazione]) {
     gestioneErrore(null, 'Data prenotazione non inserita')
@@ -607,22 +686,24 @@ function riesporta(row) {
   // Richiama l'endpoint di chiusura/esportazione
   const datiAzione = {
     endpoint: 'chiudi_elaborazione.php',
-    output: 'zip'
+    output: 'zip',
   }
   lanciaAzione(datiAzione, row.id_elaborazione, 'Riesporta')
 }
 
 function confermaElimina(row) {
-  richiediConferma(`Sei sicuro di voler eliminare i dati dell'elaborazione ${row.nome_elaborazione}? L'operazione è irreversibile e i dati verranno rimossi dal database.`)
-    .onOk(() => {
-      api.post('/elimina_elaborazione.php', { id_elaborazione: row.id_elaborazione })
-        .then(() => {
-          messaggioPositivo('Dati eliminati con successo')
-          prelevaElaborazioniConcluse()
-        })
-        .catch((e) => {
-          gestioneErrore(e, 'Errore durante l\'eliminazione dati')
-        })
+  richiediConferma(
+    `Sei sicuro di voler eliminare i dati dell'elaborazione ${row.nome_elaborazione}? L'operazione è irreversibile e i dati verranno rimossi dal database.`,
+  ).onOk(() => {
+    api
+      .post('/elimina_elaborazione.php', { id_elaborazione: row.id_elaborazione })
+      .then(() => {
+        messaggioPositivo('Dati eliminati con successo')
+        prelevaElaborazioniConcluse()
+      })
+      .catch((e) => {
+        gestioneErrore(e, "Errore durante l'eliminazione dati")
+      })
   })
 }
 
@@ -649,24 +730,31 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
   const isPdf = datiAzione.output === 'pdf'
   const isZip = datiAzione.output === 'zip'
   const isExcel = datiAzione.output === 'xlsx'
-  const config = (isPdf || isZip || isExcel) ? { responseType: 'blob' } : {}
+  const isReport = datiAzione.output === 'json'
+  const config = isPdf || isZip || isExcel ? { responseType: 'blob' } : {}
 
   try {
     const response = await api.post('/' + datiAzione.endpoint, dati, config)
-    if (isPdf || isZip || isExcel) {
+    if (isReport) {
+      reportRighe.value = response.data.report
+      dialogReportVisible.value = true
+    } else if (isPdf || isZip || isExcel) {
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
 
-      let filename = isZip ? 'esportazione.zip' : (isExcel ? 'report_bancali.xlsx' : 'etichette.pdf')
-      const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition']
+      let filename = isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : 'etichette.pdf'
+      const contentDisposition =
+        response.headers['content-disposition'] || response.headers['Content-Disposition']
 
       if (contentDisposition) {
         // Questa regex intercetta sia filename= che filename*= gestendo UTF-8 e apici
-        const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i);
+        const fileNameMatch = contentDisposition.match(
+          /filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i,
+        )
         if (fileNameMatch && fileNameMatch[1]) {
           // decodeURIComponent trasforma %20 in spazio e gestisce gli altri caratteri codificati
-          filename = decodeURIComponent(fileNameMatch[1]);
+          filename = decodeURIComponent(fileNameMatch[1])
         }
       }
 
@@ -686,20 +774,20 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
     dataAzioni.value = null
     dialogAzioniVisible.value = false
   } catch (e) {
-    let messaggio = 'Errore sconosciuto';
+    let messaggio = 'Errore sconosciuto'
 
     // Se la risposta è un Blob (caso errore con responseType: 'blob')
     if (e.response?.data instanceof Blob && config?.responseType === 'blob') {
-      const text = await e.response.data.text();
+      const text = await e.response.data.text()
       try {
-        const errorData = JSON.parse(text);
-        messaggio = errorData.message;
+        const errorData = JSON.parse(text)
+        messaggio = errorData.message
       } catch {
-        messaggio = text;
+        messaggio = text
       }
     } else {
       // Caso standard (JSON già decodificato o altri errori)
-      messaggio = e.response?.data?.message || e.message;
+      messaggio = e.response?.data?.message || e.message
     }
 
     gestioneErrore(e, 'Impossibile eseguire azione ' + datiAzione.endpoint, messaggio)
