@@ -18,6 +18,11 @@ services:
   php:
     build:
       context: .
+    # Limite di memoria del container: senza questo, un processo che esaurisce
+    # la RAM (es. import di un Excel enorme) può far collassare l'intera VM/host
+    # invece di essere fermato dal solo container. Va tenuto sopra il
+    # memory_limit di PHP (php.ini) per lasciare margine ad Apache/altri processi.
+    mem_limit: 1200m
     environment: #variabili di ambiente
       - PHP_IDE_CONFIG=serverName=docker_xdebug
       - root_progr_php=//172.21.15.15/c/
