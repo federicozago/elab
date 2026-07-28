@@ -24,6 +24,25 @@ try{
     $tipo_spedizione = $jsonData["tipo_spedizione"];
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
 
+    // Il nome configurazione salvato a db non è più (solo) quello digitato dal
+    // cliente: è la concatenazione di più campi, per renderlo univoco e
+    // descrittivo. Il campo digitato dal cliente (nome_configurazione) è
+    // opzionale ed è l'ultimo pezzo, se presente.
+    $componenti_nome = [
+        $jsonData["ragione_sociale_cliente_estesa"] ?? '',
+        $tipo_spedizione,
+        $jsonData["descrizione_tipo_spedizione"] ?? '',
+    ];
+    if ($tipo_spedizione === "target" && !empty($jsonData["prodotto_target"]))
+        $componenti_nome[] = $jsonData["prodotto_target"];
+    $componenti_nome[] = $jsonData["tipo_formato_postale"] ?? '';
+    if (!empty($jsonData["nome_configurazione"]))
+        $componenti_nome[] = $jsonData["nome_configurazione"];
+
+    $nome_configurazione = implode("_", array_filter($componenti_nome, fn($v) => $v !== ''));
+    // sicurezza: la colonna è varchar(255), taglio per non rischiare un errore db
+    $jsonData["nome_configurazione"] = substr($nome_configurazione, 0, 255);
+
     //salvo la configurazione
     if(!$db->carica_a_db($jsonData,$tipo_spedizione,null,true))
         throw new \Exception('Impossibile creare la configurazione, errore: ' . implode(", ", $db->get_errori()));

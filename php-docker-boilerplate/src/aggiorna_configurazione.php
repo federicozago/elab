@@ -24,6 +24,24 @@ try{
     $tipo_spedizione = $jsonData["tipo_spedizione"];
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
 
+    // Stesso calcolo di crea_configurazione.php: il nome configurazione non è
+    // (solo) quello digitato dal cliente, ma la concatenazione di più campi. Il
+    // campo digitato dal cliente (nome_configurazione) è opzionale ed è l'ultimo
+    // pezzo, se presente.
+    $componenti_nome = [
+        $jsonData["ragione_sociale_cliente_estesa"] ?? '',
+        $tipo_spedizione,
+        $jsonData["descrizione_tipo_spedizione"] ?? '',
+    ];
+    if ($tipo_spedizione === "target" && !empty($jsonData["prodotto_target"]))
+        $componenti_nome[] = $jsonData["prodotto_target"];
+    $componenti_nome[] = $jsonData["tipo_formato_postale"] ?? '';
+    if (!empty($jsonData["nome_configurazione"]))
+        $componenti_nome[] = $jsonData["nome_configurazione"];
+
+    $nome_configurazione = implode("_", array_filter($componenti_nome, fn($v) => $v !== ''));
+    // sicurezza: la colonna è varchar(255), taglio per non rischiare un errore db
+    $jsonData["nome_configurazione"] = substr($nome_configurazione, 0, 255);
 
     if( ! $colonne = $db->preleva_colonne("{$vg["database_cliente"]}.$tipo_spedizione"))
         throw new \Exception("Errore durante prelievo colonne");

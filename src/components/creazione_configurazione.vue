@@ -46,9 +46,14 @@
       <h6>Dettagli configurazione</h6>
       <BaseInput
         v-model="formData.nome_configurazione"
-        label="Nome breve configurazione (*)"
-        :rules="[required, maxLength(100)]"
-      />
+        label="Nome breve configurazione"
+        :rules="[maxLength(100)]"
+      >
+        <q-tooltip
+          >Facoltativo: viene accodato al nome generato automaticamente (ragione sociale, tipo
+          spedizione, descrizione prodotto, formato postale)</q-tooltip
+        >
+      </BaseInput>
 
       <BaseInput
         v-model="formData.ragione_sociale_cliente_estesa"
@@ -123,7 +128,28 @@
         :options="['P', 'M']"
       />
 
-      <BaseSelect v-model="formData.cmp" label="CMP" :options="['CMP VERONA', 'CMP BOLOGNA']" />
+      <BaseSelect
+        v-model="formData.cmp"
+        label="CMP"
+        :options="[
+          'CMP ANCONA',
+          'CMP BARI',
+          'CMP BOLOGNA',
+          'CMP CAGLIARI',
+          'CMP CATANIA',
+          'CMP FIRENZE',
+          'CMP GENOVA',
+          'CMP LAMEZIA TERME',
+          'CMP MILANO BORROMEO',
+          'CMP MILANO ROSERIO',
+          'CMP NAPOLI',
+          'CMP PADOVA',
+          'CMP PALERMO',
+          'CMP ROMA FIUMICINO',
+          'CMP TORINO ROMOLI',
+          'CMP VERONA',
+        ]"
+      />
 
       <BaseToggle label="Prenotazione con DU" v-model="formData.prenotazione_con_du" />
       <BaseInput
@@ -358,8 +384,22 @@ const emit = defineEmits(['update:modelValue', 'saved', 'cancel'])
 onMounted(() => {})
 
 const codici_age = {
-  'CMP VERONA': 'AGE68172',
+  'CMP ANCONA': 'AGE02149',
+  'CMP BARI': 'AGE07143',
   'CMP BOLOGNA': 'AGE11167',
+  'CMP CAGLIARI': 'AGE13334',
+  'CMP CATANIA': 'AGE17177',
+  'CMP FIRENZE': 'AGE25290',
+  'CMP GENOVA': 'AGE28419',
+  'CMP LAMEZIA TERME': 'AGE18304',
+  'CMP MILANO BORROMEO': 'AGE38594',
+  'CMP MILANO ROSERIO': 'AGE38615',
+  'CMP NAPOLI': 'AGE40158',
+  'CMP PADOVA': 'AGE42177',
+  'CMP PALERMO': 'AGE43202',
+  'CMP ROMA FIUMICINO': 'AGE55962',
+  'CMP TORINO ROMOLI': 'AGE63583',
+  'CMP VERONA': 'AGE68172',
 }
 
 function configurazioneCambiata(val) {
