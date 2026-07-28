@@ -1,5 +1,5 @@
 <template>
-  <q-form ref="formRef" @validation-failed="onValidationFailed">
+  <q-form ref="formRef" @submit="onFormSubmit" @validation-error="onValidationFailed">
     <!--@change intercetta gli eventi nativi del browser.
 A cosa serve: Viene scatenato quando un elemento del form perde il focus (evento blur) o quando viene selezionata un'opzione in un menu a tendina.
 Perché non basta: Molti componenti Vue (come quelli basati su v-model) aggiornano i dati internamente senza necessariamente scatenare un evento di change standard del DOM ogni volta che digiti un singolo carattere.
@@ -8,7 +8,6 @@ per questo aggiungo il watch-->
     ><!-- Quando scrivi <BaseForm><q-input ... /></BaseForm>, Vue prende quell'input e lo "inietta" esattamente dove hai messo il tag <slot> nel file BaseForm.vue. -->
 
     <BaseBtn
-      @click="onSubmit"
       type="submit"
       :label="labelInvia ? labelInvia : 'Invia'"
       :class="{ 'pulse-error': showValidationError }"
@@ -47,21 +46,29 @@ const emit = defineEmits(['submit', 'update:valido', 'validation-failed', 'reset
 
 const formRef = ref(null)
 
-const onSubmit = async () => {
-  if (formRef.value) {
-    const success = await formRef.value.validate()
-    if (success) {
-      emit('submit')
-    } else {
-      onValidationFailed()
-      emit('validation-failed')
-    }
-  }
+// Unico punto di validazione/submit: quello NATIVO di QForm, innescato dal click
+// sul bottone type="submit" (o da Invio su un campo). QForm valida da sé tutti i
+// campi e, solo se validi, chiama questa funzione (bind su @submit) - qui non
+// serve richiamare validate() manualmente.
+//
+// PRIMA c'era ANCHE una validazione manuale sul @click del bottone, che partiva
+// IN PARALLELO a quella nativa di QForm innescata dallo stesso click (essendo il
+// bottone type="submit" dentro un <q-form>, il click scatena SEMPRE anche
+// l'evento nativo "submit"). Siccome <q-form> qui non aveva un @submit collegato,
+// Quasar - a validazione riuscita - non trovando un handler eseguiva
+// `evt.target.submit()`: una VERA submission nativa del form (ricarica di
+// pagina), che interrompeva la richiesta AJAX già partita. Da qui il "la prima
+// volta fallisce, poi funziona una volta ricaricata la pagina": la request
+// partiva comunque, ma il reload del browser interrompeva tutto prima che
+// l'esito arrivasse all'utente.
+function onFormSubmit() {
+  emit('submit')
 }
 
 const showValidationError = ref(false)
 function onValidationFailed() {
   showValidationError.value = true
+  emit('validation-failed')
 
   // Rimuovi l'animazione dopo 2 secondi
   setTimeout(() => {
@@ -77,7 +84,6 @@ const onReset = () => {
 defineExpose({
   validate: () => formRef.value?.validate(),
   resetValidation: () => formRef.value?.resetValidation(),
-  onSubmit: onSubmit,
 })
 </script>
 
