@@ -92,11 +92,36 @@ export function useCassettaAttrezzi() {
     })
   }
 
+  // Copia il testo negli appunti. navigator.clipboard esiste solo in un
+  // "contesto sicuro" (HTTPS, o localhost): su http:// con un IP/hostname
+  // qualsiasi (es. accesso diretto al server di produzione senza certificato)
+  // è undefined. In quel caso si usa il vecchio execCommand('copy'), che non ha
+  // questo vincolo.
+  const copiaNegliAppunti = async (testo: string) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(testo)
+      return
+    }
+    const textarea = document.createElement('textarea')
+    textarea.value = testo
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+    try {
+      if (!document.execCommand('copy')) throw new Error('Copia negli appunti non riuscita')
+    } finally {
+      document.body.removeChild(textarea)
+    }
+  }
+
   return{
     gestioneErrore,
     dettaglioErrore,
     messaggioPositivo,
     richiediConferma,
+    copiaNegliAppunti,
   }
 }
 

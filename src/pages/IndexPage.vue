@@ -424,7 +424,7 @@ import BaseDatePicker from 'components/forms/BaseDatePicker.vue'
 import { maxLength, required } from 'src/composables/rules.js'
 import BaseInput from 'components/forms/BaseInput.vue'
 import BaseFile from 'components/forms/BaseFile.vue'
-const { gestioneErrore, messaggioPositivo, richiediConferma } = useCassettaAttrezzi()
+const { gestioneErrore, messaggioPositivo, richiediConferma, copiaNegliAppunti } = useCassettaAttrezzi()
 import { useFileStore } from 'src/stores/fileStore'
 const fileStore = useFileStore()
 
@@ -627,7 +627,7 @@ async function lanciaElaborazione(id_elaborazione) {
 
 async function copiaQuery(query) {
   try {
-    await navigator.clipboard.writeText(query)
+    await copiaNegliAppunti(query)
     messaggioPositivo('Query copiata negli appunti')
   } catch (error) {
     gestioneErrore(error, 'Impossibile copiare la query')
@@ -640,7 +640,7 @@ const convertiPathWindows = (path) => {
 
 const copiaPercorso = async (path) => {
   try {
-    await navigator.clipboard.writeText(convertiPathWindows(path))
+    await copiaNegliAppunti(convertiPathWindows(path))
     messaggioPositivo('Percorso copiato')
   } catch (e) {
     gestioneErrore(e, 'Errore durante la copia')
@@ -656,7 +656,7 @@ async function copiaReport() {
   // non va copiato.
   const testo = reportRighe.value.map((riga) => riga.conteggio).join('\n')
   try {
-    await navigator.clipboard.writeText(testo)
+    await copiaNegliAppunti(testo)
     messaggioPositivo('Report copiato negli appunti')
   } catch (e) {
     gestioneErrore(e, 'Errore durante la copia del report')
