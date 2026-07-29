@@ -205,6 +205,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                     color="negative"
                     icon="delete"
                     @click="confermaElimina(props.row)"
+                    :loading="idEliminazioneInCorso === props.row.id_elaborazione"
                   >
                     <q-tooltip>ELIMINA DATI</q-tooltip>
                   </q-btn>
@@ -430,6 +431,7 @@ const fileStore = useFileStore()
 const isSubmitting = ref(false)
 const isActionSubmitting = ref(null)
 const isSortingSubmitting = ref(null)
+const idEliminazioneInCorso = ref(null)
 
 const formData = ref({
   lavoro: route.query.id_lavoro
@@ -695,6 +697,7 @@ function confermaElimina(row) {
   richiediConferma(
     `Sei sicuro di voler eliminare i dati dell'elaborazione ${row.nome_elaborazione}? L'operazione è irreversibile e i dati verranno rimossi dal database.`,
   ).onOk(() => {
+    idEliminazioneInCorso.value = row.id_elaborazione
     api
       .post('/elimina_elaborazione.php', { id_elaborazione: row.id_elaborazione })
       .then(() => {
@@ -703,6 +706,9 @@ function confermaElimina(row) {
       })
       .catch((e) => {
         gestioneErrore(e, "Errore durante l'eliminazione dati")
+      })
+      .finally(() => {
+        idEliminazioneInCorso.value = null
       })
   })
 }

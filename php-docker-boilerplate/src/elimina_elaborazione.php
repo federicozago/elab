@@ -27,7 +27,7 @@ try {
     $res = $db->preleva_da_db("select * from elab_join where id_elaborazione = ?", [$jsonData["id_elaborazione"]]);
     if (!$res) throw new \Exception("Elaborazione non trovata");
     $el = $res[0];
-    
+
     $nome_lavoro_completo = "{$el['nome_lavoro']}_{$el['nome_elaborazione']}";
     $id_flusso = $el['id_flusso'];
 
@@ -38,8 +38,10 @@ try {
         throw new \Exception("Errore durante eliminazione dati originali");
 
     // 2. Eliminazione dai dati ordinati
-    if(!$db->esegui_query("DELETE FROM `ordinati_{$el['tipo_spedizione']}_{$el['nome_base_dati']}` WHERE nome_elaborazione = ? AND id_flusso = ?", [$nome_lavoro_completo, $id_flusso]))
-        throw new \Exception("Errore durante eliminazione dati ordinati");
+    if($db->verifica_esistenza_tabella("ordinati_{$el['tipo_spedizione']}_{$el['nome_base_dati']}")) {
+        if (!$db->esegui_query("DELETE FROM `ordinati_{$el['tipo_spedizione']}_{$el['nome_base_dati']}` WHERE nome_elaborazione = ? AND id_flusso = ?", [$nome_lavoro_completo, $id_flusso]))
+            throw new \Exception("Errore durante eliminazione dati ordinati");
+    }
 
     // 3. Eliminazione dati light (se tabella esiste)
     $tabella_light = "ordinati_light_{$el['nome_base_dati']}";
