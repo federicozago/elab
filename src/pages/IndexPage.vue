@@ -769,14 +769,20 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-
-      if (datiAzione.endpoint === 'chiudi_elaborazione.php') {
-        prelevaElaborazioniInCorso()
-        prelevaElaborazioniConcluse()
-      }
     } else {
       messaggioPositivo('Azione eseguita')
     }
+
+    // Alcune azioni chiudono/modificano lo stato dell'elaborazione: le tabelle
+    // vanno ricaricate a prescindere dal tipo di output (o dall'assenza di output).
+    if (
+      datiAzione.endpoint === 'chiudi_elaborazione.php' ||
+      datiAzione.endpoint === 'chiudi_elaborazione_senza_salvare_dati.php'
+    ) {
+      prelevaElaborazioniInCorso()
+      prelevaElaborazioniConcluse()
+    }
+
     dataAzioni.value = null
     dialogAzioniVisible.value = false
   } catch (e) {
