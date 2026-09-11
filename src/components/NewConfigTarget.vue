@@ -6,7 +6,7 @@
       v-model="model.prodotto_target"
       label="Sotto prodotto (*)"
       id="sotto-prodotto"
-      :options="['BASIC', 'CREATIVE']"
+      :options="['BASIC', 'CREATIVE', 'MAGAZINE']"
       :rules="[required]"
     />
 

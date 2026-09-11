@@ -46,7 +46,7 @@
       <h6>Dettagli configurazione</h6>
       <BaseInput
         v-model="formData.nome_configurazione"
-        label="Nome breve configurazione"
+        label="Info aggiuntive nome configurazione"
         :rules="[maxLength(100)]"
       >
         <q-tooltip
@@ -412,6 +412,13 @@ function configurazioneCambiata(val) {
     .then((response) => {
       //setto il formData con i dati prelevati
       Object.keys(response.data.configurazione).forEach((key) => {
+        // nome_configurazione non va mai copiato dalla configurazione selezionata: è
+        // legato all'elaborazione corrente (viene precompilato con il suo nome in
+        // getInitialFormData) e viene accodato al nome finale generato dal backend -
+        // se lo sovrascrivessimo qui, copiando una configurazione precedente
+        // perderemmo il collegamento con l'elaborazione corrente.
+        if (key === 'nome_configurazione') return
+
         //controllo se il valore dovrebbe essere boolean (da php torna 0/1 per indicare true/false
         let valorePrec = ''
         var valore = response.data.configurazione[key]
