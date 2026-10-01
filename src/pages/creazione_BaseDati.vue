@@ -35,7 +35,9 @@
           v-model="formData.nome_base_dati"
           label="Nome nuova base dati"
           :rules="[required, maxLength(100), notInArray(basiDati)]"
-        />
+        >
+          <q-tooltip>Mettere nome cliente e lavoro</q-tooltip>
+        </BaseInput>
 
         <BaseRadio
           v-model="formData.tipo_file"

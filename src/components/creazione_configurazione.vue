@@ -83,29 +83,15 @@
         :rules="[required, maxLength(8), minLength(8)]"
       />
 
-      <BaseToggle label="Gestione bancali" v-model="formData.gestione_bancali"></BaseToggle>
-      <BaseInput
-        v-model="formData.min_scatole_per_bancale"
-        label="Minimo scatole per bancale (*)"
-        type="number"
-        min="0"
-        max="1000"
-        v-if="formData.gestione_bancali"
-        :rules="[required, minValue(1), maxValue(1000)]"
-      />
-      <BaseInput
-        v-model="formData.max_scatole_per_bancale"
-        label="Massimo scatole per bancale (*)"
-        type="number"
-        min="0"
-        max="1000"
-        v-if="formData.gestione_bancali"
-        :rules="[required, minValue(2), maxValue(1000)]"
-      />
+      <BaseToggle
+        label="Gestione bancali"
+        v-model="formData.gestione_bancali"
+        v-if="props.tipoSpedizione === 'target'"
+      ></BaseToggle>
       <BaseInput
         v-model="formData.tara_pallet"
         label="Tara pallet (gr) (*)"
-        v-if="formData.gestione_bancali"
+        v-if="props.tipoSpedizione === 'target' && formData.gestione_bancali"
         :rules="[required, minValue(0)]"
       />
 
@@ -334,6 +320,7 @@
       <component
         :is="formAttuale"
         v-model="formData[props.tipoSpedizione]"
+        :gestione-bancali="formData.gestione_bancali"
       /><!--Il parametro :is dice a Vue: "Non renderizzare un tag HTML standard, ma renderizza il componente che ti sto passando in questa variabile".-->
     </BaseForm>
   </div>
@@ -515,8 +502,6 @@ function getInitialFormData() {
     cmp: 'CMP VERONA',
     n_conto_contrattuale: '',
     sap: '',
-    min_scatole_per_bancale: null,
-    max_scatole_per_bancale: null,
     tara_pallet: 22500,
     con_prenotazione: false,
     tara_scatola: 0.2,
@@ -546,6 +531,12 @@ function getInitialFormData() {
       plichi: '',
       contiene_gadget: false,
       tipo_formato_creative:'NORMALIZZATO',
+      larghezza_busta: null,
+      altezza_busta: null,
+      profondita_busta: null,
+      larghezza_scatola: null,
+      lunghezza_scatola: null,
+      altezza_scatola: null,
     },
     massiva: {
       peso_scatola_min: 0,
@@ -664,8 +655,6 @@ async function inviaDati() {
   }
 
   if (!datiDaInviare.gestione_bancali) {
-    delete datiDaInviare.min_scatole_per_bancale
-    delete datiDaInviare.max_scatole_per_bancale
     delete datiDaInviare.tara_pallet
   }
 

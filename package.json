@@ -2,7 +2,7 @@
   "name": "elab",
   "version": "0.0.1",
   "description": "elaborazioni postali",
-  "productName": "Quasar App",
+  "productName": "Elab",
   "author": "federicozago <zago.federico@gmail.com>",
   "type": "module",
   "private": true,

@@ -38,6 +38,49 @@
       :rules="[required]"
     />
 
+    <template v-if="props.gestioneBancali && model.plichi === 'Plichi'">
+      <BaseInput
+        v-model="model.larghezza_busta"
+        label="Larghezza busta (cm) (*)"
+        type="number"
+        :rules="[required, minValue(0)]"
+      />
+      <BaseInput
+        v-model="model.altezza_busta"
+        label="Altezza busta (cm) (*)"
+        type="number"
+        :rules="[required, minValue(0)]"
+      />
+      <BaseInput
+        v-model="model.profondita_busta"
+        label="Profondità busta (cm) (*)"
+        type="number"
+        :rules="[required, minValue(0)]"
+      >
+        <q-tooltip>Spessore di una singola busta, usato per calcolare l'altezza del plico</q-tooltip>
+      </BaseInput>
+    </template>
+
+    <template v-if="props.gestioneBancali && model.plichi === 'Scatole'">
+      <BaseInput
+        v-model="model.larghezza_scatola"
+        label="Larghezza scatola (cm) (*)"
+        type="number"
+        :rules="[required, minValue(0)]"
+      />
+      <BaseInput
+        v-model="model.lunghezza_scatola"
+        label="Lunghezza scatola (cm) (*)"
+        type="number"
+        :rules="[required, minValue(0)]"
+      />
+      <BaseInput
+        v-model="model.altezza_scatola"
+        label="Altezza scatola (cm) (*)"
+        type="number"
+        :rules="[required, minValue(0)]"
+      />
+    </template>
 
     <BaseToggle label="Contiene gadget" v-model="model.contiene_gadget">
       <q-tooltip>Compare solo nelle etichette bancale</q-tooltip>
@@ -55,6 +98,13 @@ import BaseRadio from 'components/forms/BaseRadio.vue'
 //defineModel(): È una macro di Vue 3.4+ che crea automaticamente un legame bidirezionale con il v-model del padre. In questo modo, model.sottoProdotto aggiornerà correttamente formData.target nel padre senza violare le regole di Vue.
 const model = defineModel({
   type: Object,
+})
+
+const props = defineProps({
+  gestioneBancali: {
+    type: Boolean,
+    default: false,
+  },
 })
 </script>
 <style scoped></style>
