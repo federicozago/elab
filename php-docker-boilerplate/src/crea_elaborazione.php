@@ -77,7 +77,8 @@ try {
         if(!$file->apri($targetPath, $dati_lavoro["intestazione_si_no"]))
             throw new \Exception("Errore durante l'apertura del file");
         $file->setta_parametri([
-            "separatore" => $dati_lavoro["separatore"] ?? ";"
+            "separatore" => $dati_lavoro["separatore"] ?? ";",
+            "qualificatore_testo" => '"'
         ], true);
     }
 

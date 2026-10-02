@@ -552,6 +552,7 @@ const columnsElaborazioniConcluse = [
     field: 'id_elaborazione',
     sortable: true,
   },
+  { name: 'nome_lavoro', label: 'Lavoro', field: 'nome_lavoro', sortable: true, align: 'left' },
   {
     name: 'nome_elaborazione',
     label: 'Nome elaborazione',
@@ -695,7 +696,7 @@ function riesporta(row) {
 
 function confermaElimina(row) {
   richiediConferma(
-    `Sei sicuro di voler eliminare i dati dell'elaborazione ${row.nome_elaborazione}? L'operazione è irreversibile e i dati verranno rimossi dal database.`,
+    `Sei sicuro di voler eliminare i dati dell'elaborazione ${row.nome_lavoro} - ${row.nome_elaborazione}? L'operazione è irreversibile e i dati verranno rimossi dal database.`,
   ).onOk(() => {
     idEliminazioneInCorso.value = row.id_elaborazione
     api
