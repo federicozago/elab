@@ -110,9 +110,15 @@
           <BaseInput
             v-model="elaborazione.nome_elaborazione"
             label="Nome sotto elaborazione"
-            :disable="!isMultiElaborazione"
-            :rules="[required, maxLength(50)]"
-          /><!-- se c'è una multi elaborazione allora il php creerà una vista, e quindi controllo in questo caso che non venga inserita una vista già esistente -->
+            :disable="isModifica && !isMultiElaborazione"
+            :rules="[required, maxLength(50), nomeElaborazioneValido, nomeCompletoNonTroppoLungo]"
+          >
+            <q-tooltip
+              >Compare sulle etichette insieme al nome del lavoro (lavoro_nome). Solo lettere, numeri e
+              underscore. Non modificabile dopo la creazione del lavoro</q-tooltip
+            >
+          </BaseInput
+          ><!-- se c'è una multi elaborazione allora il php creerà una vista, e quindi controllo in questo caso che non venga inserita una vista già esistente -->
 
           <BaseSelect
             v-model="elaborazione.tipo_spedizione"
@@ -215,14 +221,28 @@ watch(
   },
 )
 
-//verifica se il togle multi elaborazione è attivo e serve per fare in modo che il nome elaborazione sia fisso a elab quando disattivato
+// il nome completo (lavoro + "_" + elaborazione) diventa il nome di vista e tabelle temporanee mysql (es. ordinati_a_<nome>_<id_flusso>), che non possono superare 64 caratteri
+const NOME_COMPLETO_MAX = 46
+const nomeElaborazioneValido = (val) =>
+  !val || /^[A-Za-z0-9_]+$/.test(val) || 'Usare solo lettere, numeri e underscore'
+const nomeCompletoNonTroppoLungo = (val) => {
+  if (!val) return true
+  const totale = (formData.value.nome_lavoro || '').length + 1 + val.length
+  return (
+    totale <= NOME_COMPLETO_MAX ||
+    `Nome lavoro + nome elaborazione: massimo ${NOME_COMPLETO_MAX} caratteri in totale (ora ${totale})`
+  )
+}
+
+//verifica se il togle multi elaborazione è attivo: quando disattivato resta una sola elaborazione, il cui nome è "elab" se non è stato indicato un nome
 watch(isMultiElaborazione, (newVal) => {
   if (!newVal) {
-    // Se disattivato, resetta a una sola elaborazione e imposta nome fisso
+    // Se disattivato, resetta a una sola elaborazione
     if (formData.value.elaborazioni.length > 1) {
       formData.value.elaborazioni = [formData.value.elaborazioni[0]]
     }
-    formData.value.elaborazioni[0].nome_elaborazione = 'elab'
+    if (!formData.value.elaborazioni[0].nome_elaborazione)
+      formData.value.elaborazioni[0].nome_elaborazione = 'elab'
   } else {
     // Se attivato, svuota il nome per permettere la definizione utente
     formData.value.elaborazioni[0].nome_elaborazione = ''
