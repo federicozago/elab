@@ -42,6 +42,15 @@ try {
         $nome_tabella = $dati_base[0]['nome_base_dati'];
         // Se si volesse eliminare anche la tabella fisica:
         if(!$db->esegui_query("DROP TABLE IF EXISTS `$nome_tabella` ")) throw new \Exception("Impossibile eliminare la tabella fisica: $nome_tabella");
+
+        // Elimino anche le tabelle ordinati collegate (una per ogni tipo di spedizione + la light): la base dati non è usata
+        // da nessun lavoro, quindi altrimenti resterebbero orfane. Nomi esatti, niente wildcard (un nome base dati potrebbe
+        // essere il suffisso di un altro).
+        $tabelle_ordinati = ["ordinati_light_{$nome_tabella}"];
+        foreach (array_keys($vg["elaborazioni"]) as $tipo_spedizione)
+            $tabelle_ordinati[] = "ordinati_{$tipo_spedizione}_{$nome_tabella}";
+        foreach ($tabelle_ordinati as $tabella_ordinati)
+            if(!$db->esegui_query("DROP TABLE IF EXISTS `$tabella_ordinati` ")) throw new \Exception("Impossibile eliminare la tabella ordinati: $tabella_ordinati");
     }
 
     // 3. Eliminazione dalla tabella mysql base_dati il record con id uguale a quello passato

@@ -40,13 +40,26 @@ try{
 
     // prelevo nome_lavoro e nome_elaborazione ATTUALI (prima di sovrascriverli) per poter
     // eliminare le viste vecchie nel caso in cui nome_lavoro/nome_elaborazione cambino
-    if(! $vecchio_lavoro = $db->preleva_da_db("select nome_lavoro from lavori where id = ?", [$jsonData["id_lavoro"]]))
+    if(! $vecchio_lavoro = $db->preleva_da_db("select nome_lavoro, id_base_dati from lavori where id = ?", [$jsonData["id_lavoro"]]))
         throw new \Exception("Lavoro non trovato");
     $vecchio_nome_lavoro = $vecchio_lavoro[0]["nome_lavoro"];
+    $base_dati_cambiata = $vecchio_lavoro[0]["id_base_dati"] != $jsonData["id_base_dati"];
     $vecchie_elaborazioni = $db->preleva_da_db("select id, nome_elaborazione from elaborazioni_lavoro where id_lavoro = ?", [$jsonData["id_lavoro"]]);
     $vecchio_nome_elaborazione_per_id = [];
     foreach(($vecchie_elaborazioni ?: []) as $vecchia_elaborazione)
         $vecchio_nome_elaborazione_per_id[$vecchia_elaborazione["id"]] = $vecchia_elaborazione["nome_elaborazione"];
+
+    // Blocco la rinomina del lavoro / delle elaborazioni se ci sono elaborazioni già ordinate (stato <> 0, anche chiuse): nelle tabelle
+    // ordinati il nome è salvato come "nome_lavoro_nome_elaborazione", rinominando etichette, report, prenotazione e riesporta non troverebbero più i dati
+    $elaborazioni_ordinate = $db->preleva_da_db("select e.id_elaborazione_lavoro, count(*) as n from elaborazioni e join elaborazioni_lavoro el on e.id_elaborazione_lavoro = el.id where el.id_lavoro = ? and e.stato <> 0 group by e.id_elaborazione_lavoro", [$jsonData["id_lavoro"]]);
+    if($elaborazioni_ordinate) {
+        if($vecchio_nome_lavoro !== $jsonData["nome_lavoro"])
+            throw new \Exception("Impossibile rinominare il lavoro: esistono elaborazioni già ordinate (anche chiuse), i cui dati sono salvati con il nome attuale \"$vecchio_nome_lavoro\"");
+        $id_elaborazioni_ordinate = array_column($elaborazioni_ordinate, "id_elaborazione_lavoro");
+        foreach($jsonData["elaborazioni"] as $elaborazione_richiesta)
+            if(isset($elaborazione_richiesta["id"]) and in_array($elaborazione_richiesta["id"], $id_elaborazioni_ordinate) and isset($vecchio_nome_elaborazione_per_id[$elaborazione_richiesta["id"]]) and $vecchio_nome_elaborazione_per_id[$elaborazione_richiesta["id"]] !== $elaborazione_richiesta["nome_elaborazione"])
+                throw new \Exception("Impossibile rinominare l'elaborazione \"{$vecchio_nome_elaborazione_per_id[$elaborazione_richiesta["id"]]}\": è già stata ordinata (anche chiusa), i suoi dati sono salvati con il nome attuale");
+    }
 
     //prelevo nome base dati (serve per ricreare le viste con la base dati aggiornata)
     if( ! $nome_base_dati = $db->preleva_da_db_un_singolo_valore("select nome_base_dati from base_dati where id=?",[$jsonData["id_base_dati"]]))
@@ -76,6 +89,10 @@ try{
         $nuovo_nome_vista = "{$jsonData["nome_lavoro"]}_{$elaborazione["nome_elaborazione"]}";
         if($vecchio_nome_vista !== $nuovo_nome_vista)
             $query_drop_viste[] = "drop view if exists `$vecchio_nome_vista`";
+        // la vista _elaborato (join con la tabella ordinati) diventa obsoleta se cambia il nome o la base dati (la tabella ordinati ha il nome della base dati):
+        // la elimino, verrà ricreata al prossimo ordinamento
+        if($vecchio_nome_vista !== $nuovo_nome_vista or $base_dati_cambiata)
+            $query_drop_viste[] = "drop view if exists `{$vecchio_nome_vista}_elaborato`";
 
         //ricreo la vista dei dati (nome base dati + where possono essere cambiati)
         $where = $elaborazione["where"] ? "where {$elaborazione['where']}" : "";
