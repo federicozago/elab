@@ -103,10 +103,15 @@
       </BaseToggle>
 
       <BaseInput
+        v-if="!taraScatolaNascosta"
         v-model="formData.tara_scatola"
-        label="Tara scatola (Kg) (*)"
-        :rules="[required, minValue(0)]"
-      />
+        :label="props.tipoSpedizione === 'target' ? 'Tara scatola (gr) (*)' : 'Tara scatola (Kg) (*)'"
+        :rules="[taraScatolaValida]"
+      >
+        <q-tooltip v-if="props.tipoSpedizione === 'target'"
+          >Peso della scatola in grammi (di norma 200). Per i plichi è sempre 0</q-tooltip
+        >
+      </BaseInput>
 
       <BaseSelect
         v-model="formData.tipo_formato_postale"
@@ -435,6 +440,17 @@ function configurazioneCambiata(val) {
 
 const age = computed(() => codici_age[formData.value.cmp])
 
+// target: la tara scatola è in grammi (di norma 200) e per i plichi è sempre 0, quindi il campo non serve. massiva: resta in kg
+const taraScatolaNascosta = computed(
+  () => props.tipoSpedizione === 'target' && formData.value.target.plichi === 'Plichi',
+)
+const taraScatolaValida = (val) => {
+  if (val === null || val === undefined || val === '') return 'Campo obbligatorio'
+  const n = Number(val)
+  if (props.tipoSpedizione !== 'target') return n >= 0 || 'Il valore deve essere almeno 0'
+  return n === 0 || n >= 10 || 'Valore in grammi: inserire 0 oppure almeno 10 (es. 200)'
+}
+
 let tipologia_prodotto_consigliato = ''
 let codice_prodotto_consigliato = ''
 let codice_identificativo_pallet_consigliato = ''
@@ -504,7 +520,7 @@ function getInitialFormData() {
     sap: '',
     tara_pallet: 22500,
     con_prenotazione: false,
-    tara_scatola: 0.2,
+    tara_scatola: props.tipoSpedizione === 'target' ? 200 : 0.2,
     codice_cliente_postale: '',
     cap_mittente: '',
     utenza_ps_online: '',
@@ -568,6 +584,17 @@ watch(
         formData.value.tipo_prodotto_postale = 'Y'
       }
     }
+  },
+)
+
+// plichi: la tara scatola è sempre 0 (il campo viene nascosto); passando da plichi a scatole ripropongo 200 gr se era a 0
+watch(
+  () => formData.value.target.plichi,
+  (nuovo, vecchio) => {
+    if (props.tipoSpedizione !== 'target') return
+    if (nuovo === 'Plichi') formData.value.tara_scatola = 0
+    else if (nuovo === 'Scatole' && vecchio === 'Plichi' && !Number(formData.value.tara_scatola))
+      formData.value.tara_scatola = 200
   },
 )
 
