@@ -151,10 +151,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                           <div>
                             <BaseBtn
                               label="sql"
-                              @click="
-                                selectedRowSql = props.row;
-                                dialogSqlVisible = true
-                              "
+                              @click="apriSql(props.row)"
                             />
                           </div>
                         </q-td>
@@ -238,22 +235,8 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               color="primary"
               icon="content_copy"
               label="Copia"
-              @click="
-                copiaQuery(
-                  'SELECT * FROM `elab`.`' +
-                    selectedRowSql.nome_lavoro +
-                    '_' +
-                    selectedRowSql.nome_elaborazione +
-                    '` e JOIN `elab`.`ordinati_' +
-                    selectedRowSql.tipo_spedizione +
-                    '_' +
-                    selectedRowSql.nome_base_dati +
-                    '` o ON e.id=o.c1 ' +
-                    'where e.id_flusso = \'' +
-                    selectedRowSql.id_flusso +
-                    '\' ORDER BY o.progr',
-                )
-              "
+              :disable="caricamentoSql"
+              @click="copiaQuery(querySql)"
             ></BaseBtn>
             <BaseBtn
               dense
@@ -267,13 +250,13 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         </q-card-section>
         <q-separator></q-separator>
         <q-card-section>
-          <pre class="sql-code">
-SELECT * FROM `elab`.`{{ selectedRowSql.nome_lavoro }}_{{ selectedRowSql.nome_elaborazione }}` e
-    JOIN `elab`.`ordinati_{{ selectedRowSql.tipo_spedizione }}_{{ selectedRowSql.nome_base_dati }}` o
-         ON e.id=o.c1
-WHERE e.id_flusso = '{{ selectedRowSql.id_flusso }}'
-ORDER BY o.progr
-          </pre>
+          <div v-if="caricamentoSql" class="text-grey-7">Caricamento colonne...</div>
+          <pre v-else class="sql-code">{{ querySql }}</pre>
+          <div class="text-caption text-grey-7 q-mt-sm">
+            Tutte le colonne sono elencate (anagrafica e ordinati; se un nome è in entrambe vale
+            quella dell'anagrafica): per un record civetta basta sostituire il valore, es.
+            <code>'MARIO ROSSI' AS `COGNOME`</code>
+          </div>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -508,6 +491,8 @@ const dialogSqlVisible = ref(false)
 const dialogPrenotazioneVisible = ref(false)
 const dialogReportVisible = ref(false)
 const selectedRowSql = ref(null)
+const querySql = ref('')
+const caricamentoSql = ref(false)
 const selectedRowPrenotazione = ref(null)
 const selectedRowAzioni = ref(null)
 const reportRighe = ref([])
@@ -623,6 +608,42 @@ async function lanciaElaborazione(id_elaborazione) {
     gestioneErrore(e, 'Impossibile lanciare ordinamento')
   } finally {
     isSortingSubmitting.value = null
+  }
+}
+
+// query di partenza (senza elenco colonne), usata se il backend non riesce a leggerle
+function querySqlBase(row) {
+  return (
+    'SELECT * FROM `elab`.`' +
+    row.nome_lavoro +
+    '_' +
+    row.nome_elaborazione +
+    '` e\n    JOIN `elab`.`ordinati_' +
+    row.tipo_spedizione +
+    '_' +
+    row.nome_base_dati +
+    '` o\n         ON e.id=o.c1\nWHERE e.id_flusso = \'' +
+    row.id_flusso +
+    '\'\nORDER BY o.progr'
+  )
+}
+
+// apre il pannello con la query completa: il backend elenca una per una le colonne di anagrafica e ordinati
+async function apriSql(row) {
+  selectedRowSql.value = row
+  querySql.value = ''
+  caricamentoSql.value = true
+  dialogSqlVisible.value = true
+  try {
+    const response = await api.post('/preleva_query_sql.php', {
+      id_elaborazione: row.id_elaborazione,
+    })
+    querySql.value = response.data.query
+  } catch (e) {
+    console.error(e)
+    querySql.value = querySqlBase(row)
+  } finally {
+    caricamentoSql.value = false
   }
 }
 
