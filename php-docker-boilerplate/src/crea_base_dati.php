@@ -51,6 +51,7 @@ try {
     }
 
     $sql_tab .= "
+    `numero_riga_csv` int DEFAULT NULL,
     `nome_file_idx_input` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `id_flusso` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `id_elaborazione` int DEFAULT NULL,

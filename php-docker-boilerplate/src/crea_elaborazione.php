@@ -96,12 +96,19 @@ try {
     $folder_cliente = dirname($folder_z) . "/";
     $folder_z = basename($folder_z);
 
+    //numero della riga del file originale: la lettura è contigua (si ferma alla prima riga vuota), quindi il primo record è alla
+    //riga 2 se c'è l'intestazione, altrimenti alla 1. la colonna c'è solo nelle basi dati create dopo l'introduzione di numero_riga_csv
+    $riga_iniziale = $dati_lavoro["intestazione_si_no"] ? 2 : 1;
+    $tabella_ha_numero_riga = $db->verifica_presenza_record("select 1 from information_schema.columns where table_schema = database() and table_name = ? and column_name = 'numero_riga_csv'", [$dati_lavoro["nome_base_dati"]]);
+
     //importo i dati
     $a = new Array_php();
     foreach($dati as $key => &$record){
         if(!isset($record[$dati_lavoro["campo_cap"]]))
             throw new \Exception("Errore durante importazione dati, campo cap non trovato");
         $record[$dati_lavoro["campo_cap"]] = str_pad($record[$dati_lavoro["campo_cap"]], 5, '0', STR_PAD_LEFT);
+        if($tabella_ha_numero_riga)
+            $record["numero_riga_csv"] = $riga_iniziale + $key;
     }
     unset($record);
     $a->array_add_column($dati, "nome_file_idx_input", basename($targetPath));
