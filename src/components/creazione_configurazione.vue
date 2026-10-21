@@ -26,7 +26,12 @@
       label="Modifica configurazione"
       :disable="!idConfigurazioneSelezionata"
       v-if="!props.creazioneNuovaConfigurazione"
-    ></BaseToggle>
+    >
+      <q-tooltip
+        >Attivo: "Salva" modifica la configurazione selezionata. Disattivo: crea una nuova
+        configurazione con i dati indicati</q-tooltip
+      >
+    </BaseToggle>
 
     <BaseForm
       ref="baseFormRef"
@@ -432,6 +437,28 @@ function configurazioneCambiata(val) {
           //se il valore è a livello secondario di formData
           formData.value[props.tipoSpedizione][key] = valore
       })
+
+      // dalla pagina configurazioni (non dal dialog di creazione lavoro) selezionando una configurazione esistente si è
+      // di default in modifica: per creare una nuova configurazione bisogna togliere esplicitamente il flag
+      if (!props.creazioneNuovaConfigurazione) {
+        configurazioneEdit.value = true
+        // in modifica il nome viene ricalcolato dal backend (campi + "info aggiuntive"): ricavo dal nome salvato le info
+        // aggiuntive digitate in precedenza, altrimenti salvando andrebbero perse
+        const c = response.data.configurazione
+        const prefisso = [
+          c.ragione_sociale_cliente_estesa,
+          props.tipoSpedizione,
+          c.descrizione_tipo_spedizione,
+          props.tipoSpedizione === 'target' ? c.prodotto_target : '',
+          c.tipo_formato_postale,
+        ]
+          .filter((v) => v !== '' && v !== null && v !== undefined)
+          .join('_')
+        const nomeSalvato = c.nome_configurazione || ''
+        formData.value.nome_configurazione = nomeSalvato.startsWith(prefisso + '_')
+          ? nomeSalvato.slice(prefisso.length + 1)
+          : ''
+      }
     })
     .catch((e) => {
       gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
@@ -643,6 +670,7 @@ watch(
   () => props.tipoSpedizione,
   (nuovoTipo) => {
     idConfigurazioneSelezionata.value = ''
+    configurazioneEdit.value = false
     reset()
     if (nuovoTipo) {
       api
@@ -745,6 +773,7 @@ async function confermaEliminaConfigurazione() {
 
           // Reset selezione e form
           idConfigurazioneSelezionata.value = ''
+          configurazioneEdit.value = false
           reset()
         }
       } catch (e) {
