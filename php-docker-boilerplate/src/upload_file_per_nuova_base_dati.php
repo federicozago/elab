@@ -29,6 +29,8 @@ $uploadDir = 'temp/';
 if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
+require_once __DIR__ . '/pulisci_temp.php';
+pulisci_file_temporanei_orfani($uploadDir);
 
 try {
     // Verifica se è stato inviato un file

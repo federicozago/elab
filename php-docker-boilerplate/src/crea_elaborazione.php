@@ -9,6 +9,8 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 // Cartella di destinazione per l'upload
 $uploadDir = 'temp/';
+require_once __DIR__ . '/pulisci_temp.php';
+pulisci_file_temporanei_orfani($uploadDir);
 
 function isSqlSafe($where) {
     if (empty($where)) return true;
