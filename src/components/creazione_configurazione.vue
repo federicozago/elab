@@ -33,6 +33,23 @@
       >
     </BaseToggle>
 
+    <q-dialog v-model="dialogModificaONuovaVisibile" persistent>
+      <q-card style="min-width: 380px">
+        <q-card-section>
+          <div class="text-h6">
+            {{ idConfigurazioneSelezionata ? idConfigurazioneSelezionata.label : '' }}
+          </div>
+          <div class="q-mt-sm">
+            Vuoi modificare questa configurazione o crearne una nuova con gli stessi dati?
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <BaseBtn label="Modifica" @click="scegliModificaConfigurazione" />
+          <BaseBtn label="Nuova configurazione" @click="scegliNuovaConfigurazione" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <BaseForm
       ref="baseFormRef"
       :formData="formData"
@@ -353,6 +370,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import BaseInput from 'components/forms/BaseInput.vue'
 import BaseSelect from 'components/forms/BaseSelect.vue'
+import BaseBtn from 'components/forms/BaseBtn.vue'
 import NewConfigTarget from 'components/NewConfigTarget.vue'
 import { required, minLength, maxLength, minValue, maxValue } from 'src/composables/rules.js'
 import { api } from 'boot/axios.js'
@@ -412,6 +430,37 @@ const codici_age = {
   'CMP VERONA': 'AGE68172',
 }
 
+const dialogModificaONuovaVisibile = ref(false)
+const configurazioneCaricata = ref(null)
+
+// l'utente vuole modificare la configurazione selezionata
+function scegliModificaConfigurazione() {
+  configurazioneEdit.value = true
+  // in modifica il nome viene ricalcolato dal backend (campi + "info aggiuntive"): ricavo dal nome salvato le info
+  // aggiuntive digitate in precedenza, altrimenti salvando andrebbero perse
+  const c = configurazioneCaricata.value
+  const prefisso = [
+    c.ragione_sociale_cliente_estesa,
+    props.tipoSpedizione,
+    c.descrizione_tipo_spedizione,
+    props.tipoSpedizione === 'target' ? c.prodotto_target : '',
+    c.tipo_formato_postale,
+  ]
+    .filter((v) => v !== '' && v !== null && v !== undefined)
+    .join('_')
+  const nomeSalvato = c.nome_configurazione || ''
+  formData.value.nome_configurazione = nomeSalvato.startsWith(prefisso + '_')
+    ? nomeSalvato.slice(prefisso.length + 1)
+    : ''
+  dialogModificaONuovaVisibile.value = false
+}
+
+// l'utente vuole creare una nuova configurazione partendo dai dati di quella selezionata (che resta invariata)
+function scegliNuovaConfigurazione() {
+  configurazioneEdit.value = false
+  dialogModificaONuovaVisibile.value = false
+}
+
 function configurazioneCambiata(val) {
   //prelevo dati configurazione
   api
@@ -451,26 +500,11 @@ function configurazioneCambiata(val) {
           formData.value[props.tipoSpedizione][key] = valore
       })
 
-      // dalla pagina configurazioni (non dal dialog di creazione lavoro) selezionando una configurazione esistente si è
-      // di default in modifica: per creare una nuova configurazione bisogna togliere esplicitamente il flag
+      // dalla pagina configurazioni (non dal dialog di creazione lavoro) selezionando una configurazione esistente chiedo
+      // all'utente se vuole modificarla o crearne una nuova a partire dai suoi dati: la risposta imposta il flag "Modifica configurazione"
       if (!props.creazioneNuovaConfigurazione) {
-        configurazioneEdit.value = true
-        // in modifica il nome viene ricalcolato dal backend (campi + "info aggiuntive"): ricavo dal nome salvato le info
-        // aggiuntive digitate in precedenza, altrimenti salvando andrebbero perse
-        const c = response.data.configurazione
-        const prefisso = [
-          c.ragione_sociale_cliente_estesa,
-          props.tipoSpedizione,
-          c.descrizione_tipo_spedizione,
-          props.tipoSpedizione === 'target' ? c.prodotto_target : '',
-          c.tipo_formato_postale,
-        ]
-          .filter((v) => v !== '' && v !== null && v !== undefined)
-          .join('_')
-        const nomeSalvato = c.nome_configurazione || ''
-        formData.value.nome_configurazione = nomeSalvato.startsWith(prefisso + '_')
-          ? nomeSalvato.slice(prefisso.length + 1)
-          : ''
+        configurazioneCaricata.value = response.data.configurazione
+        dialogModificaONuovaVisibile.value = true
       }
     })
     .catch((e) => {
