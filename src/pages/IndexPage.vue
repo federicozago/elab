@@ -801,7 +801,8 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
     // vanno ricaricate a prescindere dal tipo di output (o dall'assenza di output).
     if (
       datiAzione.endpoint === 'chiudi_elaborazione.php' ||
-      datiAzione.endpoint === 'chiudi_elaborazione_senza_salvare_dati.php'
+      datiAzione.endpoint === 'chiudi_elaborazione_senza_salvare_dati.php' ||
+      datiAzione.endpoint === 'elimina_dati_ordinati.php'
     ) {
       prelevaElaborazioniInCorso()
       prelevaElaborazioniConcluse()

@@ -58,12 +58,16 @@ try {
     ), true);
 
     if(!$elab->elimina_dati_elaborazione($nome_elaborazione))
-        throw new \Exception("Errore durante la generazione delle etichette");
+        throw new \Exception("Errore durante l'eliminazione dei dati ordinati");
+    //riporto l'elaborazione allo stato "da ordinare" (0), così in home torna il pulsante ORDINA al posto di PRENOTA. vale anche per
+    //un'elaborazione rimasta "in elaborazione" (1) a causa di un ordinamento interrotto. le elaborazioni chiuse (255) non si toccano
+    if(!$db->esegui_query("update elaborazioni set stato=0 where id=? and stato<>255", [$elaborazione["id_elaborazione"]]))
+        throw new \Exception("Errore durante l'aggiornamento dello stato dell'elaborazione");
     // Restituisci una risposta di successo
     http_response_code(200);
     echo json_encode([
         'success' => true,
-        'message' => 'Ordinamento completato'
+        'message' => 'Dati ordinati eliminati'
     ]);
 }catch (\Throwable $e) {
     // In caso di errore
