@@ -120,6 +120,8 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                       :columns="columnsElaborazioniInCorso"
                       row-key="row-id"
                       :filter="filter"
+                      :pagination="{ rowsPerPage: 0 }"
+                      hide-pagination
                     >
                       <template v-slot:body-cell-stato="props">
                         <q-td :props="props">

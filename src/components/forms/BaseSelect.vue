@@ -49,7 +49,9 @@ watch(() => props.options, (newOptions) => {
 })
 
 const filterFn = (val, update) => {
-  if (val === '') {
+  //con fill-input il campo contiene l'etichetta del valore selezionato: non va usata per filtrare, altrimenti il menu mostra solo quel valore
+  const etichettaSelezionata = model.value?.label ?? model.value
+  if (val === '' || val === etichettaSelezionata) {
     update(() => {
       filteredOptions.value = props.options
     })

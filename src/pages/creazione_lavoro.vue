@@ -211,7 +211,7 @@ const formData = ref({
   ],
 })
 //svuoto array query per non far comparire sul menu la base dati creata in precedenza
-const listaConfigurazioni = ref([])
+const listaConfigurazioni = ref({}) //opzioni del menu configurazione, per id elaborazione
 const basiDati = ref([])
 const baseDatiSelezionata = ref(null)
 watch(
@@ -265,21 +265,29 @@ router.replace({
   path: route.path,
   query: {},
 })
-async function tipoSpedizioneCambiato(idElaborazione) {
-  tipoSpedizioneScelta.value = formData.value.elaborazioni[idElaborazione].tipo_spedizione
-  nomeElaborazioneScelta.value = formData.value.elaborazioni[idElaborazione].nome_elaborazione
+//un'elaborazione si identifica per id e non per posizione nell'array: in modifica l'id è quello del db
+function trovaElaborazione(idElaborazione) {
+  return formData.value.elaborazioni.find((e) => e.id === idElaborazione)
+}
+
+//preleva le configurazioni del tipo di spedizione dell'elaborazione e le mette nel suo menu
+async function caricaConfigurazioni(elaborazione) {
+  if (!elaborazione?.tipo_spedizione) return
   try {
-    await api
-      .post('/preleva_configurazioni.php', {
-        tipo_spedizione: formData.value.elaborazioni[idElaborazione].tipo_spedizione,
-      })
-      .then((response) => {
-        listaConfigurazioni.value[idElaborazione] = []
-        listaConfigurazioni.value[idElaborazione] = response.data.configurazioni
-      })
+    const response = await api.post('/preleva_configurazioni.php', {
+      tipo_spedizione: elaborazione.tipo_spedizione,
+    })
+    listaConfigurazioni.value[elaborazione.id] = response.data.configurazioni
   } catch (error) {
     gestioneErrore(error, 'Impossibile prelevare le configurazioni')
   }
+}
+
+async function tipoSpedizioneCambiato(idElaborazione) {
+  const elaborazione = trovaElaborazione(idElaborazione)
+  tipoSpedizioneScelta.value = elaborazione.tipo_spedizione
+  nomeElaborazioneScelta.value = elaborazione.nome_elaborazione
+  await caricaConfigurazioni(elaborazione)
 }
 
 function lavoroCambiato(val) {
@@ -310,6 +318,8 @@ function lavoroCambiato(val) {
           },
         })
       })
+      //carico le configurazioni selezionabili per ogni elaborazione, altrimenti il menu sarebbe vuoto
+      formData.value.elaborazioni.forEach(caricaConfigurazioni)
     })
     .catch((e) => {
       gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
@@ -337,7 +347,9 @@ function chiudiDialogConfigurazione() {
 }
 function onConfigurazioneSalvata(configurazione) {
   //imposto il select configurazione
-  formData.value.elaborazioni[indiceElaborazioneInCorso.value].id_configurazione = configurazione
+  const elaborazione = trovaElaborazione(indiceElaborazioneInCorso.value)
+  elaborazione.id_configurazione = configurazione
+  caricaConfigurazioni(elaborazione) //aggiorna il menu con la configurazione appena creata
   chiudiDialogConfigurazione()
 }
 
