@@ -666,20 +666,25 @@ watch(
   },
 )
 
+// ricarica l'elenco del menu "Lista configurazioni esistenti": va richiamata ogni volta che le configurazioni cambiano
+async function caricaConfigurazioni() {
+  try {
+    const response = await api.post('/preleva_configurazioni.php', {
+      tipo_spedizione: props.tipoSpedizione,
+    })
+    configurazioni.value = response.data.configurazioni
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
+  }
+}
+
 watch(
   () => props.tipoSpedizione,
   (nuovoTipo) => {
     idConfigurazioneSelezionata.value = ''
     configurazioneEdit.value = false
     reset()
-    if (nuovoTipo) {
-      api
-        .post('/preleva_configurazioni.php', { tipo_spedizione: props.tipoSpedizione })
-        .then((response) => (configurazioni.value = response.data.configurazioni))
-        .catch((e) => {
-          gestioneErrore(e, 'Impossibile prelevare la configurazione, controllare i dati inseriti')
-        })
-    }
+    if (nuovoTipo) caricaConfigurazioni()
   },
   { immediate: true }, // immediate: true serve a farlo eseguire anche al primo caricamento (onMounted)
 )
@@ -724,6 +729,11 @@ async function inviaDati() {
       datiDaInviare.id_configurazione = idConfigurazioneSelezionata.value.value
       const response = await api.post('/aggiorna_configurazione.php', datiDaInviare)
       messaggioPositivo('Configurazione aggiornata con successo')
+      await caricaConfigurazioni()
+      // il nome può essere cambiato: riallineo l'etichetta della configurazione selezionata
+      idConfigurazioneSelezionata.value =
+        configurazioni.value.find((c) => c.value === datiDaInviare.id_configurazione) ||
+        idConfigurazioneSelezionata.value
       emit('saved', {
         value: response.data.id_configurazione,
         label: response.data.nome_configurazione,
@@ -731,6 +741,7 @@ async function inviaDati() {
     } else {
       const response = await api.post('/crea_configurazione.php', datiDaInviare)
       messaggioPositivo('Configurazione creata con successo')
+      await caricaConfigurazioni()
       emit('saved', {
         value: response.data.id_configurazione,
         label: response.data.nome_configurazione,
@@ -768,8 +779,7 @@ async function confermaEliminaConfigurazione() {
           messaggioPositivo('Configurazione eliminata con successo')
 
           // Ricarica la lista delle configurazioni
-          const res = await api.post('/preleva_configurazioni.php', { tipo_spedizione: props.tipoSpedizione })
-          configurazioni.value = res.data.configurazioni
+          await caricaConfigurazioni()
 
           // Reset selezione e form
           idConfigurazioneSelezionata.value = ''

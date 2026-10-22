@@ -66,7 +66,8 @@ try{
     echo json_encode([
         'success' => true,
         'message' => 'Configurazione aggiornata',
-        'id_configurazione'=>$jsonData["id_configurazione"]
+        'id_configurazione'=>$jsonData["id_configurazione"],
+        'nome_configurazione'=>$jsonData["nome_configurazione"]
     ]);
 }catch(\Exception $e) {
     http_response_code(400);
