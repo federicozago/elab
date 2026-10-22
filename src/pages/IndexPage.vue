@@ -134,6 +134,15 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                             />
                           </div>
                           <div v-if="props.value === 1">In elaborazione</div>
+                          <div v-if="props.value === 5">
+                            <BaseBtn
+                              label="Bancali diretti"
+                              size="sm"
+                              @click="lanciaBancaliDiretti(props.row.id_elaborazione)"
+                              :loading="isBancaliSubmitting === props.row.id_elaborazione"
+                            />
+                          </div>
+                          <div v-if="props.value === 6">Assegnazione bancali in corso</div>
                           <div v-if="props.value === 2">
                             <BaseBtn
                               label="Prenota"
@@ -416,6 +425,7 @@ const fileStore = useFileStore()
 const isSubmitting = ref(false)
 const isActionSubmitting = ref(null)
 const isSortingSubmitting = ref(null)
+const isBancaliSubmitting = ref(null)
 const idEliminazioneInCorso = ref(null)
 
 const formData = ref({
@@ -610,6 +620,22 @@ async function lanciaElaborazione(id_elaborazione) {
     gestioneErrore(e, 'Impossibile lanciare ordinamento')
   } finally {
     isSortingSubmitting.value = null
+  }
+}
+
+// assegna i bancali diretti all'elaborazione già ordinata (stato 5): il backend lo consente una sola volta
+async function lanciaBancaliDiretti(id_elaborazione) {
+  isBancaliSubmitting.value = id_elaborazione
+  try {
+    await api.post('/aggiungi_ordinamento_bancali_diretti.php', {
+      id_elaborazione: id_elaborazione,
+    })
+    messaggioPositivo('Bancali diretti assegnati')
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile assegnare i bancali diretti')
+  } finally {
+    isBancaliSubmitting.value = null
+    prelevaElaborazioniInCorso()
   }
 }
 

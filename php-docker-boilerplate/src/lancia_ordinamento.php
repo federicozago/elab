@@ -65,7 +65,9 @@ try {
     if(!$elab->ordina_elaborazione($nome_elaborazione))
         throw new \Exception("Errore durante l'ordinamento");
 
-    if(!$db->esegui_query("update elaborazioni set stato=2 where id={$elaborazione['id_elaborazione']}"))//aggiorno stato "elaborazione"
+    //se la configurazione prevede la gestione bancali il passo successivo è l'assegnazione dei bancali diretti (stato 5), altrimenti l'elaborazione è pronta per la prenotazione (stato 2)
+    $stato_finale = !empty($configurazione["gestione_bancali"]) ? 5 : 2;
+    if(!$db->esegui_query("update elaborazioni set stato=? where id=?", [$stato_finale, $elaborazione['id_elaborazione']]))//aggiorno stato "elaborazione"
         throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
 
     // Restituisci una risposta di successo

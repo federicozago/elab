@@ -57,8 +57,20 @@ try {
         ]
     ), true);
 
+    //l'assegnazione dei bancali può cambiare idplico e progressivi, quindi va eseguita una sola volta: la "prenoto" passando da stato 5 (ordinata,
+    //bancali da assegnare) a 6 (bancali in corso) con un'unica update, così un secondo click (o un doppio click) trova lo stato già cambiato e viene rifiutato.
+    //se l'assegnazione si interrompe l'elaborazione resta a 6 (l'operazione non è transazionale e i dati potrebbero essere a metà): si riparte con Cancella dati ordinati
+    $record_aggiornati = $db->esegui_query("update elaborazioni set stato=6 where id=? and stato=5", [$elaborazione["id_elaborazione"]], true);
+    if($record_aggiornati === false)
+        throw new \Exception("Impossibile assegnare i bancali");
+    if($record_aggiornati === 0)
+        throw new \Exception("I bancali di questa elaborazione sono già stati assegnati o non è il momento di assegnarli. Per rifare l'operazione usare Cancella dati ordinati e riordinare");
+
     if(!$elab->aggiungi_ordinamento_bancali_diretti($nome_elaborazione))
-        throw new \Exception("Errore durante la generazione delle etichette");
+        throw new \Exception("Errore durante l'assegnazione dei bancali");
+
+    if(!$db->esegui_query("update elaborazioni set stato=2 where id=?", [$elaborazione["id_elaborazione"]]))
+        throw new \Exception("Errore durante l'aggiornamento dello stato dell'elaborazione");
 
     // Restituisci una risposta di successo
     http_response_code(200);
