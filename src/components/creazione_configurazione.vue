@@ -68,7 +68,20 @@
         <q-tooltip>Compare in sma e etichette bancale</q-tooltip>
       </BaseInput>
 
+      <BaseSelect
+        v-if="props.tipoSpedizione === 'target'"
+        label="Descrizione prodotto spedizione (*)"
+        v-model="formData.descrizione_tipo_spedizione"
+        :options="descrizioniProdottoTarget"
+        :rules="[required]"
+      >
+        <q-tooltip
+          >Compare nelle etichette scatole e bancale. Con "PROMOZIONE NO PROFIT" sull'etichetta scatola il
+          prodotto riporta questa dicitura al posto di creative/basic</q-tooltip
+        >
+      </BaseSelect>
       <BaseInput
+        v-else
         label="Descrizione prodotto spedizione (*)"
         v-model="formData.descrizione_tipo_spedizione"
         :rules="[required, maxLength(255)]"
@@ -467,6 +480,9 @@ function configurazioneCambiata(val) {
 
 const age = computed(() => codici_age[formData.value.cmp])
 
+// target: la descrizione prodotto si sceglie fra due valori (con PROMOZIONE NO PROFIT l'etichetta scatola cambia la dicitura del prodotto)
+const descrizioniProdottoTarget = ['TARGET', 'PROMOZIONE NO PROFIT']
+
 // target: la tara scatola è in grammi (di norma 200) e per i plichi è sempre 0, quindi il campo non serve. massiva: resta in kg
 const taraScatolaNascosta = computed(
   () => props.tipoSpedizione === 'target' && formData.value.target.plichi === 'Plichi',
@@ -540,7 +556,7 @@ function getInitialFormData() {
     ragione_sociale_cliente_estesa: '',
     peso_busta_vuota: 5,
     peso_inserto: 0,
-    descrizione_tipo_spedizione: props.tipoSpedizione,
+    descrizione_tipo_spedizione: props.tipoSpedizione === 'target' ? 'TARGET' : props.tipoSpedizione,
     tipo_formato_postale: 'P',
     cmp: 'CMP VERONA',
     n_conto_contrattuale: '',
