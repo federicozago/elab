@@ -20,5 +20,11 @@ http_response_code(200);
 echo json_encode([
     'success' => true,
     'message' => 'spedizioni elaborazioni prelevate',
-    'spedizioni' => array_keys($vg["elaborazioni"])
+    //NO_PROFIT è un alias di target (stessa tabella, stessa classe, stessi ordinati): compare nei menu subito dopo target
+    'spedizioni' => array_reduce(array_keys($vg["elaborazioni"]), function ($tipi, $tipo) {
+        $tipi[] = $tipo;
+        if ($tipo === "target")
+            $tipi[] = "NO_PROFIT";
+        return $tipi;
+    }, [])
 ]);

@@ -77,6 +77,8 @@ try{
     $query_drop_viste = [];
     foreach($elaborazioni as $key => $elaborazione){
         $elaborazione["id_configurazione"] = $elaborazione["id_configurazione"]["value"];
+        if(($elaborazione["tipo_spedizione"] ?? null) === "NO_PROFIT")//alias di target
+            $elaborazione["tipo_spedizione"] = "target";
         if(!isSqlSafe($elaborazione["where"]))
             throw new \Exception("Where non sicuro");
         if(!$db->esegui_query("update elaborazioni_lavoro set nome_elaborazione = :nome_elaborazione, `where`= :where, tipo_spedizione = :tipo_spedizione, id_configurazione=:id_configurazione where id=:id",$elaborazione))

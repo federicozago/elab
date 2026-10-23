@@ -41,6 +41,9 @@ order by elaborazioni_lavoro.id",[$jsonData["id_lavoro"]]);//se stato è maggior
         if(!$nome_configurazione = $db->preleva_da_db_un_singolo_valore("select nome_configurazione from {$elaborazione["tipo_spedizione"]} where id = ?",[$elaborazione["id_configurazione"]]))
             throw new \Exception("Errore durante prelievo configurazioni");
         $dati[$key]["nome_configurazione"] = $nome_configurazione;
+        //le configurazioni target con sotto prodotto NO_PROFIT si presentano come tipo NO_PROFIT (alias di target)
+        if($elaborazione["tipo_spedizione"] === "target" and $db->preleva_da_db_un_singolo_valore("select prodotto_target from target where id = ?",[$elaborazione["id_configurazione"]]) === "NO_PROFIT")
+            $dati[$key]["tipo_spedizione"] = "NO_PROFIT";
     }
 
     // Restituisci una risposta di successo

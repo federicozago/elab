@@ -6,7 +6,8 @@
       v-model="model.prodotto_target"
       label="Sotto prodotto (*)"
       id="sotto-prodotto"
-      :options="['BASIC', 'CREATIVE', 'MAGAZINE']"
+      :options="['BASIC', 'CREATIVE', 'MAGAZINE', 'NO_PROFIT']"
+      :disable="bloccaProdotto"
       :rules="[required]"
     />
 
@@ -102,6 +103,11 @@ const model = defineModel({
 
 const props = defineProps({
   gestioneBancali: {
+    type: Boolean,
+    default: false,
+  },
+  // true quando si è scelto il tipo NO_PROFIT: il sotto prodotto è fisso
+  bloccaProdotto: {
     type: Boolean,
     default: false,
   },

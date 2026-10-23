@@ -21,10 +21,17 @@ try{
 
     if(!isset($jsonData["tipo_spedizione"])) throw new \Exception("Manca il tipo di spedizione");
     $tipo_spedizione = $jsonData["tipo_spedizione"];
+    //NO_PROFIT è un alias di target: stessa tabella, ma solo le configurazioni con sotto prodotto NO_PROFIT (e target le esclude)
+    $filtro = "";
+    if($tipo_spedizione === "NO_PROFIT") {
+        $tipo_spedizione = "target";
+        $filtro = "where prodotto_target = 'NO_PROFIT'";
+    }elseif($tipo_spedizione === "target")
+        $filtro = "where coalesce(prodotto_target, '') <> 'NO_PROFIT'";
     if( ! in_array($tipo_spedizione, array_keys($vg["elaborazioni"])))
         throw new \Exception("Tipo di spedizione non valido");
 
-    $configurazioni = $db->preleva_da_db("select id as value,nome_configurazione as label from $tipo_spedizione",[],false);
+    $configurazioni = $db->preleva_da_db("select id as value,nome_configurazione as label from $tipo_spedizione $filtro",[],false);
     if($configurazioni === false)
         throw new \Exception("Errore durante prelievo configurazioni");
 

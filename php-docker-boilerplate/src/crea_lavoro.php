@@ -58,6 +58,8 @@ try {
         $where = $elaborazione["where"] ? "where {$elaborazione['where']}" : "";
 
         $elaborazione["id_lavoro"] = $id_lavoro;
+        if(($elaborazione["tipo_spedizione"] ?? null) === "NO_PROFIT")//alias di target
+            $elaborazione["tipo_spedizione"] = "target";
         $elaborazione["id_configurazione"] = $elaborazione["id_configurazione"]["value"];
         unset($elaborazione["id"]);
         if(!$db->carica_a_db($elaborazione, "elaborazioni_lavoro",null,true))

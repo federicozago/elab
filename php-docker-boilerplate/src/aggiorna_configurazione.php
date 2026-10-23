@@ -21,20 +21,28 @@ try{
     $jsonData = json_decode(file_get_contents('php://input'), true);//da usare quando il front end manda i dati con axios senza headers: { 'Content-Type': 'multipart/form-data' }
     if(!isset($jsonData["tipo_spedizione"]) or !isset($jsonData["id_configurazione"]))
         throw new \Exception("Manca il tipo di spedizione o l'id della configurazione");
-    $tipo_spedizione = $jsonData["tipo_spedizione"];
+    $tipo_spedizione = $jsonData["tipo_spedizione"] === "NO_PROFIT" ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT è un alias di target
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
 
     // Stesso calcolo di crea_configurazione.php: il nome configurazione non è
     // (solo) quello digitato dal cliente, ma la concatenazione di più campi. Il
     // campo digitato dal cliente (nome_configurazione) è opzionale ed è l'ultimo
     // pezzo, se presente.
-    $componenti_nome = [
-        $jsonData["ragione_sociale_cliente_estesa"] ?? '',
-        $tipo_spedizione,
-        $jsonData["descrizione_tipo_spedizione"] ?? '',
-    ];
-    if ($tipo_spedizione === "target" && !empty($jsonData["prodotto_target"]))
-        $componenti_nome[] = $jsonData["prodotto_target"];
+    if ($tipo_spedizione === "target" && ($jsonData["prodotto_target"] ?? '') === "NO_PROFIT") {
+        //no profit: nel nome compare solo NO_PROFIT (niente "target", descrizione e sotto prodotto)
+        $componenti_nome = [
+            $jsonData["ragione_sociale_cliente_estesa"] ?? '',
+            "NO_PROFIT",
+        ];
+    } else {
+        $componenti_nome = [
+            $jsonData["ragione_sociale_cliente_estesa"] ?? '',
+            $tipo_spedizione,
+            $jsonData["descrizione_tipo_spedizione"] ?? '',
+        ];
+        if ($tipo_spedizione === "target" && !empty($jsonData["prodotto_target"]))
+            $componenti_nome[] = $jsonData["prodotto_target"];
+    }
     $componenti_nome[] = $jsonData["tipo_formato_postale"] ?? '';
     if (!empty($jsonData["nome_configurazione"]))
         $componenti_nome[] = $jsonData["nome_configurazione"];

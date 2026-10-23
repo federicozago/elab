@@ -86,11 +86,12 @@
       </BaseInput>
 
       <BaseSelect
-        v-if="props.tipoSpedizione === 'target'"
+        v-if="tipoEffettivo === 'target'"
         label="Descrizione prodotto spedizione (*)"
         v-model="formData.descrizione_tipo_spedizione"
         :options="descrizioniProdottoTarget"
         :rules="[required]"
+        :disable="formData.target.prodotto_target === 'NO_PROFIT'"
       >
         <q-tooltip
           >Compare nelle etichette scatole e bancale. Con "PROMOZIONE NO PROFIT" sull'etichetta scatola il
@@ -121,12 +122,12 @@
       <BaseToggle
         label="Gestione bancali"
         v-model="formData.gestione_bancali"
-        v-if="props.tipoSpedizione === 'target'"
+        v-if="tipoEffettivo === 'target'"
       ></BaseToggle>
       <BaseInput
         v-model="formData.tara_pallet"
         label="Tara pallet (gr) (*)"
-        v-if="props.tipoSpedizione === 'target' && formData.gestione_bancali"
+        v-if="tipoEffettivo === 'target' && formData.gestione_bancali"
         :rules="[required, minValue(0)]"
       />
 
@@ -140,10 +141,10 @@
       <BaseInput
         v-if="!taraScatolaNascosta"
         v-model="formData.tara_scatola"
-        :label="props.tipoSpedizione === 'target' ? 'Tara scatola (gr) (*)' : 'Tara scatola (Kg) (*)'"
+        :label="tipoEffettivo === 'target' ? 'Tara scatola (gr) (*)' : 'Tara scatola (Kg) (*)'"
         :rules="[taraScatolaValida]"
       >
-        <q-tooltip v-if="props.tipoSpedizione === 'target'"
+        <q-tooltip v-if="tipoEffettivo === 'target'"
           >Peso della scatola in grammi (di norma 200). Per i plichi è sempre 0</q-tooltip
         >
       </BaseInput>
@@ -359,8 +360,9 @@
       <!-- dettagli configurazione tipo spedizione specifica (target, massiva...)-->
       <component
         :is="formAttuale"
-        v-model="formData[props.tipoSpedizione]"
+        v-model="formData[tipoEffettivo]"
         :gestione-bancali="formData.gestione_bancali"
+        v-bind="tipoEffettivo === 'target' ? { bloccaProdotto: isNoProfit } : {}"
       /><!--Il parametro :is dice a Vue: "Non renderizzare un tag HTML standard, ma renderizza il componente che ti sto passando in questa variabile".-->
     </BaseForm>
   </div>
@@ -407,6 +409,10 @@ const props = defineProps({
   },
 })
 
+// NO_PROFIT è un alias di target: stessa tabella e stesso form, con sotto prodotto NO_PROFIT e descrizione prodotto fissi
+const isNoProfit = computed(() => props.tipoSpedizione === 'NO_PROFIT')
+const tipoEffettivo = computed(() => (isNoProfit.value ? 'target' : props.tipoSpedizione))
+
 const emit = defineEmits(['update:modelValue', 'saved', 'cancel'])
 
 onMounted(() => {})
@@ -439,13 +445,17 @@ function scegliModificaConfigurazione() {
   // in modifica il nome viene ricalcolato dal backend (campi + "info aggiuntive"): ricavo dal nome salvato le info
   // aggiuntive digitate in precedenza, altrimenti salvando andrebbero perse
   const c = configurazioneCaricata.value
-  const prefisso = [
-    c.ragione_sociale_cliente_estesa,
-    props.tipoSpedizione,
-    c.descrizione_tipo_spedizione,
-    props.tipoSpedizione === 'target' ? c.prodotto_target : '',
-    c.tipo_formato_postale,
-  ]
+  const prefisso = (
+    c.prodotto_target === 'NO_PROFIT' && tipoEffettivo.value === 'target'
+      ? [c.ragione_sociale_cliente_estesa, 'NO_PROFIT', c.tipo_formato_postale]
+      : [
+          c.ragione_sociale_cliente_estesa,
+          tipoEffettivo.value,
+          c.descrizione_tipo_spedizione,
+          tipoEffettivo.value === 'target' ? c.prodotto_target : '',
+          c.tipo_formato_postale,
+        ]
+  )
     .filter((v) => v !== '' && v !== null && v !== undefined)
     .join('_')
   const nomeSalvato = c.nome_configurazione || ''
@@ -466,7 +476,7 @@ function configurazioneCambiata(val) {
   api
     .post('/preleva_configurazione.php', {
       id_configurazione: val.value,
-      tipo_spedizione: props.tipoSpedizione,
+      tipo_spedizione: tipoEffettivo.value,
     })
     .then((response) => {
       //setto il formData con i dati prelevati
@@ -483,8 +493,8 @@ function configurazioneCambiata(val) {
         var valore = response.data.configurazione[key]
 
         if (key in formData.value) valorePrec = formData.value[key]
-        else if (key in formData.value[props.tipoSpedizione])
-          valorePrec = formData.value[props.tipoSpedizione][key]
+        else if (key in formData.value[tipoEffettivo.value])
+          valorePrec = formData.value[tipoEffettivo.value][key]
 
         if (typeof valorePrec == 'boolean') {
           //converto 0=>false 1=>true
@@ -495,9 +505,9 @@ function configurazioneCambiata(val) {
         if (key in formData.value) {
           //se il valore è a livello principale di formData
           formData.value[key] = valore
-        } else if (key in formData.value[props.tipoSpedizione])
+        } else if (key in formData.value[tipoEffettivo.value])
           //se il valore è a livello secondario di formData
-          formData.value[props.tipoSpedizione][key] = valore
+          formData.value[tipoEffettivo.value][key] = valore
       })
 
       // dalla pagina configurazioni (non dal dialog di creazione lavoro) selezionando una configurazione esistente chiedo
@@ -519,12 +529,12 @@ const descrizioniProdottoTarget = ['TARGET', 'PROMOZIONE NO PROFIT']
 
 // target: la tara scatola è in grammi (di norma 200) e per i plichi è sempre 0, quindi il campo non serve. massiva: resta in kg
 const taraScatolaNascosta = computed(
-  () => props.tipoSpedizione === 'target' && formData.value.target.plichi === 'Plichi',
+  () => tipoEffettivo.value === 'target' && formData.value.target.plichi === 'Plichi',
 )
 const taraScatolaValida = (val) => {
   if (val === null || val === undefined || val === '') return 'Campo obbligatorio'
   const n = Number(val)
-  if (props.tipoSpedizione !== 'target') return n >= 0 || 'Il valore deve essere almeno 0'
+  if (tipoEffettivo.value !== 'target') return n >= 0 || 'Il valore deve essere almeno 0'
   return n === 0 || n >= 10 || 'Valore in grammi: inserire 0 oppure almeno 10 (es. 200)'
 }
 
@@ -540,37 +550,37 @@ const componentiForm = {
   massiva: NewConfigMassiva,
 }
 
-const formAttuale = computed(() => componentiForm[props.tipoSpedizione])
+const formAttuale = computed(() => componentiForm[tipoEffettivo.value])
 
-if (props.tipoSpedizione === 'time') {
+if (tipoEffettivo.value === 'time') {
   tipologia_prodotto_consigliato = 'V'
   codice_prodotto_consigliato = 80
   codice_identificativo_pallet_consigliato = 91
   tipologia_codice_di_tracciatura_consigliato = 1
   descrittivo_gamma_consigliato = 'V'
   //tipo_prodotto_postale è gestito dal watch sotto
-} else if (props.tipoSpedizione === 'contest') {
+} else if (tipoEffettivo.value === 'contest') {
   tipologia_prodotto_consigliato = 'B'
   codice_prodotto_consigliato = 125
   codice_identificativo_pallet_consigliato = 95
   tipologia_codice_di_tracciatura_consigliato = 1
   descrittivo_gamma_consigliato = 'B'
   tipo_prodotto_postale_consigliato = 'S'
-} else if (props.tipoSpedizione === 'market') {
+} else if (tipoEffettivo.value === 'market') {
   tipologia_prodotto_consigliato = 'R'
   codice_prodotto_consigliato = 233
   codice_identificativo_pallet_consigliato = 95
   tipologia_codice_di_tracciatura_consigliato = 2
   descrittivo_gamma_consigliato = 'B'
   tipo_prodotto_postale_consigliato = '' //non saprei
-} else if (props.tipoSpedizione === 'racc_smart') {
+} else if (tipoEffettivo.value === 'racc_smart') {
   tipologia_prodotto_consigliato = 'R'
   codice_prodotto_consigliato = 225
   codice_identificativo_pallet_consigliato = 95
   tipologia_codice_di_tracciatura_consigliato = 2
   descrittivo_gamma_consigliato = 'B'
   tipo_prodotto_postale_consigliato = '' //non saprei
-} else if (props.tipoSpedizione === 'target') {
+} else if (tipoEffettivo.value === 'target') {
   tipologia_prodotto_consigliato = 'T'
   //codice_prodotto viene aggiornato dal watch sotto
   codice_identificativo_pallet_consigliato = 95
@@ -590,14 +600,19 @@ function getInitialFormData() {
     ragione_sociale_cliente_estesa: '',
     peso_busta_vuota: 5,
     peso_inserto: 0,
-    descrizione_tipo_spedizione: props.tipoSpedizione === 'target' ? 'TARGET' : props.tipoSpedizione,
+    descrizione_tipo_spedizione:
+      tipoEffettivo.value === 'target'
+        ? isNoProfit.value
+          ? 'PROMOZIONE NO PROFIT'
+          : 'TARGET'
+        : tipoEffettivo.value,
     tipo_formato_postale: 'P',
     cmp: 'CMP VERONA',
     n_conto_contrattuale: '',
     sap: '',
     tara_pallet: 22500,
     con_prenotazione: false,
-    tara_scatola: props.tipoSpedizione === 'target' ? 200 : 0.2,
+    tara_scatola: tipoEffettivo.value === 'target' ? 200 : 0.2,
     codice_cliente_postale: '',
     cap_mittente: '',
     utenza_ps_online: '',
@@ -618,7 +633,7 @@ function getInitialFormData() {
     etichetta_n_up: true,
 
     target: {
-      prodotto_target: '',
+      prodotto_target: isNoProfit.value ? 'NO_PROFIT' : '',
       buste_min: 0,
       buste_max: 0,
       plichi: '',
@@ -646,7 +661,7 @@ const formData = ref(getInitialFormData())
 watch(
   () => formData.value.target.prodotto_target,
   (nuovoValore) => {
-    if (props.tipoSpedizione === 'target') {
+    if (tipoEffettivo.value === 'target') {
       if (nuovoValore === 'BASIC') {
         formData.value.codice_prodotto = 75
         formData.value.tipo_prodotto_postale = 'S'
@@ -656,6 +671,8 @@ watch(
       } else if (nuovoValore === 'GOLD') {
         formData.value.codice_prodotto = 68
         formData.value.tipo_prodotto_postale = 'Q'
+      } else if (nuovoValore === 'NO_PROFIT') {
+        formData.value.descrizione_tipo_spedizione = 'PROMOZIONE NO PROFIT'
       } else if (nuovoValore === 'INVITO ALLA PROVA') {
         formData.value.codice_prodotto = 123
         formData.value.tipo_prodotto_postale = 'Y'
@@ -668,7 +685,7 @@ watch(
 watch(
   () => formData.value.target.plichi,
   (nuovo, vecchio) => {
-    if (props.tipoSpedizione !== 'target') return
+    if (tipoEffettivo.value !== 'target') return
     if (nuovo === 'Plichi') formData.value.tara_scatola = 0
     else if (nuovo === 'Scatole' && vecchio === 'Plichi' && !Number(formData.value.tara_scatola))
       formData.value.tara_scatola = 200
@@ -678,7 +695,7 @@ watch(
 watch(
   () => formData.value.time.prodotto_time,
   (nuovoValore) => {
-    if (props.tipoSpedizione === 'time') {
+    if (tipoEffettivo.value === 'time') {
       if (nuovoValore === 'BASE') formData.value.tipo_prodotto_postale = 'Q'
       else if (nuovoValore === 'ORA') formData.value.tipo_prodotto_postale = 'S'
       else if (nuovoValore === 'OPERATORI') formData.value.tipo_prodotto_postale = 'T'
@@ -689,7 +706,7 @@ watch(
 watch(
   () => formData.value.time.kpm,
   (nuovoValore) => {
-    if (props.tipoSpedizione === 'time') {
+    if (tipoEffettivo.value === 'time') {
       if (nuovoValore === true) formData.value.codice_identificativo_stampatore = 'SE'
       else formData.value.codice_identificativo_stampatore = 'BC'
     }
@@ -742,7 +759,7 @@ watch(
 async function inviaDati() {
   const datiDaInviare = { ...formData.value }
   datiDaInviare.age = age.value
-  datiDaInviare.tipo_spedizione = props.tipoSpedizione
+  datiDaInviare.tipo_spedizione = tipoEffettivo.value
 
   if (!datiDaInviare.stampa_datamatrix) {
     delete datiDaInviare.descrittivo_gamma
@@ -822,7 +839,7 @@ async function confermaEliminaConfigurazione() {
       try {
         const response = await api.post('/elimina_configurazione_postale.php', {
           id_configurazione: idConfigurazioneSelezionata.value.value,
-          tipo_spedizione: props.tipoSpedizione
+          tipo_spedizione: tipoEffettivo.value
         })
 
         if (response.data.success) {
