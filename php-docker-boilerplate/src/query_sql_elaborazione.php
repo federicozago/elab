@@ -48,3 +48,24 @@ function costruisci_query_sql_elaborazione($db, $id_elaborazione)
 
     return ["query" => $query, "completa" => (bool)$campi, "elaborazione" => $el];
 }
+
+/** esegue la query in streaming su una connessione dedicata: i record si leggono uno alla volta con fetch() senza caricarli tutti in
+ * memoria (Gestione_db li carica tutti e limita ogni query a 2 minuti, inadatto agli export di centinaia di migliaia di righe)
+ * @param array $vg variabili globali "elab" (ip_db, porta_db, user_db, pass_db, database_cliente)
+ * @param string $query
+ * @return \PDOStatement
+ */
+function esegui_query_streaming($vg, $query)
+{
+    $porta = $vg["porta_db"] ?? "";
+    if ($porta != "" and strpos($porta, "port=") === false)
+        $porta = "port=" . $porta;
+    $conn = new \PDO("mysql:host={$vg['ip_db']};dbname={$vg['database_cliente']};charset=utf8;$porta;", $vg["user_db"], $vg["pass_db"], [
+        \PDO::ATTR_PERSISTENT => false,
+        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+        \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+    ]);
+    $conn->exec("set names 'utf8'");
+    $conn->exec("SET SESSION MAX_EXECUTION_TIME=0");
+    return $conn->query($query);
+}

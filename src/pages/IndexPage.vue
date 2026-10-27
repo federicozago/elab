@@ -256,9 +256,20 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               icon="download"
               label="CSV"
               :disable="caricamentoSql"
-              :loading="esportazioneCsv"
+              :loading="esportazione === 'csv'"
               title="Esporta in CSV i record estratti dalla query"
-              @click="esportaCsv(selectedRowSql)"
+              @click="esportaQuery(selectedRowSql, 'csv')"
+            ></BaseBtn>
+            <BaseBtn
+              dense
+              flat
+              color="primary"
+              icon="table_view"
+              label="XLSX"
+              :disable="caricamentoSql"
+              :loading="esportazione === 'xlsx'"
+              title="Esporta in Excel i record estratti dalla query"
+              @click="esportaQuery(selectedRowSql, 'xlsx')"
             ></BaseBtn>
             <BaseBtn
               dense
@@ -516,7 +527,7 @@ const dialogReportVisible = ref(false)
 const selectedRowSql = ref(null)
 const querySql = ref('')
 const caricamentoSql = ref(false)
-const esportazioneCsv = ref(false)
+const esportazione = ref(null) // formato in corso di esportazione ('csv' | 'xlsx')
 const selectedRowPrenotazione = ref(null)
 const selectedRowAzioni = ref(null)
 const reportRighe = ref([])
@@ -687,22 +698,23 @@ async function apriSql(row) {
   }
 }
 
-// scarica in csv i record estratti dalla query mostrata nel pannello (la query viene ricostruita dal backend)
-async function esportaCsv(row) {
-  esportazioneCsv.value = true
+// scarica in csv o xlsx i record estratti dalla query mostrata nel pannello (la query viene ricostruita dal backend)
+async function esportaQuery(row, formato) {
+  esportazione.value = formato
+  const nomeFormato = formato.toUpperCase()
   try {
     const response = await api.post(
-      '/esporta_query_csv.php',
+      `/esporta_query_${formato}.php`,
       { id_elaborazione: row.id_elaborazione },
       { responseType: 'blob', timeout: 0 },
     )
-    let filename = `${row.nome_lavoro}_${row.nome_elaborazione}.csv`
+    let filename = `${row.nome_lavoro}_${row.nome_elaborazione}.${formato}`
     const contentDisposition =
       response.headers['content-disposition'] || response.headers['Content-Disposition']
     const fileNameMatch = contentDisposition?.match(/filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i)
     if (fileNameMatch && fileNameMatch[1]) filename = decodeURIComponent(fileNameMatch[1])
 
-    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }))
+    const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', filename)
@@ -710,7 +722,7 @@ async function esportaCsv(row) {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
-    messaggioPositivo('CSV esportato')
+    messaggioPositivo(`${nomeFormato} esportato`)
   } catch (e) {
     // con responseType blob l'errore json arriva come Blob: lo leggo per mostrare il messaggio
     let messaggio = null
@@ -722,9 +734,9 @@ async function esportaCsv(row) {
         messaggio = testo
       }
     }
-    gestioneErrore(e, 'Impossibile esportare il CSV', messaggio)
+    gestioneErrore(e, `Impossibile esportare il ${nomeFormato}`, messaggio)
   } finally {
-    esportazioneCsv.value = false
+    esportazione.value = null
   }
 }
 

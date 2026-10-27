@@ -32,20 +32,8 @@ try {
     $risultato = costruisci_query_sql_elaborazione($db, $jsonData["id_elaborazione"]);
     $el = $risultato["elaborazione"];
 
-    // connessione dedicata alla lettura in streaming (Gestione_db carica tutto in memoria e limita le query a 2 minuti)
-    $porta = $vg["porta_db"] ?? "";
-    if ($porta != "" and strpos($porta, "port=") === false)
-        $porta = "port=" . $porta;
-    $conn = new \PDO("mysql:host={$vg['ip_db']};dbname={$vg['database_cliente']};charset=utf8;$porta;", $vg["user_db"], $vg["pass_db"], [
-        \PDO::ATTR_PERSISTENT => false,
-        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-        \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
-    ]);
-    $conn->exec("set names 'utf8'");
-    $conn->exec("SET SESSION MAX_EXECUTION_TIME=0");
-
     // la query parte prima degli header: se fallisce la risposta è un normale errore json
-    $stm = $conn->query($risultato["query"]);
+    $stm = esegui_query_streaming($vg, $risultato["query"]);
 
     $nome_file = preg_replace('/[^A-Za-z0-9_.-]+/', '_', "{$el['nome_lavoro']}_{$el['nome_elaborazione']}") . ".csv";
 
