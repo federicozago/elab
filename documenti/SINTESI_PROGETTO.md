@@ -338,6 +338,8 @@ Registra le singole esecuzioni (upload di nuovi file) per un determinato lavoro.
 #### 5. Tabelle Configurazioni (`target`, `massiva`, ecc.)
 Ogni tipo di spedizione ha una propria tabella per memorizzare i parametri tecnici di ordinamento (es. affrancatura, formato, tipologia cliente).
 
+**Datamatrix postale (solo target / no profit):** con il flag `stampa_datamatrix` l'ordinamento calcola per ogni record il datamatrix standard unico Poste (72 caratteri) e lo salva in `ordinati_target_*.barcode` (indice univoco), con `codice_figlio` prelevato dalla tabella indicata in `tabella_codici_figli` (formato `schema.tabella`, es. `import_file.figli_kpm`; un codice per elaborazione, consumato a ogni ordinamento). `descrittivo_gamma` non è modificabile (V time, E no profit, T target, B massiva); autorizzazione postale, omologa e tabella codici figli sono obbligatori. Sulle etichette scatola compare "LINEA EVOLUTION". Dettagli in `documenti/18_PIANO_AZIONE_DATAMATRIX_TARGET.md`.
+
 ### Tabelle Dinamiche
 
 Il sistema genera tabelle e viste dinamicamente per gestire i dati degli utenti:

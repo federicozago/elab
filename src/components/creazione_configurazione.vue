@@ -229,7 +229,7 @@
       >
         <q-tooltip
           >Compare nella DU. Per Kpm si usa In Consegna + Resi Report. Dipende dal contratto fatto
-          dal cliente</q-tooltip
+          dal cliente. Vedere la guida di Poste per la generazione della DU, tabella 2</q-tooltip
         >
       </BaseSelect>
       <BaseInput
@@ -265,13 +265,13 @@
       <BaseToggle label="Stampa datamatrix" v-model="formData.stampa_datamatrix"></BaseToggle>
       <BaseInput
         v-if="formData.stampa_datamatrix"
-        label="Descrittivo gamma (*)"
-        v-model="formData.descrittivo_gamma"
-        :rules="[required, minValue(1), maxValue(3)]"
+        label="Descrittivo gamma"
+        :model-value="gammaAutomatico"
+        readonly
       >
         <q-tooltip
-          >Compare nel datamatrix, per il Time è V, per il target è V altrimenti solitamente è
-          B</q-tooltip
+          >Compare nel datamatrix. Non è modificabile, dipende dal tipo di spedizione: V per Time, E
+          per No Profit, T per Target, B per Massiva</q-tooltip
         >
       </BaseInput>
       <BaseInput
@@ -292,8 +292,9 @@
         :rules="[required, maxLength(1)]"
       >
         <q-tooltip
-          >Compare nel datamatrix, per il time dipende se è ora, base operatori (modifica il sotto
-          prodotto per capire). Per le raccomandate non saprei</q-tooltip
+          >Compare nel datamatrix. Per massiva mettere W, per Time Kpm T, per No Profit solitamente
+          è Q ma verificare, per il PT Creative è W, per il PT Card è U, per il PT Basic è S,
+          verificare comunque guardando guida postale tabella 3 pagina 7</q-tooltip
         >
       </BaseInput>
       <BaseInput
@@ -316,12 +317,31 @@
         </q-tooltip>
       </BaseInput>
 
+      <BaseSelect
+        v-if="formData.stampa_datamatrix"
+        label="Tabella codici figli (*)"
+        v-model="formData.tabella_codici_figli"
+        :options="tabelleFigli"
+        :rules="[required]"
+      >
+        <q-tooltip
+          >Tabella mysql da cui il programma preleva il codice figlio (prenotazione) che compare nel
+          datamatrix. Un codice viene consumato a ogni ordinamento. Sono elencate le tabelle di
+          import_file ed elab che iniziano per figli_</q-tooltip
+        >
+      </BaseSelect>
+
       <BaseInput
-        label="Autorizzazione postale"
+        :label="formData.stampa_datamatrix ? 'Autorizzazione postale (*)' : 'Autorizzazione postale'"
         v-model="formData.autorizzazione_postale"
+        :rules="formData.stampa_datamatrix ? [required] : []"
       ></BaseInput>
 
-      <BaseInput label="Omologa" v-model="formData.omologa"></BaseInput>
+      <BaseInput
+        :label="formData.stampa_datamatrix ? 'Omologa (*)' : 'Omologa'"
+        v-model="formData.omologa"
+        :rules="formData.stampa_datamatrix ? [required] : []"
+      ></BaseInput>
 
       <BaseRadio
         label="N etichette per foglio (*)"
@@ -524,6 +544,25 @@ function configurazioneCambiata(val) {
 
 const age = computed(() => codici_age[formData.value.cmp])
 
+// descrittivo gamma del datamatrix (guida Poste, tabella 1): non si sceglie, dipende dal tipo di spedizione.
+// V time, E no profit, T target, B massiva (e per gli altri prodotti bulk mail)
+const gammaAutomatico = computed(() => {
+  if (tipoEffettivo.value === 'time') return 'V'
+  if (tipoEffettivo.value === 'target') return isNoProfit.value ? 'E' : 'T'
+  return 'B'
+})
+
+// tabelle dei codici figli (figli_* in import_file ed elab) selezionabili quando si stampa il datamatrix
+const tabelleFigli = ref([])
+async function caricaTabelleFigli() {
+  try {
+    const response = await api.post('/preleva_tabelle_figli.php')
+    tabelleFigli.value = response.data.tabelle
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile prelevare le tabelle dei codici figli')
+  }
+}
+
 // target: la descrizione prodotto si sceglie fra due valori (con PROMOZIONE NO PROFIT l'etichetta scatola cambia la dicitura del prodotto)
 const descrizioniProdottoTarget = ['TARGET', 'PROMOZIONE NO PROFIT']
 
@@ -593,6 +632,7 @@ if (tipoEffettivo.value === 'time') {
 function getInitialFormData() {
   return {
     stampa_datamatrix: false,
+    tabella_codici_figli: '',
     prenotazione_con_du: false,
     gestione_bancali: false,
     contiene_inserto: false,
@@ -658,6 +698,13 @@ function getInitialFormData() {
 }
 
 const formData = ref(getInitialFormData())
+watch(
+  () => formData.value.stampa_datamatrix,
+  (stampa) => {
+    if (stampa && !tabelleFigli.value.length) caricaTabelleFigli()
+  },
+  { immediate: true },
+)
 watch(
   () => formData.value.target.prodotto_target,
   (nuovoValore) => {
@@ -761,12 +808,15 @@ async function inviaDati() {
   datiDaInviare.age = age.value
   datiDaInviare.tipo_spedizione = tipoEffettivo.value
 
-  if (!datiDaInviare.stampa_datamatrix) {
+  if (datiDaInviare.stampa_datamatrix) {
+    datiDaInviare.descrittivo_gamma = gammaAutomatico.value
+  } else {
     delete datiDaInviare.descrittivo_gamma
     delete datiDaInviare.classe_postale
     delete datiDaInviare.tipo_prodotto_postale
     delete datiDaInviare.codice_identificativo_stampatore
     delete datiDaInviare.barcode_campi_cliente
+    delete datiDaInviare.tabella_codici_figli
   }
 
   if (!datiDaInviare.prenotazione_con_du) {

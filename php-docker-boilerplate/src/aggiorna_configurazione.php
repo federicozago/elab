@@ -24,6 +24,20 @@ try{
     $tipo_spedizione = $jsonData["tipo_spedizione"] === "NO_PROFIT" ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT è un alias di target
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
 
+    if (!empty($jsonData["stampa_datamatrix"])) {
+        // descrittivo gamma del datamatrix (guida Poste, tabella 1): non modificabile, dipende dal tipo di spedizione
+        $gamma = [
+            "time" => "V",
+            "massiva" => "B",
+            "target" => ($jsonData["prodotto_target"] ?? '') === "NO_PROFIT" ? "E" : "T",
+        ][$tipo_spedizione] ?? null;
+        if ($gamma)
+            $jsonData["descrittivo_gamma"] = $gamma;
+        foreach (["autorizzazione_postale" => "Autorizzazione postale", "omologa" => "Omologa", "tabella_codici_figli" => "Tabella codici figli"] as $campo => $descrizione)
+            if (empty($jsonData[$campo]))
+                throw new \Exception("$descrizione è obbligatoria quando si stampa il datamatrix");
+    }
+
     // Stesso calcolo di crea_configurazione.php: il nome configurazione non è
     // (solo) quello digitato dal cliente, ma la concatenazione di più campi. Il
     // campo digitato dal cliente (nome_configurazione) è opzionale ed è l'ultimo
