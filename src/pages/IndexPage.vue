@@ -144,16 +144,47 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                           </div>
                           <div v-if="props.value === 6">Assegnazione bancali in corso</div>
                           <div v-if="props.value === 2">
+                            <!-- la prenotazione (generazione DU) c'è solo se la configurazione la prevede -->
                             <BaseBtn
+                              v-if="props.row.prenotazione_con_du"
                               label="Prenota"
                               @click="
                                 selectedRowPrenotazione = props.row;
                                 dialogPrenotazioneVisible = true
                               "
                             />
+                            <div v-else>Ordinato</div>
                           </div>
                           <div v-if="props.value === 3">In attesa di ok da Poste</div>
-                          <div v-if="props.value === 4">Prenotato</div>
+                          <div v-if="props.value === 4">
+                            {{ props.row.prenotazione_con_du ? 'Prenotato' : 'Ordinato' }}
+                            <BaseBtn
+                              v-if="props.row.prenotazione_con_du"
+                              label="Scarica DU"
+                              size="sm"
+                              flat
+                              @click="
+                                selectedRowPrenotazione = props.row;
+                                dialogPrenotazioneVisible = true
+                              "
+                            />
+                          </div>
+                        </q-td>
+                      </template>
+
+                      <template v-slot:body-cell-chiudi="props">
+                        <q-td :props="props">
+                          <!-- dopo la prenotazione (o subito dopo l'ordinamento se non c'è la DU): come "chiudi elaborazione" delle azioni -->
+                          <BaseBtn
+                            v-if="
+                              props.row.stato === 4 ||
+                              (props.row.stato === 2 && !props.row.prenotazione_con_du)
+                            "
+                            label="Chiudi elab"
+                            size="sm"
+                            @click="chiudiElaborazione(props.row.id_elaborazione)"
+                            :loading="isChiusuraSubmitting === props.row.id_elaborazione"
+                          />
                         </q-td>
                       </template>
 
@@ -184,11 +215,6 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                 </q-tr>
               </template>
 
-              <template v-slot:body-cell-chiudi="props">
-                <q-td :props="props">
-                  <BaseBtn label="Chiudi" @click="chiudiElaborazione(props.row.id)"></BaseBtn>
-                </q-td>
-              </template>
             </q-table>
           </q-tab-panel>
 
@@ -297,7 +323,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
     <q-dialog v-model="dialogPrenotazioneVisible" @hide="selectedRowPrenotazione = null">
       <q-card flat bordered v-if="selectedRowPrenotazione">
         <q-card-section class="row items-center justify-between">
-          <div class="text-h6">Azioni</div>
+          <div class="text-h6">Prenotazione con DU</div>
           <div class="row q-gutter-sm">
             <BaseBtn
               dense
@@ -311,13 +337,17 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         </q-card-section>
         <q-separator></q-separator>
         <q-card-section>
+          <div class="q-mb-md text-caption">
+            Indicare la data di spedizione: la prenotazione genera la DU e ne scarica lo zip.
+          </div>
           <BaseDatePicker
             v-model="dataPrenotazione[selectedRowPrenotazione.id_elaborazione]"
-            label="Data prenotazione"
+            label="Data di spedizione"
           ></BaseDatePicker>
           <BaseBtn
-            label="Prenota"
+            label="Prenota e scarica DU"
             size="sm"
+            :loading="prenotazioneInCorso === selectedRowPrenotazione.id_elaborazione"
             @click="lanciaPrenotazione(selectedRowPrenotazione.id_elaborazione)"
           />
         </q-card-section>
@@ -448,6 +478,8 @@ const isSubmitting = ref(false)
 const isActionSubmitting = ref(null)
 const isSortingSubmitting = ref(null)
 const isBancaliSubmitting = ref(null)
+const prenotazioneInCorso = ref(null)
+const isChiusuraSubmitting = ref(null)
 const idEliminazioneInCorso = ref(null)
 
 const formData = ref({
@@ -778,25 +810,74 @@ async function copiaReport() {
   }
 }
 
-function lanciaPrenotazione(id_elaborazione) {
+/** salva la data di spedizione, genera la DU dell'elaborazione e ne scarica lo zip. poi l'elaborazione risulta prenotata e si può chiudere */
+async function lanciaPrenotazione(id_elaborazione) {
   if (!dataPrenotazione.value[id_elaborazione]) {
     gestioneErrore(null, 'Data prenotazione non inserita')
     return
   }
 
-  api
-    .post('/prenotazione.php', {
-      data_prenotazione: dataPrenotazione.value[id_elaborazione],
-      id_elaborazione: id_elaborazione,
-    })
-    .then(() => {
-      dialogPrenotazioneVisible.value = false
-      prelevaElaborazioniInCorso()
-      messaggioPositivo('Prenotazione effettuata')
-    })
-    .catch((e) => {
-      gestioneErrore(e, 'Impossibile lanciare prenotazione')
-    })
+  prenotazioneInCorso.value = id_elaborazione
+  try {
+    const response = await api.post(
+      '/genera_du.php',
+      {
+        data_prenotazione: dataPrenotazione.value[id_elaborazione],
+        id_elaborazione: id_elaborazione,
+      },
+      { responseType: 'blob' },
+    )
+    scaricaFile(response, 'du.zip')
+    dialogPrenotazioneVisible.value = false
+    messaggioPositivo('Prenotazione effettuata, DU scaricata')
+    prelevaElaborazioniInCorso()
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile lanciare prenotazione', await estraiMessaggioErrore(e))
+  } finally {
+    prenotazioneInCorso.value = null
+  }
+}
+
+/** fa scaricare al browser il file restituito dal backend (nome preso da content-disposition) */
+function scaricaFile(response, nomePredefinito) {
+  const url = window.URL.createObjectURL(new Blob([response.data]))
+  const link = document.createElement('a')
+  link.href = url
+
+  let filename = nomePredefinito
+  const contentDisposition =
+    response.headers['content-disposition'] || response.headers['Content-Disposition']
+
+  if (contentDisposition) {
+    // Questa regex intercetta sia filename= che filename*= gestendo UTF-8 e apici
+    const fileNameMatch = contentDisposition.match(
+      /filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i,
+    )
+    if (fileNameMatch && fileNameMatch[1]) {
+      // decodeURIComponent trasforma %20 in spazio e gestisce gli altri caratteri codificati
+      filename = decodeURIComponent(fileNameMatch[1])
+    }
+  }
+
+  link.setAttribute('download', filename)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+/** messaggio di errore di una chiamata: se la risposta è un Blob (richiesta con responseType: 'blob') il messaggio json va letto dal contenuto */
+async function estraiMessaggioErrore(e) {
+  if (e.response?.data instanceof Blob) {
+    const text = await e.response.data.text()
+    try {
+      return JSON.parse(text).message
+    } catch {
+      return text
+    }
+  }
+  // Caso standard (JSON già decodificato o altri errori)
+  return e.response?.data?.message || e.message
 }
 
 function riesporta(row) {
@@ -860,30 +941,7 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
       reportRighe.value = response.data.report
       dialogReportVisible.value = true
     } else if (isPdf || isZip || isExcel) {
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-
-      let filename = isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : 'etichette.pdf'
-      const contentDisposition =
-        response.headers['content-disposition'] || response.headers['Content-Disposition']
-
-      if (contentDisposition) {
-        // Questa regex intercetta sia filename= che filename*= gestendo UTF-8 e apici
-        const fileNameMatch = contentDisposition.match(
-          /filename\*?=['"]?(?:UTF-8'')?([^'";\n]*)['"]?/i,
-        )
-        if (fileNameMatch && fileNameMatch[1]) {
-          // decodeURIComponent trasforma %20 in spazio e gestisce gli altri caratteri codificati
-          filename = decodeURIComponent(fileNameMatch[1])
-        }
-      }
-
-      link.setAttribute('download', filename)
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      scaricaFile(response, isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : 'etichette.pdf')
     } else {
       messaggioPositivo('Azione eseguita')
     }
@@ -902,39 +960,25 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
     dataAzioni.value = null
     dialogAzioniVisible.value = false
   } catch (e) {
-    let messaggio = 'Errore sconosciuto'
-
-    // Se la risposta è un Blob (caso errore con responseType: 'blob')
-    if (e.response?.data instanceof Blob && config?.responseType === 'blob') {
-      const text = await e.response.data.text()
-      try {
-        const errorData = JSON.parse(text)
-        messaggio = errorData.message
-      } catch {
-        messaggio = text
-      }
-    } else {
-      // Caso standard (JSON già decodificato o altri errori)
-      messaggio = e.response?.data?.message || e.message
-    }
-
+    const messaggio = await estraiMessaggioErrore(e)
     gestioneErrore(e, 'Impossibile eseguire azione ' + datiAzione.endpoint, messaggio)
   } finally {
     isActionSubmitting.value = null
   }
 }
 
-function chiudiElaborazione(id_elaborazione) {
-  api
-    .post('/chiudi_elaborazione.php', { id_elaborazione: id_elaborazione })
-    .then(() => {
-      messaggioPositivo('Elaborazione chiusa')
-      prelevaElaborazioniInCorso()
-      prelevaElaborazioniConcluse()
-    })
-    .catch((e) => {
-      gestioneErrore(e, 'Impossibile chiudere elaborazione')
-    })
+/** pulsante "Chiudi elab": esegue la stessa azione di "chiudi elaborazione" del dialog azioni (scarica lo zip con i dati e chiude l'elaborazione) */
+async function chiudiElaborazione(id_elaborazione) {
+  isChiusuraSubmitting.value = id_elaborazione
+  try {
+    await lanciaAzione(
+      { endpoint: 'chiudi_elaborazione.php', output: 'zip' },
+      id_elaborazione,
+      'Chiudi elab',
+    )
+  } finally {
+    isChiusuraSubmitting.value = null
+  }
 }
 
 function riapriElaborazione(id_elaborazione) {

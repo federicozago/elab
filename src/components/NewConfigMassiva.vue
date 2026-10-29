@@ -15,6 +15,18 @@
       type="number"
       :rules="[required, minValue(1), maxValue(7000)]"
     />
+    <BaseInput
+      v-model="model.max_scatole_per_bancale"
+      label="Scatole per bancale (max) (*)"
+      type="number"
+      :rules="[required, minValue(1), maxValue(500)]"
+    >
+      <q-tooltip
+        >La massiva non ha l'ordinamento in bancali: le scatole ordinate vengono divise in bancali
+        di al massimo questo numero di scatole (come per il Time, di norma 56). Il bancale è
+        indispensabile per l'id bancale (HU) della DU</q-tooltip
+      >
+    </BaseInput>
   </div>
 </template>
 

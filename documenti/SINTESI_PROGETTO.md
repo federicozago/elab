@@ -91,9 +91,9 @@ Tutti i file di configurazione necessari al funzionamento dell'infrastruttura so
     - Folder Z
     - Stato ordinamento (pulsante "Ordina" / "In elaborazione" / "Elaborato")
     - Query SQL per visualizzare i dati ordinati
-    - Stato prenotazione (pulsante "Prenota" con data / "In attesa" / "Prenotato")
+    - Stato prenotazione: pulsante "Prenota" (data di spedizione, genera e scarica la DU) solo se la configurazione ha "Prenotazione con DU"; poi "Prenotato" (con "Scarica DU")
     - Pulsante "Azioni" per eseguire azioni specifiche (es. etichette con download diretto e suggerimento cartella di salvataggio)
-    - Pulsante "Chiudi Elab" per chiudere l'elaborazione
+    - Pulsante "Chiudi Elab" (dopo la prenotazione, o subito dopo l'ordinamento se non c'è la DU): stessa azione di "chiudi elaborazione" delle azioni, scarica lo ZIP e chiude
 
 - **Visualizzazione elaborazioni concluse:**
   - Tabella con lavori chiusi
@@ -103,9 +103,9 @@ Tutti i file di configurazione necessari al funzionamento dell'infrastruttura so
 
 - **Azioni disponibili:**
   - `lanciaElaborazione()`: Avvia l'ordinamento dei dati
-  - `lanciaPrenotazione()`: Prenota la spedizione con data
+  - `lanciaPrenotazione()`: Prenota la spedizione con data (`genera_du.php`: salva la data, genera la DU e ne scarica lo zip)
   - `lanciaAzione()`: Esegue azioni specifiche (etichette, distinte, chiusura lavoro con download ZIP, ecc.)
-  - `chiudiElaborazione()`: Chiude un'elaborazione (non più visibile in "in corso")
+  - `chiudiElaborazione()`: Chiude un'elaborazione (come l'azione `chiudi_elaborazione.php`, con download ZIP)
   - `riapriElaborazione()`: Riapre un'elaborazione chiusa
   - `riesporta()`: Riesporta un'elaborazione conclusa in formato ZIP
   - `confermaElimina()`: Elimina i dati relativi a un'elaborazione specifica
@@ -431,7 +431,7 @@ Il sistema genera tabelle e viste dinamicamente per gestire i dati degli utenti:
 
 ### Stati Elaborazione
 - **Ordinamento:** 0 = Da ordinare, 1 = In elaborazione, 2+ = Elaborato
-- **Prenotazione:** 2 = Da prenotare, 3 = In attesa OK Poste, 4 = Prenotato
+- **Prenotazione:** 2 = Ordinata (da prenotare se la configurazione ha la DU), 3 = In attesa OK Poste (non più impostato), 4 = Prenotato (DU generata). Da 2 (senza DU) o 4 si chiude con "Chiudi elab"
 - **Lavoro:** Attivo / Concluso (chiuso)
 
 ---
@@ -685,15 +685,13 @@ Tutti gli endpoint PHP seguono un pattern comune:
   - Aggiorna stato elaborazione a 2 (elaborato)
 - **Libreria utilizzata:** `Gestione_db`, `Elaborazione_postale_{tipo}` (da vendor/elaborazione_postale)
 
-#### **prenotazione.php**
-**Scopo:** Gestisce la prenotazione della spedizione con Poste Italiane.
-- **Input:** `id_elaborazione`, `data_prenotazione`
-- **Processo:**
-  - Preleva dati elaborazione
-  - Genera file distinta per Poste Italiane
-  - Carica file su FTP Poste (configurazione da `temp/elab.php`)
-  - Aggiorna stato prenotazione
-- **Libreria utilizzata:** `Gestione_db`, `Ftp`, classi elaborazione postale
+#### **genera_du.php** (pulsante "Prenota", sostituisce il vecchio `prenotazione.php`)
+**Scopo:** Prenotazione con DU (Distinta Elettronica di Prenotazione Unica, un record per busta) di un'elaborazione ordinata. Vedi `documenti/19_PIANO_AZIONE_PRENOTAZIONE_DU.md`.
+- **Input:** `id_elaborazione`, `data_prenotazione` (`Y/m/d`)
+- **Condizioni:** la configurazione ha `prenotazione_con_du` (impostata in automatico con `stampa_datamatrix`); l'elaborazione è in stato 2 (ordinata) o 4 (già prenotata: si riscarica la DU); la base dati ha `campo_ragsoc` e `campo_indirizzo`
+- **Processo:** controlla che i record ordinati abbiano datamatrix e codice padre (assegnati all'ordinamento), salva la data di spedizione in `ordinati` (`salva_data_spedizione`), genera la DU
+  (`genera_du`, zip con `ZipArchive` su Linux); poi l'elaborazione passa a stato 4 e lo zip viene restituito come download. La DU non consuma codici (figlio e padre si prelevano a ogni Ordina)
+- **Libreria utilizzata:** `Gestione_db`, `Elaborazione_postale_{tipo}`
 
 #### **genera_etichette.php**
 **Scopo:** Genera etichette PDF univoche per la spedizione e le invia al browser per il download.

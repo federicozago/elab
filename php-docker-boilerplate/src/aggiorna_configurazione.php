@@ -33,10 +33,19 @@ try{
         ][$tipo_spedizione] ?? null;
         if ($gamma)
             $jsonData["descrittivo_gamma"] = $gamma;
-        foreach (["autorizzazione_postale" => "Autorizzazione postale", "omologa" => "Omologa", "tabella_codici_figli" => "Tabella codici figli"] as $campo => $descrizione)
+        foreach (["autorizzazione_postale" => "Autorizzazione postale", "omologa" => "Omologa", "tabella_codici_figli" => "Tabella codici figli", "tabella_codici_padri" => "Tabella codici padri"] as $campo => $descrizione)
             if (empty($jsonData[$campo]))
                 throw new \Exception("$descrizione è obbligatoria quando si stampa il datamatrix");
+        // la massiva non ha l'ordinamento in bancali: senza max_scatole_per_bancale l'id bancale (ID HU) della DU non verrebbe valorizzato
+        if ($tipo_spedizione === "massiva" && empty($jsonData["max_scatole_per_bancale"]))
+            throw new \Exception("Scatole per bancale (max) è obbligatorio quando si stampa il datamatrix");
     }
+    // il datamatrix comporta sempre la DU (il codice invio della DU è il datamatrix): la prenotazione con DU segue la stampa del datamatrix
+    $jsonData["prenotazione_con_du"] = !empty($jsonData["stampa_datamatrix"]) ? 1 : 0;
+    // le tabelle dei codici finiscono nelle query del programma di ordinamento: accetto solo schema.tabella con il prefisso previsto (la scelta arriva dal menu, ma il valore passa dal client)
+    foreach (["tabella_codici_figli" => "figli", "tabella_codici_padri" => "padri"] as $campo => $prefisso)
+        if (!empty($jsonData[$campo]) && !preg_match('/^(import_file|elab)\.' . $prefisso . '_[A-Za-z0-9_]+$/', $jsonData[$campo]))
+            throw new \Exception("Valore non valido per il campo $campo");
 
     // Stesso calcolo di crea_configurazione.php: il nome configurazione non è
     // (solo) quello digitato dal cliente, ma la concatenazione di più campi. Il

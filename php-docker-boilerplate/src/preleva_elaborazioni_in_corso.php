@@ -25,6 +25,7 @@ try {
 
     //raggruppo i dati per gruppo elaborazione
     $nome_lavoro = "";
+    $prenotazione_con_du = [];//cache per configurazione
     $dati_out = [];
     $indice_dati_out=0;
     $indice_riga = 0;
@@ -52,6 +53,15 @@ try {
         }else{
             $elaborazione["da_prenotare"] = 0;
         }*/
+
+        //la prenotazione con DU dipende dalla configurazione: il frontend mostra il pulsante Prenota solo se è prevista
+        $chiave_configurazione = $elaborazione["tipo_spedizione"] . "_" . $elaborazione["id_configurazione"];
+        if(!isset($prenotazione_con_du[$chiave_configurazione])){
+            $prenotazione_con_du[$chiave_configurazione] = false;
+            if(preg_match('/^[a-z_]+$/', (string)$elaborazione["tipo_spedizione"]))
+                $prenotazione_con_du[$chiave_configurazione] = (bool) $db->preleva_da_db_un_singolo_valore("select prenotazione_con_du from `{$elaborazione["tipo_spedizione"]}` where id = ?", [$elaborazione["id_configurazione"]], false);
+        }
+        $elaborazione["prenotazione_con_du"] = $prenotazione_con_du[$chiave_configurazione];
 
         //creo il gruppo e alimento la relativa tabella dettagli
         $elaborazione["row-id"] = $indice_riga++;

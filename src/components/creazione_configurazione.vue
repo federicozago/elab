@@ -131,13 +131,6 @@
         :rules="[required, minValue(0)]"
       />
 
-      <BaseToggle label="Con prenotazione" v-model="formData.con_prenotazione">
-        <q-tooltip
-          >Abilita la prenotazione postale, altrimenti viene salvata solamente la data di
-          spedizione</q-tooltip
-        >
-      </BaseToggle>
-
       <BaseInput
         v-if="!taraScatolaNascosta"
         v-model="formData.tara_scatola"
@@ -178,91 +171,13 @@
         ]"
       />
 
-      <BaseToggle label="Prenotazione con DU" v-model="formData.prenotazione_con_du" />
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Codice cliente postale (*)"
-        v-model="formData.codice_cliente_postale"
-        :rules="[required, maxLength(3)]"
-      >
-        <q-tooltip>Codice a 3 caratteri che compare nella DU</q-tooltip>
-      </BaseInput>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Cap mittente (*)"
-        v-model="formData.cap_mittente"
-        :rules="[required, maxLength(5)]"
-      ></BaseInput>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Utenza ps online (*)"
-        v-model="formData.utenza_ps_online"
-        :rules="[required, maxLength(255)]"
-      ></BaseInput>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Tipologia prodotto (*)"
-        v-model="formData.tipologia_prodotto"
-        :rules="[required, maxLength(1)]"
-      >
-        <q-tooltip>Compare nella DU. Può essere V se Time, B se Contest, R se Market</q-tooltip>
-      </BaseInput>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Codice prodotto (*)"
-        v-model="formData.codice_prodotto"
-        :rules="[required, minValue(0), maxValue(299)]"
-      >
+      <BaseToggle label="Stampa datamatrix" v-model="formData.stampa_datamatrix">
         <q-tooltip
-          >Compare nella DU. Può essere 80 se Time, 125 se Contest, 233 se Market</q-tooltip
+          >Il datamatrix è il codice invio della DU: attivandolo si abilita anche la prenotazione con
+          DU (pulsante Prenota). Nella base dati servono i campi ragione sociale e
+          indirizzo</q-tooltip
         >
-      </BaseInput>
-      <BaseSelect
-        label="Codice servizio accessorio (*)"
-        v-if="formData.prenotazione_con_du"
-        v-model="formData.codice_servizio_accessorio"
-        :options="[
-          { label: 'Qui e Ora + Resi Report', value: 'CT' },
-          { label: 'In Consegna + Resi Report', value: 'TT' },
-          { label: 'Infodelivery', value: 'IDS' },
-        ]"
-      >
-        <q-tooltip
-          >Compare nella DU. Per Kpm si usa In Consegna + Resi Report. Dipende dal contratto fatto
-          dal cliente. Vedere la guida di Poste per la generazione della DU, tabella 2</q-tooltip
-        >
-      </BaseSelect>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Codice identificativo pallet (*)"
-        v-model="formData.codice_identificativo_pallet"
-        :rules="[required, minValue(0), maxValue(100)]"
-      >
-        <q-tooltip>Compare nella DU. Solitamente è 95 per Market e Contest, 91 per Time</q-tooltip>
-      </BaseInput>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Tipologia codice di tracciatura (*)"
-        v-model="formData.tipologia_codice_di_tracciatura"
-        :rules="[required, minValue(1), maxValue(3)]"
-      >
-        <q-tooltip
-          >Compare nella DU. Solitamente è 1 quando c'è il datamatrix, 2 quando c'è il barcode
-          raccomandata</q-tooltip
-        >
-      </BaseInput>
-      <BaseInput
-        v-if="formData.prenotazione_con_du"
-        label="Campi spare"
-        v-model="formData.campi_spare"
-      >
-        <q-tooltip
-          >Inserire i campi divisi da virgola (E' possibile inserire i campi del file del cliente o
-          i campi dell'ordinamento come tariffa,peso_plico ecc...)</q-tooltip
-        >
-      </BaseInput>
-
-      <BaseToggle label="Stampa datamatrix" v-model="formData.stampa_datamatrix"></BaseToggle>
+      </BaseToggle>
       <BaseInput
         v-if="formData.stampa_datamatrix"
         label="Descrittivo gamma"
@@ -331,6 +246,20 @@
         >
       </BaseSelect>
 
+      <BaseSelect
+        v-if="formData.stampa_datamatrix"
+        label="Tabella codici padri (*)"
+        v-model="formData.tabella_codici_padri"
+        :options="tabellePadri"
+        :rules="[required]"
+      >
+        <q-tooltip
+          >Tabella mysql da cui il programma preleva il codice padre (ID prenotazione) della DU. Un
+          codice viene consumato a ogni ordinamento, insieme al figlio. Sono elencate le tabelle di
+          import_file ed elab che iniziano per padri_</q-tooltip
+        >
+      </BaseSelect>
+
       <BaseInput
         :label="formData.stampa_datamatrix ? 'Autorizzazione postale (*)' : 'Autorizzazione postale'"
         v-model="formData.autorizzazione_postale"
@@ -342,6 +271,93 @@
         v-model="formData.omologa"
         :rules="formData.stampa_datamatrix ? [required] : []"
       ></BaseInput>
+
+      <div v-if="formData.stampa_datamatrix" class="text-caption">
+        Con il datamatrix si abilita la prenotazione con DU (pulsante Prenota): dati della DU
+      </div>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Codice cliente postale (*)"
+        v-model="formData.codice_cliente_postale"
+        :rules="[required, maxLength(3)]"
+      >
+        <q-tooltip>Codice a 3 caratteri che compare nella DU</q-tooltip>
+      </BaseInput>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Cap mittente (*)"
+        v-model="formData.cap_mittente"
+        :rules="[required, maxLength(5)]"
+      ></BaseInput>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Utenza ps online (*)"
+        v-model="formData.utenza_ps_online"
+        :rules="[required, maxLength(255)]"
+      ></BaseInput>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Tipologia prodotto (*)"
+        v-model="formData.tipologia_prodotto"
+        :rules="[required, maxLength(1)]"
+      >
+        <q-tooltip>Compare nella DU. Può essere V se Time, B se Contest, R se Market</q-tooltip>
+      </BaseInput>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Codice prodotto (*)"
+        v-model="formData.codice_prodotto"
+        :rules="[required, minValue(0), maxValue(299)]"
+      >
+        <q-tooltip
+          >Compare nella DU. Può essere 80 se Time, 125 se Contest, 233 se Market</q-tooltip
+        >
+      </BaseInput>
+      <BaseSelect
+        label="Codice servizio accessorio (*)"
+        v-if="formData.stampa_datamatrix"
+        v-model="formData.codice_servizio_accessorio"
+        :options="[
+          { label: 'Qui e Ora + Resi Report', value: 'CT' },
+          { label: 'In Consegna + Resi Report', value: 'TT' },
+          { label: 'Infodelivery', value: 'IDS' },
+        ]"
+      >
+        <q-tooltip
+          >Compare nella DU. Per Kpm si usa In Consegna + Resi Report. Dipende dal contratto fatto
+          dal cliente. Vedere la guida di Poste per la generazione della DU, tabella 2</q-tooltip
+        >
+      </BaseSelect>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Codice identificativo pallet (*)"
+        v-model="formData.codice_identificativo_pallet"
+        :rules="[required, minValue(0), maxValue(100)]"
+      >
+        <q-tooltip>Compare nella DU e nel codice HU del bancale. Da guida Poste (codice HU): 91 Time base, 92 Time ora, 95 Contest, 96 Massiva, 98 Target</q-tooltip>
+      </BaseInput>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Tipologia codice di tracciatura (*)"
+        v-model="formData.tipologia_codice_di_tracciatura"
+        :rules="[required, minValue(1), maxValue(3)]"
+      >
+        <q-tooltip
+          >Compare nella DU. Solitamente è 1 quando c'è il datamatrix, 2 quando c'è il barcode
+          raccomandata</q-tooltip
+        >
+      </BaseInput>
+      <BaseInput
+        v-if="formData.stampa_datamatrix"
+        label="Campi spare"
+        v-model="formData.campi_spare"
+      >
+        <q-tooltip
+          >Inserire i campi divisi da virgola (E' possibile inserire i campi del file del cliente o
+          i campi dell'ordinamento come tariffa,peso_plico ecc...)</q-tooltip
+        >
+      </BaseInput>
+
 
       <BaseRadio
         label="N etichette per foglio (*)"
@@ -563,6 +579,17 @@ async function caricaTabelleFigli() {
   }
 }
 
+// tabelle dei codici padri (padri_* in import_file ed elab) selezionabili con la prenotazione con DU
+const tabellePadri = ref([])
+async function caricaTabellePadri() {
+  try {
+    const response = await api.post('/preleva_tabelle_padri.php')
+    tabellePadri.value = response.data.tabelle
+  } catch (e) {
+    gestioneErrore(e, 'Impossibile prelevare le tabelle dei codici padri')
+  }
+}
+
 // target: la descrizione prodotto si sceglie fra due valori (con PROMOZIONE NO PROFIT l'etichetta scatola cambia la dicitura del prodotto)
 const descrizioniProdottoTarget = ['TARGET', 'PROMOZIONE NO PROFIT']
 
@@ -619,10 +646,12 @@ if (tipoEffettivo.value === 'time') {
   tipologia_codice_di_tracciatura_consigliato = 2
   descrittivo_gamma_consigliato = 'B'
   tipo_prodotto_postale_consigliato = '' //non saprei
+} else if (tipoEffettivo.value === 'massiva') {
+  codice_identificativo_pallet_consigliato = 96
 } else if (tipoEffettivo.value === 'target') {
   tipologia_prodotto_consigliato = 'T'
   //codice_prodotto viene aggiornato dal watch sotto
-  codice_identificativo_pallet_consigliato = 95
+  codice_identificativo_pallet_consigliato = 98
   tipologia_codice_di_tracciatura_consigliato = 1
   descrittivo_gamma_consigliato = 'T'
   //tipo_prodotto_postale_consigliato gestito dal watch sotto
@@ -633,6 +662,7 @@ function getInitialFormData() {
   return {
     stampa_datamatrix: false,
     tabella_codici_figli: '',
+    tabella_codici_padri: '',
     prenotazione_con_du: false,
     gestione_bancali: false,
     contiene_inserto: false,
@@ -651,7 +681,6 @@ function getInitialFormData() {
     n_conto_contrattuale: '',
     sap: '',
     tara_pallet: 22500,
-    con_prenotazione: false,
     tara_scatola: tipoEffettivo.value === 'target' ? 200 : 0.2,
     codice_cliente_postale: '',
     cap_mittente: '',
@@ -689,6 +718,7 @@ function getInitialFormData() {
     massiva: {
       peso_scatola_min: 0,
       peso_scatola_max: 0,
+      max_scatole_per_bancale: 56,
     },
     time: {
       prodotto_time: '',
@@ -702,6 +732,7 @@ watch(
   () => formData.value.stampa_datamatrix,
   (stampa) => {
     if (stampa && !tabelleFigli.value.length) caricaTabelleFigli()
+    if (stampa && !tabellePadri.value.length) caricaTabellePadri()
   },
   { immediate: true },
 )
@@ -817,9 +848,7 @@ async function inviaDati() {
     delete datiDaInviare.codice_identificativo_stampatore
     delete datiDaInviare.barcode_campi_cliente
     delete datiDaInviare.tabella_codici_figli
-  }
-
-  if (!datiDaInviare.prenotazione_con_du) {
+    delete datiDaInviare.tabella_codici_padri
     delete datiDaInviare.codice_cliente_postale
     delete datiDaInviare.cap_mittente
     delete datiDaInviare.utenza_ps_online
@@ -830,6 +859,8 @@ async function inviaDati() {
     delete datiDaInviare.tipologia_codice_di_tracciatura
     delete datiDaInviare.campi_spare
   }
+  // il datamatrix comporta la prenotazione con DU (il backend la imposta comunque)
+  datiDaInviare.prenotazione_con_du = !!datiDaInviare.stampa_datamatrix
 
   if (!datiDaInviare.gestione_bancali) {
     delete datiDaInviare.tara_pallet

@@ -102,6 +102,39 @@
           :rules="[required]"
           v-if="formData.intestazione_si_no !== null"
         />
+        <BaseSelect
+          :options="intestazione"
+          label="Campo Ragione sociale / Nominativo"
+          v-model="formData.campo_ragsoc"
+          :disable="!intestazione.length"
+          clearable
+          v-if="formData.intestazione_si_no !== null"
+        >
+          <q-tooltip>Facoltativo. Serve per generare la DU (prenotazione con DU)</q-tooltip>
+        </BaseSelect>
+        <BaseSelect
+          :options="intestazione"
+          label="Campo Indirizzo"
+          v-model="formData.campo_indirizzo"
+          :disable="!intestazione.length"
+          clearable
+          v-if="formData.intestazione_si_no !== null"
+        >
+          <q-tooltip>Facoltativo. Serve per generare la DU (prenotazione con DU)</q-tooltip>
+        </BaseSelect>
+        <BaseSelect
+          :options="intestazione"
+          label="Campo Numero civico"
+          v-model="formData.campo_civico"
+          :disable="!intestazione.length"
+          clearable
+          v-if="formData.intestazione_si_no !== null"
+        >
+          <q-tooltip
+            >Facoltativo. Solo se il civico è in una colonna separata dall'indirizzo (generazione
+            della DU)</q-tooltip
+          >
+        </BaseSelect>
       </BaseForm>
     </div>
   </q-page>
@@ -137,6 +170,9 @@ const formData = ref({
   campo_cap: '',
   campo_localita: '',
   campo_provincia: '',
+  campo_ragsoc: null,
+  campo_indirizzo: null,
+  campo_civico: null,
   intestazione_si_no: null,
   separatore: ';',
   tipo_file: 'CSV/Testo',
@@ -220,6 +256,9 @@ async function confermaEliminaBaseDati() {
             campo_cap: '',
             campo_localita: '',
             campo_provincia: '',
+            campo_ragsoc: null,
+            campo_indirizzo: null,
+            campo_civico: null,
             intestazione_si_no: null,
             separatore: ';',
             tipo_file: 'CSV/Testo',
