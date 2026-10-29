@@ -119,17 +119,23 @@
         :rules="[required, maxLength(8), minLength(8)]"
       />
 
+      <!-- con il datamatrix (DU) i bancali del target sono sempre automatici: servono le dimensioni (nel form del target) e la tara del pallet -->
       <BaseToggle
         label="Gestione bancali"
         v-model="formData.gestione_bancali"
-        v-if="tipoEffettivo === 'target'"
+        v-if="tipoEffettivo === 'target' && !formData.stampa_datamatrix"
       ></BaseToggle>
       <BaseInput
         v-model="formData.tara_pallet"
         label="Tara pallet (gr) (*)"
-        v-if="tipoEffettivo === 'target' && formData.gestione_bancali"
+        v-if="bancaliTarget"
         :rules="[required, minValue(0)]"
-      />
+      >
+        <q-tooltip
+          >Obbligatoria con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a
+          calcolare quante scatole stanno in un bancale</q-tooltip
+        >
+      </BaseInput>
 
       <BaseInput
         v-if="!taraScatolaNascosta"
@@ -397,7 +403,7 @@
       <component
         :is="formAttuale"
         v-model="formData[tipoEffettivo]"
-        :gestione-bancali="formData.gestione_bancali"
+        :gestione-bancali="bancaliTarget"
         v-bind="tipoEffettivo === 'target' ? { bloccaProdotto: isNoProfit } : {}"
       /><!--Il parametro :is dice a Vue: "Non renderizzare un tag HTML standard, ma renderizza il componente che ti sto passando in questa variabile".-->
     </BaseForm>
@@ -594,6 +600,12 @@ async function caricaTabellePadri() {
 const descrizioniProdottoTarget = ['TARGET', 'PROMOZIONE NO PROFIT']
 
 // target: la tara scatola è in grammi (di norma 200) e per i plichi è sempre 0, quindi il campo non serve. massiva: resta in kg
+// target: tara pallet e dimensioni di busta/scatola servono con la gestione bancali e, con il datamatrix (DU), sempre (id bancale obbligatorio)
+const bancaliTarget = computed(
+  () =>
+    tipoEffettivo.value === 'target' &&
+    (formData.value.gestione_bancali || formData.value.stampa_datamatrix),
+)
 const taraScatolaNascosta = computed(
   () => tipoEffettivo.value === 'target' && formData.value.target.plichi === 'Plichi',
 )
@@ -862,9 +874,11 @@ async function inviaDati() {
   // il datamatrix comporta la prenotazione con DU (il backend la imposta comunque)
   datiDaInviare.prenotazione_con_du = !!datiDaInviare.stampa_datamatrix
 
-  if (!datiDaInviare.gestione_bancali) {
+  if (!bancaliTarget.value) {
     delete datiDaInviare.tara_pallet
   }
+  // con il datamatrix i bancali sono automatici: il passo manuale "bancali diretti" non serve
+  if (datiDaInviare.stampa_datamatrix) datiDaInviare.gestione_bancali = false
 
   if (!datiDaInviare.contiene_inserto) {
     delete datiDaInviare.peso_inserto

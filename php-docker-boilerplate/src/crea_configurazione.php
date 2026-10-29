@@ -39,6 +39,14 @@ try{
         // la massiva non ha l'ordinamento in bancali: senza max_scatole_per_bancale l'id bancale (ID HU) della DU non verrebbe valorizzato
         if ($tipo_spedizione === "massiva" && empty($jsonData["max_scatole_per_bancale"]))
             throw new \Exception("Scatole per bancale (max) è obbligatorio quando si stampa il datamatrix");
+        // target con la DU: l'id bancale (ID HU) è obbligatorio, i bancali si assegnano in automatico all'ordinamento e servono le dimensioni di busta o scatola e la tara del pallet
+        if ($tipo_spedizione === "target") {
+            $campi_dimensioni = ($jsonData["plichi"] ?? '') === "Scatole" ? ["larghezza_scatola", "lunghezza_scatola", "altezza_scatola"] : ["larghezza_busta", "altezza_busta", "profondita_busta"];
+            foreach (array_merge($campi_dimensioni, ["tara_pallet"]) as $campo)
+                if (empty($jsonData[$campo]))
+                    throw new \Exception("Il campo $campo è obbligatorio quando si stampa il datamatrix (serve ai bancali della DU)");
+            $jsonData["gestione_bancali"] = 0;//con la DU i bancali sono sempre automatici
+        }
     }
     // il datamatrix comporta sempre la DU (il codice invio della DU è il datamatrix): la prenotazione con DU segue la stampa del datamatrix
     $jsonData["prenotazione_con_du"] = !empty($jsonData["stampa_datamatrix"]) ? 1 : 0;

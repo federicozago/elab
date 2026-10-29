@@ -45,20 +45,26 @@
         label="Larghezza busta (cm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
-      />
+      >
+        <q-tooltip>Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip>
+      </BaseInput>
       <BaseInput
         v-model="model.altezza_busta"
         label="Altezza busta (cm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
-      />
+      >
+        <q-tooltip>Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip>
+      </BaseInput>
       <BaseInput
         v-model="model.profondita_busta"
         label="Profondità busta (cm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
       >
-        <q-tooltip>Spessore di una singola busta, usato per calcolare l'altezza del plico</q-tooltip>
+        <q-tooltip
+          >Spessore di una singola busta, usato per calcolare l'altezza del plico. Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip
+        >
       </BaseInput>
     </template>
 
@@ -68,19 +74,25 @@
         label="Larghezza scatola (cm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
-      />
+      >
+        <q-tooltip>Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip>
+      </BaseInput>
       <BaseInput
         v-model="model.lunghezza_scatola"
         label="Lunghezza scatola (cm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
-      />
+      >
+        <q-tooltip>Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip>
+      </BaseInput>
       <BaseInput
         v-model="model.altezza_scatola"
         label="Altezza scatola (cm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
-      />
+      >
+        <q-tooltip>Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip>
+      </BaseInput>
     </template>
 
     <BaseToggle label="Contiene gadget" v-model="model.contiene_gadget">

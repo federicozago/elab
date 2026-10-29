@@ -111,7 +111,7 @@ try {
 
     //codice invio (datamatrix) e codice padre li ha già assegnati l'ordinamento: se mancano l'elaborazione è stata ordinata prima del datamatrix e va riordinata
     $controllo = $db->preleva_da_db(
-        "select count(*) as totale, sum(barcode is null or barcode = '') as senza_barcode, sum(codice_padre is null or codice_padre = '') as senza_padre, count(distinct codice_padre) as padri
+        "select count(*) as totale, sum(barcode is null or barcode = '') as senza_barcode, sum(codice_padre is null or codice_padre = '') as senza_padre, count(distinct codice_padre) as padri, sum(idbancale is null) as senza_bancale
          from `{$vg['database_cliente']}`.`ordinati_{$elaborazione['tipo_spedizione']}_{$elaborazione['nome_base_dati']}` where id_flusso = ? and nome_elaborazione = ?",
         [$elaborazione["id_flusso"], $nome_elaborazione]
     );
@@ -122,6 +122,9 @@ try {
         throw new \Exception("Non ci sono record ordinati per questa elaborazione");
     if ($controllo["senza_barcode"] or $controllo["senza_padre"] or $controllo["padri"] != 1)
         throw new \Exception("I record non hanno il datamatrix e il codice padre: l'elaborazione va riordinata con la stampa del datamatrix attiva");
+    //ogni riga della DU ha il barcode del bancale (ID HU): senza id bancale non si genera
+    if ($controllo["senza_bancale"])
+        throw new \Exception("I record non hanno l'id bancale (ID HU della DU): l'elaborazione va riordinata (target: servono le dimensioni di busta o scatola in configurazione; massiva: scatole per bancale)");
 
     //salvo la data di spedizione in ordinati (rifiuta le date passate) e genero la DU nello zip
     if (!$elab->salva_data_spedizione($data_spedizione, $nome_elaborazione))

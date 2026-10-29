@@ -65,8 +65,13 @@ try {
     if(!$elab->ordina_elaborazione($nome_elaborazione))
         throw new \Exception("Errore durante l'ordinamento");
 
+    //target con la DU (datamatrix): ogni riga della DU ha l'id bancale, quindi i bancali si assegnano subito (diretti se ci sono bacini che riempiono un bancale, altrimenti divisione semplice)
+    $bancali_automatici = $elaborazione['tipo_spedizione'] === "target" && !empty($configurazione["stampa_datamatrix"]);
+    if($bancali_automatici && !$elab->assegna_bancali_con_du($nome_elaborazione))
+        throw new \Exception("Errore durante l'assegnazione dei bancali");
+
     //se la configurazione prevede la gestione bancali il passo successivo è l'assegnazione dei bancali diretti (stato 5), altrimenti l'elaborazione è pronta per la prenotazione (stato 2)
-    $stato_finale = !empty($configurazione["gestione_bancali"]) ? 5 : 2;
+    $stato_finale = !empty($configurazione["gestione_bancali"]) && !$bancali_automatici ? 5 : 2;
     if(!$db->esegui_query("update elaborazioni set stato=? where id=?", [$stato_finale, $elaborazione['id_elaborazione']]))//aggiorno stato "elaborazione"
         throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
 
