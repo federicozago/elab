@@ -57,13 +57,13 @@
         <q-tooltip>Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip>
       </BaseInput>
       <BaseInput
-        v-model="model.profondita_busta"
-        label="Profondità busta (cm) (*)"
+        v-model="profonditaBustaMm"
+        label="Profondità busta (mm) (*)"
         type="number"
         :rules="[required, minValue(0)]"
       >
         <q-tooltip
-          >Spessore di una singola busta, usato per calcolare l'altezza del plico. Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip
+          >Spessore di una singola busta in millimetri (es. 2 per 0,2 cm), usato per calcolare l'altezza del plico. Obbligatorio con la prenotazione con DU (datamatrix) e con la gestione bancali: serve a calcolare quante scatole stanno in un bancale (id bancale della DU)</q-tooltip
         >
       </BaseInput>
     </template>
@@ -104,6 +104,7 @@
 <script setup>
 import BaseSelect from './forms/BaseSelect.vue'
 import BaseInput from 'components/forms/BaseInput.vue'
+import { computed } from 'vue'
 import { required, minValue, maxValue } from 'src/composables/rules.js'
 import BaseToggle from 'components/forms/BaseToggle.vue'
 import BaseRadio from 'components/forms/BaseRadio.vue'
@@ -111,6 +112,18 @@ import BaseRadio from 'components/forms/BaseRadio.vue'
 //defineModel(): È una macro di Vue 3.4+ che crea automaticamente un legame bidirezionale con il v-model del padre. In questo modo, model.sottoProdotto aggiornerà correttamente formData.target nel padre senza violare le regole di Vue.
 const model = defineModel({
   type: Object,
+})
+
+// la profondità busta si inserisce in millimetri (le altre dimensioni sono in cm), ma nel form e a db resta in centimetri: la conversione è solo qui
+const profonditaBustaMm = computed({
+  get: () => {
+    const cm = model.value.profondita_busta
+    return cm === null || cm === undefined || cm === '' ? '' : Number((Number(cm) * 10).toFixed(2))
+  },
+  set: (mm) => {
+    model.value.profondita_busta =
+      mm === null || mm === undefined || mm === '' ? null : Number((Number(mm) / 10).toFixed(3))
+  },
 })
 
 const props = defineProps({
