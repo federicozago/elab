@@ -74,6 +74,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               :columns="columnsGruppiElaborazioniInCorso"
               row-key="row-id"
               :filter="filter"
+              v-model:pagination="paginazioneInCorso"
             >
               <template v-slot:top-right>
                 <q-input borderless dense debounce="300" v-model="filter" placeholder="Cerca">
@@ -227,6 +228,7 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
               :columns="columnsElaborazioniConcluse"
               row-key="id"
               :filter="filterElabConcluse"
+              v-model:pagination="paginazioneConcluse"
             >
               <template v-slot:body-cell-azioni="props">
                 <q-td :props="props">
@@ -570,6 +572,9 @@ const dialogReportVisible = ref(false)
 const selectedRowSql = ref(null)
 const querySql = ref('')
 const caricamentoSql = ref(false)
+// tabelle della home: 10 elaborazioni per pagina
+const paginazioneInCorso = ref({ page: 1, rowsPerPage: 10 })
+const paginazioneConcluse = ref({ page: 1, rowsPerPage: 10 })
 const esportazione = ref(null) // formato in corso di esportazione ('csv' | 'xlsx' | 'xls')
 const selectedRowPrenotazione = ref(null)
 const selectedRowAzioni = ref(null)
@@ -943,16 +948,20 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
   const isPdf = datiAzione.output === 'pdf'
   const isZip = datiAzione.output === 'zip'
   const isExcel = datiAzione.output === 'xlsx'
+  const isTxt = datiAzione.output === 'txt'
   const isReport = datiAzione.output === 'json'
-  const config = isPdf || isZip || isExcel ? { responseType: 'blob' } : {}
+  const config = isPdf || isZip || isExcel || isTxt ? { responseType: 'blob' } : {}
 
   try {
     const response = await api.post('/' + datiAzione.endpoint, dati, config)
     if (isReport) {
       reportRighe.value = response.data.report
       dialogReportVisible.value = true
-    } else if (isPdf || isZip || isExcel) {
-      scaricaFile(response, isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : 'etichette.pdf')
+    } else if (isPdf || isZip || isExcel || isTxt) {
+      scaricaFile(
+        response,
+        isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : isTxt ? 'riepilogo.txt' : 'etichette.pdf',
+      )
     } else {
       messaggioPositivo('Azione eseguita')
     }
