@@ -2,6 +2,7 @@
 
 namespace indi\Classes;
 require 'vendor/autoload.php';
+require_once __DIR__ . '/alias_target.php';
 
 // Imposta l'header per indicare che la risposta è in formato JSON
 header('Content-Type: application/json');
@@ -20,11 +21,12 @@ http_response_code(200);
 echo json_encode([
     'success' => true,
     'message' => 'spedizioni elaborazioni prelevate',
-    //NO_PROFIT è un alias di target (stessa tabella, stessa classe, stessi ordinati): compare nei menu subito dopo target
+    //gli alias di target (NO_PROFIT, ...) hanno stessa tabella, stessa classe e stessi ordinati: compaiono nei menu subito dopo target
     'spedizioni' => array_reduce(array_keys($vg["elaborazioni"]), function ($tipi, $tipo) {
         $tipi[] = $tipo;
         if ($tipo === "target")
-            $tipi[] = "NO_PROFIT";
+            foreach (array_keys(alias_target()) as $alias)
+                $tipi[] = $alias;
         return $tipi;
     }, [])
 ]);

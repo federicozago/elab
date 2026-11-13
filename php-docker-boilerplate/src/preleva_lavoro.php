@@ -2,6 +2,7 @@
 // Configura gli header CORS se necessario
 namespace indi\Classes;
 require 'vendor/autoload.php';
+require_once __DIR__ . '/alias_target.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -41,9 +42,12 @@ order by elaborazioni_lavoro.id",[$jsonData["id_lavoro"]]);//se stato è maggior
         if(!$nome_configurazione = $db->preleva_da_db_un_singolo_valore("select nome_configurazione from {$elaborazione["tipo_spedizione"]} where id = ?",[$elaborazione["id_configurazione"]]))
             throw new \Exception("Errore durante prelievo configurazioni");
         $dati[$key]["nome_configurazione"] = $nome_configurazione;
-        //le configurazioni target con sotto prodotto NO_PROFIT si presentano come tipo NO_PROFIT (alias di target)
-        if($elaborazione["tipo_spedizione"] === "target" and $db->preleva_da_db_un_singolo_valore("select prodotto_target from target where id = ?",[$elaborazione["id_configurazione"]]) === "NO_PROFIT")
-            $dati[$key]["tipo_spedizione"] = "NO_PROFIT";
+        //le configurazioni target con sotto prodotto NO_PROFIT (o un altro alias) si presentano come quel tipo (alias di target)
+        if($elaborazione["tipo_spedizione"] === "target") {
+            $prodotto_target = (string)$db->preleva_da_db_un_singolo_valore("select prodotto_target from target where id = ?", [$elaborazione["id_configurazione"]]);
+            if(isset(alias_target()[$prodotto_target]))
+                $dati[$key]["tipo_spedizione"] = $prodotto_target;
+        }
     }
 
     // Restituisci una risposta di successo

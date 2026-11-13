@@ -1,6 +1,7 @@
 <?php
 namespace indi\Classes;
 require 'vendor/autoload.php';
+require_once __DIR__ . '/alias_target.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -21,13 +22,14 @@ try{
 
     if(!isset($jsonData["tipo_spedizione"])) throw new \Exception("Manca il tipo di spedizione");
     $tipo_spedizione = $jsonData["tipo_spedizione"];
-    //NO_PROFIT è un alias di target: stessa tabella, ma solo le configurazioni con sotto prodotto NO_PROFIT (e target le esclude)
+    //gli alias di target (NO_PROFIT, ...) hanno la stessa tabella, ma solo le configurazioni con quel sotto prodotto (e target le esclude)
     $filtro = "";
-    if($tipo_spedizione === "NO_PROFIT") {
+    $alias = alias_target();
+    if(isset($alias[$tipo_spedizione])) {
+        $filtro = "where prodotto_target = '$tipo_spedizione'";//la chiave arriva dalla lista degli alias
         $tipo_spedizione = "target";
-        $filtro = "where prodotto_target = 'NO_PROFIT'";
     }elseif($tipo_spedizione === "target")
-        $filtro = "where coalesce(prodotto_target, '') <> 'NO_PROFIT'";
+        $filtro = "where coalesce(prodotto_target, '') not in ('" . implode("','", array_keys($alias)) . "')";
     if( ! in_array($tipo_spedizione, array_keys($vg["elaborazioni"])))
         throw new \Exception("Tipo di spedizione non valido");
 

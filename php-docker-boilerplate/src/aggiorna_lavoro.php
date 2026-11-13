@@ -1,6 +1,7 @@
 <?php
 namespace indi\Classes;
 require 'vendor/autoload.php';
+require_once __DIR__ . '/alias_target.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -77,7 +78,7 @@ try{
     $query_drop_viste = [];
     foreach($elaborazioni as $key => $elaborazione){
         $elaborazione["id_configurazione"] = $elaborazione["id_configurazione"]["value"];
-        if(($elaborazione["tipo_spedizione"] ?? null) === "NO_PROFIT")//alias di target
+        if(isset(alias_target()[$elaborazione["tipo_spedizione"] ?? ""]))//alias di target (NO_PROFIT, ...)
             $elaborazione["tipo_spedizione"] = "target";
         if(!isSqlSafe($elaborazione["where"]))
             throw new \Exception("Where non sicuro");

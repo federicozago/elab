@@ -91,7 +91,7 @@
         v-model="formData.descrizione_tipo_spedizione"
         :options="descrizioniProdottoTarget"
         :rules="[required]"
-        :disable="formData.target.prodotto_target === 'NO_PROFIT'"
+        :disable="!!aliasTarget"
       >
         <q-tooltip
           >Compare nelle etichette scatole e bancale. Con "PROMOZIONE NO PROFIT" sull'etichetta scatola il
@@ -404,7 +404,7 @@
         :is="formAttuale"
         v-model="formData[tipoEffettivo]"
         :gestione-bancali="bancaliTarget"
-        v-bind="tipoEffettivo === 'target' ? { bloccaProdotto: isNoProfit } : {}"
+        v-bind="tipoEffettivo === 'target' ? { bloccaProdotto: !!aliasTarget } : {}"
       /><!--Il parametro :is dice a Vue: "Non renderizzare un tag HTML standard, ma renderizza il componente che ti sto passando in questa variabile".-->
     </BaseForm>
   </div>
@@ -451,9 +451,22 @@ const props = defineProps({
   },
 })
 
-// NO_PROFIT è un alias di target: stessa tabella e stesso form, con sotto prodotto NO_PROFIT e descrizione prodotto fissi
-const isNoProfit = computed(() => props.tipoSpedizione === 'NO_PROFIT')
-const tipoEffettivo = computed(() => (isNoProfit.value ? 'target' : props.tipoSpedizione))
+// alias di target: stessa tabella e stesso form, con sotto prodotto (prodotto_target = chiave) e descrizione prodotto fissi. Va tenuto allineato con alias_target.php e Elaborazione_postale_target.php
+//  - gamma: descrittivo gamma del datamatrix (guida Poste, tabella 1: E = Editoria)
+//  - tipo_prodotto_postale: suggerito (guida Poste, tabella 3: promozioni no profit Q, pubblicazioni informative no profit W; per il periodico roc non è indicato)
+//  - pallet: codice servizio del codice HU (guida Poste: 93 Editoria)
+const ALIAS_TARGET = {
+  NO_PROFIT: { etichetta: 'PROMOZIONE NO PROFIT', gamma: 'E', tipo_prodotto_postale: 'Q', pallet: 93 },
+  PUBBL_INFORMATIVA_NO_PROFIT: {
+    etichetta: 'PUBBL. INFORMATIVA NO PROFIT',
+    gamma: 'E',
+    tipo_prodotto_postale: 'W',
+    pallet: 93,
+  },
+  PERIODICO_ROC: { etichetta: 'PERIODICO ROC', gamma: 'E', tipo_prodotto_postale: '', pallet: 93 },
+}
+const aliasTarget = computed(() => ALIAS_TARGET[props.tipoSpedizione] ?? null)
+const tipoEffettivo = computed(() => (aliasTarget.value ? 'target' : props.tipoSpedizione))
 
 const emit = defineEmits(['update:modelValue', 'saved', 'cancel'])
 
@@ -488,8 +501,8 @@ function scegliModificaConfigurazione() {
   // aggiuntive digitate in precedenza, altrimenti salvando andrebbero perse
   const c = configurazioneCaricata.value
   const prefisso = (
-    c.prodotto_target === 'NO_PROFIT' && tipoEffettivo.value === 'target'
-      ? [c.ragione_sociale_cliente_estesa, 'NO_PROFIT', c.tipo_formato_postale]
+    ALIAS_TARGET[c.prodotto_target] && tipoEffettivo.value === 'target'
+      ? [c.ragione_sociale_cliente_estesa, c.prodotto_target, c.tipo_formato_postale]
       : [
           c.ragione_sociale_cliente_estesa,
           tipoEffettivo.value,
@@ -567,10 +580,10 @@ function configurazioneCambiata(val) {
 const age = computed(() => codici_age[formData.value.cmp])
 
 // descrittivo gamma del datamatrix (guida Poste, tabella 1): non si sceglie, dipende dal tipo di spedizione.
-// V time, E no profit, T target, B massiva (e per gli altri prodotti bulk mail)
+// V time, E no profit e altri alias (editoria), T target, B massiva (e per gli altri prodotti bulk mail)
 const gammaAutomatico = computed(() => {
   if (tipoEffettivo.value === 'time') return 'V'
-  if (tipoEffettivo.value === 'target') return isNoProfit.value ? 'E' : 'T'
+  if (tipoEffettivo.value === 'target') return aliasTarget.value ? aliasTarget.value.gamma : 'T'
   return 'B'
 })
 
@@ -596,8 +609,10 @@ async function caricaTabellePadri() {
   }
 }
 
-// target: la descrizione prodotto si sceglie fra due valori (con PROMOZIONE NO PROFIT l'etichetta scatola cambia la dicitura del prodotto)
-const descrizioniProdottoTarget = ['TARGET', 'PROMOZIONE NO PROFIT']
+// target: la descrizione prodotto si sceglie fra due valori (con PROMOZIONE NO PROFIT l'etichetta scatola cambia la dicitura del prodotto); negli alias è fissa
+const descrizioniProdottoTarget = computed(() =>
+  aliasTarget.value ? [aliasTarget.value.etichetta] : ['TARGET', 'PROMOZIONE NO PROFIT'],
+)
 
 // target: la tara scatola è in grammi (di norma 200) e per i plichi è sempre 0, quindi il campo non serve. massiva: resta in kg
 // target: tara pallet e dimensioni di busta/scatola servono con la gestione bancali e, con il datamatrix (DU), sempre (id bancale obbligatorio)
@@ -663,9 +678,10 @@ if (tipoEffettivo.value === 'time') {
 } else if (tipoEffettivo.value === 'target') {
   tipologia_prodotto_consigliato = 'T'
   //codice_prodotto viene aggiornato dal watch sotto
-  codice_identificativo_pallet_consigliato = 98
+  codice_identificativo_pallet_consigliato = aliasTarget.value ? aliasTarget.value.pallet : 98
   tipologia_codice_di_tracciatura_consigliato = 1
-  descrittivo_gamma_consigliato = 'T'
+  descrittivo_gamma_consigliato = aliasTarget.value ? aliasTarget.value.gamma : 'T'
+  if (aliasTarget.value) tipo_prodotto_postale_consigliato = aliasTarget.value.tipo_prodotto_postale
   //tipo_prodotto_postale_consigliato gestito dal watch sotto
 }
 
@@ -684,8 +700,8 @@ function getInitialFormData() {
     peso_inserto: 0,
     descrizione_tipo_spedizione:
       tipoEffettivo.value === 'target'
-        ? isNoProfit.value
-          ? 'PROMOZIONE NO PROFIT'
+        ? aliasTarget.value
+          ? aliasTarget.value.etichetta
           : 'TARGET'
         : tipoEffettivo.value,
     tipo_formato_postale: 'P',
@@ -714,7 +730,7 @@ function getInitialFormData() {
     etichetta_n_up: true,
 
     target: {
-      prodotto_target: isNoProfit.value ? 'NO_PROFIT' : '',
+      prodotto_target: aliasTarget.value ? props.tipoSpedizione : '',
       buste_min: 0,
       buste_max: 0,
       plichi: '',
@@ -761,8 +777,8 @@ watch(
       } else if (nuovoValore === 'GOLD') {
         formData.value.codice_prodotto = 68
         formData.value.tipo_prodotto_postale = 'Q'
-      } else if (nuovoValore === 'NO_PROFIT') {
-        formData.value.descrizione_tipo_spedizione = 'PROMOZIONE NO PROFIT'
+      } else if (ALIAS_TARGET[nuovoValore]) {
+        formData.value.descrizione_tipo_spedizione = ALIAS_TARGET[nuovoValore].etichetta
       } else if (nuovoValore === 'INVITO ALLA PROVA') {
         formData.value.codice_prodotto = 123
         formData.value.tipo_prodotto_postale = 'Y'
@@ -850,6 +866,11 @@ async function inviaDati() {
   const datiDaInviare = { ...formData.value }
   datiDaInviare.age = age.value
   datiDaInviare.tipo_spedizione = tipoEffettivo.value
+  // il tipo formato creative non serve negli alias (compare solo sull'etichetta scatola degli altri prodotti)
+  if (aliasTarget.value) {
+    datiDaInviare.target = { ...datiDaInviare.target }
+    delete datiDaInviare.target.tipo_formato_creative
+  }
 
   if (datiDaInviare.stampa_datamatrix) {
     datiDaInviare.descrittivo_gamma = gammaAutomatico.value

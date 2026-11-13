@@ -1,6 +1,7 @@
 <?php
 namespace indi\Classes;
 require 'vendor/autoload.php';
+require_once __DIR__ . '/alias_target.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -58,7 +59,7 @@ try {
         $where = $elaborazione["where"] ? "where {$elaborazione['where']}" : "";
 
         $elaborazione["id_lavoro"] = $id_lavoro;
-        if(($elaborazione["tipo_spedizione"] ?? null) === "NO_PROFIT")//alias di target
+        if(isset(alias_target()[$elaborazione["tipo_spedizione"] ?? ""]))//alias di target (NO_PROFIT, ...)
             $elaborazione["tipo_spedizione"] = "target";
         $elaborazione["id_configurazione"] = $elaborazione["id_configurazione"]["value"];
         unset($elaborazione["id"]);

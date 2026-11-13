@@ -6,12 +6,14 @@
       v-model="model.prodotto_target"
       label="Sotto prodotto (*)"
       id="sotto-prodotto"
-      :options="['BASIC', 'CREATIVE', 'MAGAZINE', 'NO_PROFIT']"
+      :options="['BASIC', 'CREATIVE', 'MAGAZINE', 'NO_PROFIT', 'PUBBL_INFORMATIVA_NO_PROFIT', 'PERIODICO_ROC']"
       :disable="bloccaProdotto"
       :rules="[required]"
     />
 
+    <!-- il tipo formato compare solo sull'etichetta scatola e non serve per gli alias (no profit, periodico...) -->
     <BaseSelect
+      v-if="!bloccaProdotto"
       v-model="model.tipo_formato_creative"
       label="Tipo formato creative (*)"
       id="tipo-formato-creative"
@@ -131,7 +133,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // true quando si è scelto il tipo NO_PROFIT: il sotto prodotto è fisso
+  // true quando si è scelto un alias di target (NO_PROFIT, ...): il sotto prodotto è fisso
   bloccaProdotto: {
     type: Boolean,
     default: false,

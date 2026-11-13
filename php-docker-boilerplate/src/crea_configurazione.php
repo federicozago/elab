@@ -1,6 +1,7 @@
 <?php
 namespace indi\Classes;
 require 'vendor/autoload.php';
+require_once __DIR__ . '/alias_target.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -21,7 +22,7 @@ $db = new Gestione_db("elab",$log);
 try{
     $jsonData = json_decode(file_get_contents('php://input'), true);//da usare quando il front end manda i dati con axios senza headers: { 'Content-Type': 'multipart/form-data' }
 
-    $tipo_spedizione = $jsonData["tipo_spedizione"] === "NO_PROFIT" ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT è un alias di target
+    $tipo_spedizione = isset(alias_target()[$jsonData["tipo_spedizione"]]) ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT e gli altri alias sono target
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
 
     if (!empty($jsonData["stampa_datamatrix"])) {
@@ -29,7 +30,7 @@ try{
         $gamma = [
             "time" => "V",
             "massiva" => "B",
-            "target" => ($jsonData["prodotto_target"] ?? '') === "NO_PROFIT" ? "E" : "T",
+            "target" => alias_target()[$jsonData["prodotto_target"] ?? ""]["gamma"] ?? "T",//gli alias (no profit, periodico...) sono Editoria
         ][$tipo_spedizione] ?? null;
         if ($gamma)
             $jsonData["descrittivo_gamma"] = $gamma;
@@ -50,6 +51,11 @@ try{
     }
     // il datamatrix comporta sempre la DU (il codice invio della DU è il datamatrix): la prenotazione con DU segue la stampa del datamatrix
     $jsonData["prenotazione_con_du"] = !empty($jsonData["stampa_datamatrix"]) ? 1 : 0;
+    // alias di target: la descrizione prodotto (etichette scatola e bancale) è fissa e il tipo formato creative non serve (compare solo sull'etichetta scatola, non per questi prodotti)
+    if ($tipo_spedizione === "target" && isset(alias_target()[$jsonData["prodotto_target"] ?? ""])) {
+        $jsonData["descrizione_tipo_spedizione"] = alias_target()[$jsonData["prodotto_target"]]["etichetta"];
+        unset($jsonData["tipo_formato_creative"]);
+    }
     // le tabelle dei codici finiscono nelle query del programma di ordinamento: accetto solo schema.tabella con il prefisso previsto (la scelta arriva dal menu, ma il valore passa dal client)
     foreach (["tabella_codici_figli" => "figli", "tabella_codici_padri" => "padri"] as $campo => $prefisso)
         if (!empty($jsonData[$campo]) && !preg_match('/^(import_file|elab)\.' . $prefisso . '_[A-Za-z0-9_]+$/', $jsonData[$campo]))
@@ -59,11 +65,11 @@ try{
     // cliente: è la concatenazione di più campi, per renderlo univoco e
     // descrittivo. Il campo digitato dal cliente (nome_configurazione) è
     // opzionale ed è l'ultimo pezzo, se presente.
-    if ($tipo_spedizione === "target" && ($jsonData["prodotto_target"] ?? '') === "NO_PROFIT") {
-        //no profit: nel nome compare solo NO_PROFIT (niente "target", descrizione e sotto prodotto)
+    if ($tipo_spedizione === "target" && isset(alias_target()[$jsonData["prodotto_target"] ?? ""])) {
+        //alias (no profit...): nel nome compare solo il nome dell'alias (niente "target", descrizione e sotto prodotto)
         $componenti_nome = [
             $jsonData["ragione_sociale_cliente_estesa"] ?? '',
-            "NO_PROFIT",
+            $jsonData["prodotto_target"],
         ];
     } else {
         $componenti_nome = [
