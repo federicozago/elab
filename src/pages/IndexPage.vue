@@ -300,6 +300,17 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
             <BaseBtn
               dense
               flat
+              color="primary"
+              icon="table_view"
+              label="XLS"
+              :disable="caricamentoSql"
+              :loading="esportazione === 'xls'"
+              title="Esporta in Excel 97-2003 (xls, max 65.535 righe) i record estratti dalla query"
+              @click="esportaQuery(selectedRowSql, 'xls')"
+            ></BaseBtn>
+            <BaseBtn
+              dense
+              flat
               color="negative"
               icon="close"
               label="Chiudi"
@@ -559,7 +570,7 @@ const dialogReportVisible = ref(false)
 const selectedRowSql = ref(null)
 const querySql = ref('')
 const caricamentoSql = ref(false)
-const esportazione = ref(null) // formato in corso di esportazione ('csv' | 'xlsx')
+const esportazione = ref(null) // formato in corso di esportazione ('csv' | 'xlsx' | 'xls')
 const selectedRowPrenotazione = ref(null)
 const selectedRowAzioni = ref(null)
 const reportRighe = ref([])
@@ -730,7 +741,7 @@ async function apriSql(row) {
   }
 }
 
-// scarica in csv o xlsx i record estratti dalla query mostrata nel pannello (la query viene ricostruita dal backend)
+// scarica in csv, xlsx o xls i record estratti dalla query mostrata nel pannello (la query viene ricostruita dal backend)
 async function esportaQuery(row, formato) {
   esportazione.value = formato
   const nomeFormato = formato.toUpperCase()
