@@ -948,20 +948,16 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
   const isPdf = datiAzione.output === 'pdf'
   const isZip = datiAzione.output === 'zip'
   const isExcel = datiAzione.output === 'xlsx'
-  const isTxt = datiAzione.output === 'txt'
   const isReport = datiAzione.output === 'json'
-  const config = isPdf || isZip || isExcel || isTxt ? { responseType: 'blob' } : {}
+  const config = isPdf || isZip || isExcel ? { responseType: 'blob' } : {}
 
   try {
     const response = await api.post('/' + datiAzione.endpoint, dati, config)
     if (isReport) {
       reportRighe.value = response.data.report
       dialogReportVisible.value = true
-    } else if (isPdf || isZip || isExcel || isTxt) {
-      scaricaFile(
-        response,
-        isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : isTxt ? 'riepilogo.txt' : 'etichette.pdf',
-      )
+    } else if (isPdf || isZip || isExcel) {
+      scaricaFile(response, isZip ? 'esportazione.zip' : isExcel ? 'report_bancali.xlsx' : 'etichette.pdf')
     } else {
       messaggioPositivo('Azione eseguita')
     }

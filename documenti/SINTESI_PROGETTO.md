@@ -695,11 +695,11 @@ Tutti gli endpoint PHP seguono un pattern comune:
   (`genera_du`, zip con `ZipArchive` su Linux); poi l'elaborazione passa a stato 4 e lo zip viene restituito come download. La DU non consuma codici (figlio e padre si prelevano a ogni Ordina)
 - **Libreria utilizzata:** `Gestione_db`, `Elaborazione_postale_{tipo}`
 
-#### **genera_riepilogo_cap_bancali.php** (azione "txt" del pannello AZIONI)
-**Scopo:** Scarica un txt `ProCapComQta_<lavoro>_<elaborazione>.txt` con campi separati da pipe e righe CRLF: `provincia|cap|località|numero buste|numero bancale`.
+#### **genera_riepilogo_cap_bancali.php** (azione "xlsx" del pannello AZIONI)
+**Scopo:** Scarica un xlsx `ProCapComQta_<lavoro>_<elaborazione>.xlsx` senza intestazione, con 5 colonne: provincia, CAP, località, numero buste, numero bancale.
 - **Input:** `id_elaborazione`
-- **Processo:** raggruppa i record dell'elaborazione (anagrafica + `ordinati_*` su `c1`) per provincia, CAP, località e `idbancale`: una riga per ogni terna, più righe se la terna è su più bancali. Errore se i bancali non sono assegnati (`idbancale` nullo o 0)
-- **Configurazione:** l'azione va aggiunta in `variabili_globali/elab.php` (fuori repo) con `"endpoint"=>"genera_riepilogo_cap_bancali.php", "output"=>"txt"`; il frontend scarica il file se `output` è `txt`
+- **Processo:** raggruppa i record dell'elaborazione (anagrafica + `ordinati_*` su `c1`) per provincia, CAP, località e `idbancale`: una riga per ogni terna, più righe se la terna è su più bancali. Provincia, CAP (zeri iniziali conservati) e località sono testo, buste e bancale numeri. Errore se i bancali non sono assegnati (`idbancale` nullo o 0)
+- **Configurazione:** l'azione va aggiunta in `variabili_globali/elab.php` (fuori repo) con `"endpoint"=>"genera_riepilogo_cap_bancali.php", "output"=>"xlsx"`
 
 #### **genera_etichette.php**
 **Scopo:** Genera etichette PDF univoche per la spedizione e le invia al browser per il download.
