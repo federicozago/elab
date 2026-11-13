@@ -29,5 +29,10 @@
     "psr-4": {
       "indi\\": "app"
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": false
+    }
   }
 }
