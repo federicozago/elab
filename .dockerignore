@@ -1,0 +1,23 @@
+# Frontend: ricostruiti dentro l'immagine dal frontend-builder
+node_modules
+.quasar
+/dist
+/quasar.config.*.temporary.compiled*
+
+# VCS / editor / assistenti AI
+.git
+.idea
+.vscode
+.junie
+
+# Log ed env locali
+*.log
+.env.local*
+
+# Documentazione e cartelle di scratch del backend (non servono a runtime)
+documenti/
+php-docker-boilerplate/src/temp/
+php-docker-boilerplate/src/temp_excel/
+php-docker-boilerplate/src/temp_pdf/
+php-docker-boilerplate/src/old/
+php-docker-boilerplate/test/
