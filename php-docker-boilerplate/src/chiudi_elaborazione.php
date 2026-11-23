@@ -105,7 +105,13 @@ try {
         }
     }
 
-    if(!$db->esegui_query("update elaborazioni set stato=255 where id=?", [$jsonData['id_elaborazione']]))
+    // salvo lo stato in cui si trovava l'elaborazione, così riapri_elaborazione.php la riporta lì. se è già chiusa (es. "Riesporta" dalle elaborazioni concluse)
+    // lo stato precedente resta quello salvato alla prima chiusura. in MySQL gli assegnamenti del set sono valutati da sinistra a destra: stato_precedente vede lo stato ancora vecchio
+    $ha_stato_precedente = (bool)$db->preleva_da_db_un_singolo_valore("select count(*) from information_schema.columns where table_schema = database() and table_name = 'elaborazioni' and column_name = 'stato_precedente'");
+    $query_chiusura = $ha_stato_precedente
+        ? "update elaborazioni set stato_precedente = if(stato = 255, stato_precedente, stato), stato = 255 where id = ?"
+        : "update elaborazioni set stato = 255 where id = ?";
+    if(!$db->esegui_query($query_chiusura, [$jsonData['id_elaborazione']]))
         throw new \Exception("Errore aggiornamento stato elaborazione");
 
     exit;
