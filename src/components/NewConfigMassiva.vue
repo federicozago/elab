@@ -5,16 +5,26 @@
 
     <BaseInput
       v-model="model.peso_scatola_min"
-      label="Peso scatola minimo (*)"
+      label="Peso scatola minimo (gr) (*)"
       type="number"
       :rules="[required, minValue(1), maxValue(7000)]"
-    />
+    >
+      <q-tooltip
+        >In grammi (es. 5000 = 5 kg). Sotto questo peso la scatola è considerata riempita
+        parzialmente. Il peso è quello delle buste, senza la tara della scatola</q-tooltip
+      >
+    </BaseInput>
     <BaseInput
       v-model="model.peso_scatola_max"
-      label="Massimo peso scatola (*)"
+      label="Massimo peso scatola (gr) (*)"
       type="number"
       :rules="[required, minValue(1), maxValue(7000)]"
-    />
+    >
+      <q-tooltip
+        >In grammi (max 7000, cioè 7 kg). Una scatola viene chiusa quando le buste si avvicinano a
+        questo peso. Il peso è quello delle buste, senza la tara della scatola</q-tooltip
+      >
+    </BaseInput>
     <BaseInput
       v-model="model.max_scatole_per_bancale"
       label="Scatole per bancale (max) (*)"
