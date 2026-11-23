@@ -702,6 +702,13 @@ Tutti gli endpoint PHP seguono un pattern comune:
 - **Processo:** raggruppa i record dell'elaborazione (anagrafica + `ordinati_*` su `c1`) per provincia, CAP, località e `idbancale`: una riga per ogni terna, più righe se la terna è su più bancali. Provincia, CAP (zeri iniziali conservati) e località sono testo, buste e bancale numeri. Errore se i bancali non sono assegnati (`idbancale` nullo o 0)
 - **Configurazione:** l'azione va aggiunta in `variabili_globali/elab.php` (fuori repo) con `"endpoint"=>"genera_riepilogo_cap_bancali.php", "output"=>"xlsx"`
 
+#### **genera_sma.php** (azione "xlsx" del pannello AZIONI, solo massiva)
+**Scopo:** Scarica la SMA (distinta di spedizione della posta massiva, excel dal template "Modalità B") di un'elaborazione massiva ordinata (stato 2 o 4). Non modifica il db.
+- **Input:** `id_elaborazione`
+- **Processo:** usa `Elaborazione_postale_massiva::genera_distinta_postale()` (via `genera_distinta_postale_elaborazione`): invii per tariffa AM/CP/EU con la tariffa da `import_file.tariffe`, scatole piene/parziali/mix, scatole per area, peso totale lordo, ordinamento scelto (opzione 1/2). La data è quella salvata da "Prenota" in `ordinati.data_spedizione`; se non c'è ancora la SMA è di simulazione (data di oggi, file `SMA_<lavoro>_<elab>_SIMULAZIONE_<data>.xlsx`)
+- **Da compilare a mano sul foglio:** indirizzo e telefono del cliente, tipo di pagamento e numero pallet, perché la configurazione massiva non li contiene (restano vuoti; il numero pallet è fisso a 1)
+- **Configurazione:** l'azione va aggiunta in `variabili_globali/elab.php` (fuori repo), nel blocco `massiva`, con `"endpoint"=>"genera_sma.php", "output"=>"xlsx"`
+
 #### **genera_etichette.php**
 **Scopo:** Genera etichette PDF univoche per la spedizione e le invia al browser per il download.
 - **Input:** `id_elaborazione`, `data_spedizione` (opzionale)
