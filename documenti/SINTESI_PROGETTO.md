@@ -626,13 +626,13 @@ Tutti gli endpoint PHP seguono un pattern comune:
   - Archivia i CSV in un file .zip tramite la libreria `ZipStream`.
   - Invia il file .zip al frontend per il download tramite streaming HTTP.
   - Elimina i file CSV temporanei dal server dopo l'archiviazione.
-  - Aggiorna lo stato dell'elaborazione a conclusa (stato 255).
+  - Aggiorna lo stato dell'elaborazione a conclusa (stato 255) e salva lo stato di prima in `elaborazioni.stato_precedente` (se era già chiusa, es. "Riesporta", resta quello della prima chiusura). La colonna si crea con `ALTER TABLE elab.elaborazioni ADD COLUMN stato_precedente int NULL DEFAULT NULL AFTER stato;` (senza la colonna il codice funziona come prima, senza salvare lo stato).
 - **Libreria utilizzata:** `Csv`, `ZipStream`, `Gestione_db`
 
 #### **riapri_elaborazione.php**
 **Scopo:** Riapre un'elaborazione precedentemente chiusa.
 - **Input:** `id_elaborazione`
-- **Processo:** Aggiorna campo stato/chiuso nella tabella `elaborazioni`
+- **Processo:** una sola update: lo stato torna a `stato_precedente` (salvato da `chiudi_elaborazione.php`) e `stato_precedente` si azzera; se non c'è (elaborazioni chiuse prima di questa funzione) torna a 0, lo stato dopo l'importazione (da ordinare). Agisce solo se l'elaborazione è chiusa (255). Richiede la colonna `stato_precedente`.
 
 ---
 

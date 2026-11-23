@@ -24,10 +24,12 @@ try {
 
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"], blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
-    if(!$db->esegui_query("update elaborazioni set stato=4 where id={$jsonData['id_elaborazione']}"))//aggiorno stato "elaborazione"
+    // la riapre riportandola allo stato che aveva quando è stata chiusa (stato_precedente, salvato da chiudi_elaborazione.php).
+    // se non c'è (elaborazioni chiuse prima di questa funzione) torna a 0, lo stato dopo l'importazione dei dati (da ordinare)
+    if(!$db->esegui_query("update elaborazioni set stato = coalesce(stato_precedente, 0), stato_precedente = null where id = ? and stato = 255", [$jsonData["id_elaborazione"]]))
         throw new \Exception("Errore durante l'aggiornamento della tabella elaborazioni");
 
     // Restituisci una risposta di successo
@@ -36,7 +38,7 @@ try {
         'success' => true,
         'message' => 'Elaborazione riaperta correttamente'
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);
     echo json_encode([
