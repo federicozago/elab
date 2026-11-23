@@ -2,6 +2,7 @@
 namespace indi\Classes;
 require 'vendor/autoload.php';
 require_once __DIR__ . '/alias_target.php';
+require_once __DIR__ . '/normalizza_configurazione.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -16,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $vg=new Variabili_globali_import();
 $vg=$vg->get_variabili_globali("elab");
-$log = new Segnalazioni_e_log($vg["id_flusso"]);
+//false: un warning php (es. "Array to string conversion") diventa un'eccezione e arriva al frontend come messaggio; con il valore predefinito (true) il programma si fermava con exit(1) restituendo una risposta vuota con http 200, che il frontend scambiava per un salvataggio riuscito
+$log = new Segnalazioni_e_log($vg["id_flusso"],blocca_il_programma_per_qualsiasi_errore:false);
 $db = new Gestione_db("elab",$log);
 
 try{
@@ -24,6 +26,7 @@ try{
 
     $tipo_spedizione = isset(alias_target()[$jsonData["tipo_spedizione"]]) ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT e gli altri alias sono target
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
+    $jsonData = normalizza_dati_configurazione($jsonData);
 
     if (!empty($jsonData["stampa_datamatrix"])) {
         // descrittivo gamma del datamatrix (guida Poste, tabella 1): non modificabile, dipende dal tipo di spedizione
@@ -103,7 +106,7 @@ try{
         'id_configurazione'=>$conf_inserita[0]["id"],
         'nome_configurazione'=>$conf_inserita[0]["nome_configurazione"]
     ]);
-}catch(\Exception $e) {
+}catch(\Throwable $e) {
     http_response_code(400);
     echo json_encode([
         'success' => false,

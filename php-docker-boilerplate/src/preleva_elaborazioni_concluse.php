@@ -20,7 +20,7 @@ try {
     // Verifica se è stato inviato un file
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"], blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
     $dati = $db->preleva_da_db("select * from elab_join where stato = 255",[],false);
@@ -33,7 +33,7 @@ try {
         'success' => true,
         'elaborazioni'=>$dati
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);
     echo json_encode([

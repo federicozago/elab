@@ -24,7 +24,7 @@ try {
 
     $vg = new Variabili_globali_import();
     $vg = $vg->get_variabili_globali("elab");
-    $log = new Segnalazioni_e_log($vg["id_flusso"]);
+    $log = new Segnalazioni_e_log($vg["id_flusso"], blocca_il_programma_per_qualsiasi_errore: false);
     $db = new Gestione_db("elab", $log);
 
     //verifica esistenza base dati
@@ -91,7 +91,7 @@ try {
         'nome_base_dati'=>$jsonData["nome_base_dati"],
         'intestazione'=>$jsonData["intestazione"]
     ]);
-}catch (\Exception $e) {
+}catch (\Throwable $e) {
     // In caso di errore
     http_response_code(400);
     echo json_encode([
