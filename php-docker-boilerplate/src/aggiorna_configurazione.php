@@ -2,6 +2,7 @@
 namespace indi\Classes;
 require 'vendor/autoload.php';
 require_once __DIR__ . '/alias_target.php';
+require_once __DIR__ . '/normalizza_configurazione.php';
 
 // Configura gli header CORS
 header("Access-Control-Allow-Origin: *");
@@ -24,6 +25,7 @@ try{
         throw new \Exception("Manca il tipo di spedizione o l'id della configurazione");
     $tipo_spedizione = isset(alias_target()[$jsonData["tipo_spedizione"]]) ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT e gli altri alias sono target
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
+    $jsonData = normalizza_dati_configurazione($jsonData);
 
     if (!empty($jsonData["stampa_datamatrix"])) {
         // descrittivo gamma del datamatrix (guida Poste, tabella 1): non modificabile, dipende dal tipo di spedizione
@@ -114,7 +116,7 @@ try{
         'id_configurazione'=>$jsonData["id_configurazione"],
         'nome_configurazione'=>$jsonData["nome_configurazione"]
     ]);
-}catch(\Exception $e) {
+}catch(\Throwable $e) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
