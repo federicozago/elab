@@ -779,6 +779,9 @@ function getInitialFormData() {
       peso_scatola_min: 0,
       peso_scatola_max: 0,
       max_scatole_per_bancale: 56,
+      tipo_pagamento: null,
+      indirizzo_cliente: '',
+      telefono_cliente: '',
     },
     time: {
       prodotto_time: '',

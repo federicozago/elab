@@ -706,7 +706,7 @@ Tutti gli endpoint PHP seguono un pattern comune:
 **Scopo:** Scarica la SMA (distinta di spedizione della posta massiva, excel dal template "Modalità B") di un'elaborazione massiva ordinata (stato 2 o 4). Non modifica il db.
 - **Input:** `id_elaborazione`
 - **Processo:** usa `Elaborazione_postale_massiva::genera_distinta_postale()` (via `genera_distinta_postale_elaborazione`): invii per tariffa AM/CP/EU con la tariffa da `import_file.tariffe`, scatole piene/parziali/mix, scatole per area, peso totale lordo, ordinamento scelto (opzione 1/2). La data è quella salvata da "Prenota" in `ordinati.data_spedizione`; se non c'è ancora la SMA è di simulazione (data di oggi, file `SMA_<lavoro>_<elab>_SIMULAZIONE_<data>.xlsx`)
-- **Da compilare a mano sul foglio:** indirizzo e telefono del cliente, tipo di pagamento e numero pallet, perché la configurazione massiva non li contiene (restano vuoti; il numero pallet è fisso a 1)
+- **Dati dalla configurazione massiva:** `tipo_pagamento` (obbligatorio: contestuale, anticipato, posticipato = "Differito" del foglio), `indirizzo_cliente` e `telefono_cliente` (facoltativi), colonne aggiunte con `ALTER TABLE elab.massiva ADD COLUMN indirizzo_cliente varchar(255) NULL, ADD COLUMN telefono_cliente varchar(30) NULL, ADD COLUMN tipo_pagamento varchar(20) NULL;` (senza le colonne `carica_a_db` scarta i campi senza errori). Il numero pallet resta da compilare a mano (fisso a 1)
 - **Configurazione:** l'azione va aggiunta in `variabili_globali/elab.php` (fuori repo), nel blocco `massiva`, con `"endpoint"=>"genera_sma.php", "output"=>"xlsx"`
 
 #### **genera_etichette.php**

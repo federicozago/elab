@@ -37,12 +37,38 @@
         indispensabile per l'id bancale (HU) della DU</q-tooltip
       >
     </BaseInput>
+    <BaseSelect
+      v-model="model.tipo_pagamento"
+      label="Tipo di pagamento (*)"
+      :options="['contestuale', 'anticipato', 'posticipato']"
+      :rules="[required]"
+    >
+      <q-tooltip
+        >Compare nella SMA (distinta di spedizione), dove "posticipato" corrisponde alla voce
+        "Differito"</q-tooltip
+      >
+    </BaseSelect>
+    <BaseInput
+      v-model="model.indirizzo_cliente"
+      label="Indirizzo cliente"
+      :rules="[maxLength(255)]"
+    >
+      <q-tooltip>Facoltativo. Compare nella SMA (distinta di spedizione)</q-tooltip>
+    </BaseInput>
+    <BaseInput
+      v-model="model.telefono_cliente"
+      label="Telefono cliente"
+      :rules="[maxLength(30)]"
+    >
+      <q-tooltip>Facoltativo. Compare nella SMA (distinta di spedizione)</q-tooltip>
+    </BaseInput>
   </div>
 </template>
 
 <script setup>
 import BaseInput from 'components/forms/BaseInput.vue'
-import { required, minValue, maxValue } from 'src/composables/rules.js'
+import BaseSelect from 'components/forms/BaseSelect.vue'
+import { required, minValue, maxValue, maxLength } from 'src/composables/rules.js'
 
 //defineModel(): È una macro di Vue 3.4+ che crea automaticamente un legame bidirezionale con il v-model del padre. In questo modo, model.sottoProdotto aggiornerà correttamente formData.target nel padre senza violare le regole di Vue.
 const model = defineModel({

@@ -27,6 +27,9 @@ try{
     $tipo_spedizione = isset(alias_target()[$jsonData["tipo_spedizione"]]) ? "target" : $jsonData["tipo_spedizione"];//NO_PROFIT e gli altri alias sono target
     $jsonData = array_merge($jsonData, $jsonData[$tipo_spedizione]);//alcuni parametri sono all'interno di $jsonData[$tipo_spedizione]
     $jsonData = normalizza_dati_configurazione($jsonData);
+    //il tipo di pagamento compare nella SMA della massiva (valori previsti dalla libreria)
+    if ($tipo_spedizione === "massiva" && !in_array($jsonData["tipo_pagamento"] ?? "", ["contestuale", "anticipato", "posticipato"], true))
+        throw new \Exception("Il tipo di pagamento è obbligatorio (contestuale, anticipato o posticipato)");
 
     if (!empty($jsonData["stampa_datamatrix"])) {
         // descrittivo gamma del datamatrix (guida Poste, tabella 1): non modificabile, dipende dal tipo di spedizione
