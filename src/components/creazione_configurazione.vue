@@ -55,7 +55,7 @@
       :formData="formData"
       @submit="inviaDati"
       labelInvia="SALVA CONFIGURAZIONE"
-      @reset="reset"
+      @reset="confermaReset"
       :showResetButton="true"
       :loading="isSubmitting"
       v-if="props.tipoSpedizione"
@@ -287,7 +287,10 @@
         v-model="formData.codice_cliente_postale"
         :rules="[required, maxLength(3)]"
       >
-        <q-tooltip>Codice a 3 caratteri che compare nella DU</q-tooltip>
+        <q-tooltip
+          >Identificativo cliente mittente a 3 caratteri, assegnato da Poste con l'omologazione del
+          prodotto (es. ABC). Compare nel datamatrix e nella DU</q-tooltip
+        >
       </BaseInput>
       <BaseInput
         v-if="formData.stampa_datamatrix"
@@ -299,15 +302,24 @@
         v-if="formData.stampa_datamatrix"
         label="Utenza ps online (*)"
         v-model="formData.utenza_ps_online"
-        :rules="[required, maxLength(255)]"
-      ></BaseInput>
+        :rules="[required, maxLength(100)]"
+      >
+        <q-tooltip
+          >Utenza dell'operatore che carica la distinta su PsOnline. Secondo campo dell'header della
+          DU ("Utenza operatore", max 100 caratteri)</q-tooltip
+        >
+      </BaseInput>
       <BaseInput
         v-if="formData.stampa_datamatrix"
         label="Tipologia prodotto (*)"
         v-model="formData.tipologia_prodotto"
         :rules="[required, maxLength(1)]"
       >
-        <q-tooltip>Compare nella DU. Può essere V se Time, B se Contest, R se Market</q-tooltip>
+        <q-tooltip
+          >Secondo la tabella 1 della guida DU è la lettera della gamma. Compare nell'header della DU.
+          Può essere B se Massiva o Contest, T se Target, E se Editoria (no profit, pubblicazioni
+          informative, periodico), V se Time, R se Market</q-tooltip
+        >
       </BaseInput>
       <BaseInput
         v-if="formData.stampa_datamatrix"
@@ -316,7 +328,10 @@
         :rules="[required, minValue(0), maxValue(299)]"
       >
         <q-tooltip
-          >Compare nella DU. Può essere 80 se Time, 125 se Contest, 233 se Market</q-tooltip
+          >Compare nell'header della DU. Può essere 65 se Massiva (268 / 269 per gli operatori
+          intrabacino / extrabacino), 80 se Time, 125 se Contest, 233 se Market, 118 se promozioni no
+          profit, 119 se pubblicazioni informative no profit, 3 se periodico ROC (verificare guida
+          postale)</q-tooltip
         >
       </BaseInput>
       <BaseSelect
@@ -324,9 +339,9 @@
         v-if="formData.stampa_datamatrix"
         v-model="formData.codice_servizio_accessorio"
         :options="[
-          { label: 'Qui e Ora + Resi Report', value: 'CT' },
-          { label: 'In Consegna + Resi Report', value: 'TT' },
-          { label: 'Infodelivery', value: 'IDS' },
+          { label: 'Qui e Ora + Resi Report (CT)', value: 'CT' },
+          { label: 'In Consegna + Resi Report (TT)', value: 'TT' },
+          { label: 'Infodelivery (IDS)', value: 'IDS' },
         ]"
       >
         <q-tooltip
@@ -453,17 +468,31 @@ const props = defineProps({
 
 // alias di target: stessa tabella e stesso form, con sotto prodotto (prodotto_target = chiave) e descrizione prodotto fissi. Va tenuto allineato con alias_target.php e Elaborazione_postale_target.php
 //  - gamma: descrittivo gamma del datamatrix (guida Poste, tabella 1: E = Editoria)
+//  - tipologia prodotto (DU, tabella 1): E (Editoria) e codice prodotto 118 no profit, 119 pubblicazioni informative, 3 periodico (da verificare)
 //  - tipo_prodotto_postale: suggerito (guida Poste, tabella 3: promozioni no profit Q, pubblicazioni informative no profit W; per il periodico roc non è indicato)
 //  - pallet: codice servizio del codice HU (guida Poste: 93 Editoria)
 const ALIAS_TARGET = {
-  NO_PROFIT: { etichetta: 'PROMOZIONE NO PROFIT', gamma: 'E', tipo_prodotto_postale: 'Q', pallet: 93 },
+  NO_PROFIT: {
+    etichetta: 'PROMOZIONE NO PROFIT',
+    gamma: 'E',
+    tipo_prodotto_postale: 'Q',
+    codice_prodotto: 118,
+    pallet: 93,
+  },
   PUBBL_INFORMATIVA_NO_PROFIT: {
     etichetta: 'PUBBL. INFORMATIVA NO PROFIT',
     gamma: 'E',
     tipo_prodotto_postale: 'W',
+    codice_prodotto: 119,
     pallet: 93,
   },
-  PERIODICO_ROC: { etichetta: 'PERIODICO ROC', gamma: 'E', tipo_prodotto_postale: '', pallet: 93 },
+  PERIODICO_ROC: {
+    etichetta: 'PERIODICO ROC',
+    gamma: 'E',
+    tipo_prodotto_postale: '',
+    codice_prodotto: 3, // da verificare con la guida postale (in alternativa 117, stampe periodiche in regime libero)
+    pallet: 93,
+  },
 }
 const aliasTarget = computed(() => ALIAS_TARGET[props.tipoSpedizione] ?? null)
 const tipoEffettivo = computed(() => (aliasTarget.value ? 'target' : props.tipoSpedizione))
@@ -674,10 +703,13 @@ if (tipoEffettivo.value === 'time') {
   descrittivo_gamma_consigliato = 'B'
   tipo_prodotto_postale_consigliato = '' //non saprei
 } else if (tipoEffettivo.value === 'massiva') {
+  tipologia_prodotto_consigliato = 'B' //DU, tabella 1: Bulk Mail
+  codice_prodotto_consigliato = 65 //DU, tabella 1: Posta Massiva (268 / 269 per gli operatori intra / extrabacino)
   codice_identificativo_pallet_consigliato = 96
 } else if (tipoEffettivo.value === 'target') {
-  tipologia_prodotto_consigliato = 'T'
-  //codice_prodotto viene aggiornato dal watch sotto
+  tipologia_prodotto_consigliato = aliasTarget.value ? 'E' : 'T'
+  if (aliasTarget.value) codice_prodotto_consigliato = aliasTarget.value.codice_prodotto
+  //per gli altri prodotti codice_prodotto viene aggiornato dal watch sotto
   codice_identificativo_pallet_consigliato = aliasTarget.value ? aliasTarget.value.pallet : 98
   tipologia_codice_di_tracciatura_consigliato = 1
   descrittivo_gamma_consigliato = aliasTarget.value ? aliasTarget.value.gamma : 'T'
@@ -864,6 +896,11 @@ watch(
 
 async function inviaDati() {
   const datiDaInviare = { ...formData.value }
+  // i menu con opzioni {label, value} (es. codice servizio accessorio) restituiscono l'oggetto intero: al server va solo il valore
+  for (const [campo, valore] of Object.entries(datiDaInviare)) {
+    if (valore && typeof valore === 'object' && 'value' in valore && 'label' in valore)
+      datiDaInviare[campo] = valore.value
+  }
   datiDaInviare.age = age.value
   datiDaInviare.tipo_spedizione = tipoEffettivo.value
   // il tipo formato creative non serve negli alias (compare solo sull'etichetta scatola degli altri prodotti)
@@ -911,6 +948,8 @@ async function inviaDati() {
       if (idConfigurazioneSelezionata.value === '') throw new Error('Selezionare una configurazione')
       datiDaInviare.id_configurazione = idConfigurazioneSelezionata.value.value
       const response = await api.post('/aggiorna_configurazione.php', datiDaInviare)
+      if (!response.data?.success)
+        throw new Error(response.data?.message || "Il server non ha confermato l'aggiornamento della configurazione")
       messaggioPositivo('Configurazione aggiornata con successo')
       await caricaConfigurazioni()
       // il nome può essere cambiato: riallineo l'etichetta della configurazione selezionata
@@ -923,6 +962,9 @@ async function inviaDati() {
       })
     } else {
       const response = await api.post('/crea_configurazione.php', datiDaInviare)
+      // il server deve restituire l'id della configurazione creata: se manca il salvataggio non è andato a buon fine, anche con risposta http 200
+      if (!response.data?.success || !response.data?.id_configurazione)
+        throw new Error(response.data?.message || 'Il server non ha confermato il salvataggio della configurazione')
       messaggioPositivo('Configurazione creata con successo')
       await caricaConfigurazioni()
       emit('saved', {
@@ -945,6 +987,13 @@ async function inviaDati() {
 
 function reset() {
   formData.value = getInitialFormData()
+}
+
+/** pulsante Reset del form: chiede conferma perché cancella tutti i campi compilati */
+function confermaReset() {
+  richiediConferma('Sei sicuro di voler resettare il form? Tutti i dati inseriti andranno persi.').onOk(
+    () => reset(),
+  )
 }
 
 async function confermaEliminaConfigurazione() {
