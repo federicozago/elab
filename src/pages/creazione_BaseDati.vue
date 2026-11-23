@@ -114,6 +114,19 @@
         </BaseSelect>
         <BaseSelect
           :options="intestazione"
+          label="Campo Nome"
+          v-model="formData.campo_nome"
+          :disable="!intestazione.length"
+          clearable
+          v-if="formData.intestazione_si_no !== null"
+        >
+          <q-tooltip
+            >Facoltativo. Solo se nome e cognome sono in colonne separate: nella DU la ragione
+            sociale diventa "nome cognome" (il cognome è il campo Ragione sociale / Nominativo)</q-tooltip
+          >
+        </BaseSelect>
+        <BaseSelect
+          :options="intestazione"
           label="Campo Indirizzo"
           v-model="formData.campo_indirizzo"
           :disable="!intestazione.length"
@@ -171,6 +184,7 @@ const formData = ref({
   campo_localita: '',
   campo_provincia: '',
   campo_ragsoc: null,
+  campo_nome: null,
   campo_indirizzo: null,
   campo_civico: null,
   intestazione_si_no: null,
@@ -257,6 +271,7 @@ async function confermaEliminaBaseDati() {
             campo_localita: '',
             campo_provincia: '',
             campo_ragsoc: null,
+            campo_nome: null,
             campo_indirizzo: null,
             campo_civico: null,
             intestazione_si_no: null,

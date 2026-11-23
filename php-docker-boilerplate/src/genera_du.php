@@ -64,9 +64,10 @@ try {
         throw new \Exception("L'elaborazione deve essere ordinata per poter essere prenotata");
 
     //la DU contiene ragione sociale e indirizzo di ogni destinatario: la base dati deve indicare in quali colonne si trovano
-    $campi_base_dati = $db->preleva_da_db("select campo_ragsoc, campo_indirizzo, campo_civico from base_dati where id = ?", [$elaborazione["id_base_dati"]]);
+    //select * : campo_nome (facoltativo, nome e cognome in colonne separate) esiste solo dopo l'ALTER della tabella base_dati
+    $campi_base_dati = $db->preleva_da_db("select * from base_dati where id = ?", [$elaborazione["id_base_dati"]]);
     if (!$campi_base_dati)
-        throw new \Exception("Impossibile leggere i campi ragione sociale e indirizzo della base dati (verificare che la tabella base_dati abbia le colonne campo_ragsoc, campo_indirizzo, campo_civico)");
+        throw new \Exception("Impossibile leggere i campi ragione sociale e indirizzo della base dati");
     $campi_base_dati = $campi_base_dati[0];
     if (empty($campi_base_dati["campo_ragsoc"]) or empty($campi_base_dati["campo_indirizzo"]))
         throw new \Exception("La base dati {$elaborazione['nome_base_dati']} non ha i campi ragione sociale e indirizzo, necessari per generare la DU: vanno indicati nella creazione della base dati");
@@ -80,6 +81,9 @@ try {
     ];
     if (!empty($campi_base_dati["campo_civico"]))
         $associazione_campi["numero_civico"] = $campi_base_dati["campo_civico"];
+    //la ragione sociale della DU diventa "nome cognome" (campo_ragsoc è il cognome)
+    if (!empty($campi_base_dati["campo_nome"]))
+        $associazione_campi["nome"] = $campi_base_dati["campo_nome"];
 
     //campi spare della DU: nella configurazione sono scritti separati da virgola, la libreria vuole un array
     $configurazione["campi_spare"] = array_values(array_filter(array_map('trim', explode(",", (string)($configurazione["campi_spare"] ?? "")))));
