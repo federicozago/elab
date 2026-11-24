@@ -170,6 +170,20 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
                               "
                             />
                           </div>
+                          <!-- avviso (solo se negativo) della verifica scarti dopo l'ordinamento: vedi verificaScarti() -->
+                          <q-chip
+                            v-if="scartiElaborazioni[props.row.id_elaborazione]"
+                            dense
+                            square
+                            color="negative"
+                            text-color="white"
+                            icon="warning"
+                          >
+                            {{ testoScarti(scartiElaborazioni[props.row.id_elaborazione]) }}
+                            <q-tooltip>{{
+                              dettaglioScarti(scartiElaborazioni[props.row.id_elaborazione])
+                            }}</q-tooltip>
+                          </q-chip>
                         </q-td>
                       </template>
 
@@ -333,7 +347,11 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="dialogPrenotazioneVisible" @hide="selectedRowPrenotazione = null">
+    <q-dialog
+      v-model="dialogPrenotazioneVisible"
+      @show="verificaScarti(selectedRowPrenotazione?.id_elaborazione)"
+      @hide="selectedRowPrenotazione = null"
+    >
       <q-card flat bordered v-if="selectedRowPrenotazione">
         <q-card-section class="row items-center justify-between">
           <div class="text-h6">Prenotazione con DU</div>
@@ -350,6 +368,19 @@ col-auto: Il BaseBtn occupa solo lo spazio necessario per il suo contenuto
         </q-card-section>
         <q-separator></q-separator>
         <q-card-section>
+          <q-chip
+            v-if="scartiElaborazioni[selectedRowPrenotazione.id_elaborazione]"
+            dense
+            square
+            color="negative"
+            text-color="white"
+            icon="warning"
+          >
+            {{ testoScarti(scartiElaborazioni[selectedRowPrenotazione.id_elaborazione]) }}
+            <q-tooltip>{{
+              dettaglioScarti(scartiElaborazioni[selectedRowPrenotazione.id_elaborazione])
+            }}</q-tooltip>
+          </q-chip>
           <div class="q-mb-md text-caption">
             Indicare la data di spedizione: la prenotazione genera la DU e ne scarica lo zip.
           </div>
@@ -492,6 +523,8 @@ const isActionSubmitting = ref(null)
 const isSortingSubmitting = ref(null)
 const isBancaliSubmitting = ref(null)
 const prenotazioneInCorso = ref(null)
+// ultimo esito NEGATIVO della verifica scarti per id elaborazione (solo in memoria, vedi verificaScarti)
+const scartiElaborazioni = ref({})
 const isChiusuraSubmitting = ref(null)
 const idEliminazioneInCorso = ref(null)
 
@@ -679,14 +712,42 @@ function prelevaElaborazioniConcluse() {
     })
 }
 
+/**
+ * dopo l'ordinamento (e alla prenotazione) controlla la percentuale di scarti dell'elaborazione (documenti/21_PIANO_AZIONE_VERIFICA_SCARTI.md).
+ * con esito negativo la riga mostra l'etichetta "Molti scarti". l'ordinamento è comunque riuscito: se la verifica fallisce non si segnala niente, non lancia mai errori
+ */
+async function verificaScarti(id_elaborazione) {
+  if (!id_elaborazione) return
+  try {
+    const response = await api.post('/verifica_quantita_scarti.php', { id_elaborazione })
+    if (response.data?.success && response.data.esito === false)
+      scartiElaborazioni.value[id_elaborazione] = response.data
+    else delete scartiElaborazioni.value[id_elaborazione]
+  } catch {
+    // verifica non riuscita: nessuna etichetta, l'ordinamento non è in discussione
+  }
+}
+
+function testoScarti(esito) {
+  return 'Molti scarti ' + Number(esito.percentuale).toLocaleString('it-IT') + '%'
+}
+
+function dettaglioScarti(esito) {
+  let testo = `${esito.scarti} su ${esito.totale} record (soglia ${esito.soglia}%)`
+  if (esito.provincia_vuota) testo += `, ${esito.provincia_vuota} senza provincia`
+  return testo
+}
+
 async function lanciaElaborazione(id_elaborazione) {
   isSortingSubmitting.value = id_elaborazione
+  delete scartiElaborazioni.value[id_elaborazione]
   try {
     await api.post('/lancia_ordinamento.php', {
       id_elaborazione: id_elaborazione,
     })
     messaggioPositivo('Ordinamento avviato con successo')
     prelevaElaborazioniInCorso()
+    await verificaScarti(id_elaborazione)
   } catch (e) {
     gestioneErrore(e, 'Impossibile lanciare ordinamento')
   } finally {
@@ -967,11 +1028,16 @@ async function lanciaAzione(datiAzione, id_elaborazione, nomeAzione = null) {
     if (
       datiAzione.endpoint === 'chiudi_elaborazione.php' ||
       datiAzione.endpoint === 'chiudi_elaborazione_senza_salvare_dati.php' ||
-      datiAzione.endpoint === 'elimina_dati_ordinati.php'
+      datiAzione.endpoint === 'elimina_dati_ordinati.php' ||
+      datiAzione.endpoint === 'lancia_ordinamento.php'
     ) {
       prelevaElaborazioniInCorso()
       prelevaElaborazioniConcluse()
     }
+    // i dati ordinati sono cambiati: l'avviso scarti non vale più (con un nuovo ordinamento si ricalcola)
+    if (datiAzione.endpoint === 'elimina_dati_ordinati.php' || datiAzione.endpoint === 'lancia_ordinamento.php')
+      delete scartiElaborazioni.value[id_elaborazione]
+    if (datiAzione.endpoint === 'lancia_ordinamento.php') await verificaScarti(id_elaborazione)
 
     dataAzioni.value = null
     dialogAzioniVisible.value = false

@@ -702,6 +702,12 @@ Tutti gli endpoint PHP seguono un pattern comune:
 - **Processo:** raggruppa i record dell'elaborazione (anagrafica + `ordinati_*` su `c1`) per provincia, CAP, località e `idbancale`: una riga per ogni terna, più righe se la terna è su più bancali. Provincia, CAP (zeri iniziali conservati) e località sono testo, buste e bancale numeri. Errore se i bancali non sono assegnati (`idbancale` nullo o 0)
 - **Configurazione:** l'azione va aggiunta in `variabili_globali/elab.php` (fuori repo) con `"endpoint"=>"genera_riepilogo_cap_bancali.php", "output"=>"xlsx"`
 
+#### **verifica_quantita_scarti.php** (chiamato dal frontend dopo l'ordinamento e all'apertura di "Prenota")
+**Scopo:** Calcola la percentuale di scarti (record con `bacino = 'ZCARTI'` in `ordinati_<tipo>_<base_dati>`) dell'elaborazione. Vedi `documenti/21_PIANO_AZIONE_VERIFICA_SCARTI.md`. Sola lettura.
+- **Input:** `id_elaborazione`
+- **Output:** sempre HTTP 200 (l'ordinamento è riuscito): `esito` (false se la percentuale supera la soglia del 5%, costante `SOGLIA_SCARTI_PERCENTUALE`, sostituibile con `soglia_scarti_percentuale` in `variabili_globali/elab.php`), `applicabile` (false se la tabella ordinati non ha `bacino`), `totale`, `scarti`, `percentuale`, `soglia`, `message`; con esito negativo anche `provincia_vuota` (scarti con provincia vuota nell'anagrafica). Errori tecnici: HTTP 400
+- **Frontend:** con esito negativo la riga dell'elaborazione (e la finestra Prenota) mostra l'etichetta rossa "Molti scarti X%" (tooltip con il dettaglio); in memoria, si azzera con un nuovo ordinamento o con "Elimina dati ordinati"
+
 #### **genera_sma.php** (azione "xlsx" del pannello AZIONI, solo massiva)
 **Scopo:** Scarica la SMA (distinta di spedizione della posta massiva, excel dal template "Modalità B") di un'elaborazione massiva ordinata (stato 2 o 4). Non modifica il db.
 - **Input:** `id_elaborazione`
